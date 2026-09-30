@@ -1,0 +1,6 @@
+{
+  "name": "EscalaPro - Gestão e Visualização de Escalas",
+  "description": "Sistema completo para supervisores planejarem e publicarem escalas de trabalho e prestadores visualizarem seus plantões em calendário interativo.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
