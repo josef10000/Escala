@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"on-error-container":"#ffdad6","error-container":"#93000a","surface-variant":"#343439","outline":"#859490","surface-container-high":"#292a2e","primary":"#57f1db","inverse-surface":"#e3e2e7","on-primary-fixed":"#00201c","on-background":"#e3e2e7","background":"#121317","surface-tint":"#3cddc7","secondary":"#ddb7ff","on-tertiary":"#213145","surface-bright":"#38393d","tertiary":"#cadbf5","on-secondary-container":"#d6a9ff","on-tertiary-container":"#3e4e63","secondary-fixed":"#f0dbff","on-surface-variant":"#bacac5","on-tertiary-fixed-variant":"#38485d","on-secondary":"#490080","on-primary-fixed-variant":"#005047","tertiary-fixed":"#d3e4fe","secondary-container":"#6f00be","on-primary":"#003731","surface-container-highest":"#343439","primary-container":"#2dd4bf","on-tertiary-fixed":"#0b1c30","primary-fixed-dim":"#3cddc7","tertiary-fixed-dim":"#b7c8e1","surface-container-low":"#1a1b20","secondary-fixed-dim":"#ddb7ff","inverse-primary":"#006b5f","surface-dim":"#121317","outline-variant":"#3c4a46","surface-container":"#1f1f24","on-surface":"#e3e2e7","primary-fixed":"#62fae3","on-error":"#690005","surface-container-lowest":"#0d0e12","on-secondary-fixed-variant":"#6900b3","on-primary-container":"#00574d","tertiary-container":"#afbfd9","error":"#ffb4ab","surface":"#121317","inverse-on-surface":"#2f3035","on-secondary-fixed":"#2c0051"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"space-xs":"0.25rem","margin-sm":"1rem","space-lg":"1.25rem","space-xl":"2rem","space-sm":"0.5rem","gutter":"1rem","space-md":"0.75rem","gutter-dense":"0.5rem","margin":"2rem"},"fontFamily":{"display":["Geist"],"headline-lg":["Geist"],"label-md":["Geist"],"headline-sm":["Geist"],"body-md":["Geist"],"headline-md":["Geist"],"label-sm":["Geist"],"body-lg":["Geist"],"body-sm":["Geist"],"code-sm":["JetBrains Mono"]},"fontSize":{"display":["32px",{"lineHeight":"40px","letterSpacing":"-0.03em","fontWeight":"600"}],"headline-lg":["24px",{"lineHeight":"32px","letterSpacing":"-0.025em","fontWeight":"600"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.01em","fontWeight":"500"}],"headline-sm":["15px",{"lineHeight":"22px","letterSpacing":"-0.015em","fontWeight":"600"}],"body-md":["13px",{"lineHeight":"20px","letterSpacing":"-0.005em","fontWeight":"400"}],"headline-md":["18px",{"lineHeight":"26px","letterSpacing":"-0.02em","fontWeight":"600"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.02em","fontWeight":"500"}],"body-lg":["15px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"400"}],"body-sm":["12px",{"lineHeight":"18px","fontWeight":"400"}],"code-sm":["11px",{"lineHeight":"16px","letterSpacing":"0.02em","fontWeight":"400"}]}}}};</script></head><body class="bg-surface font-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen relative"><div class="pointer-events-none fixed inset-x-0 top-0 h-72 bg-gradient-to-b from-primary/5 via-secondary/5 to-transparent blur-3xl opacity-40"></div><header class="fixed top-0 inset-x-0 z-50 bg-surface-container-lowest/80 backdrop-blur-xl border-b border-white/[0.07]"><div class="h-16 w-full px-margin flex items-center justify-between gap-space-lg"><div class="flex items-center gap-space-xl"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-sm"><div class="w-7 h-7 rounded-lg bg-surface-container-high border border-white/[0.08] flex items-center justify-center"><span class="material-symbols-outlined text-primary text-[17px]">grid_view</span></div><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight font-semibold">EscalaPro</span></div><div class="hidden sm:flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-surface-container-high border border-white/[0.05]"><span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span><span class="font-code-sm text-code-sm text-on-surface-variant">Nuvem Conectada</span></div></div><nav class="hidden xl:flex items-center gap-1 p-1 rounded-xl bg-surface-container-low border border-white/[0.04]" data-active-classes="bg-surface-container-highest text-on-surface font-semibold"><a class="px-space-md py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all text-body-sm font-body-sm" data-path="quadro-geral" href="#">Quadro Geral</a><a class="px-space-md py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all text-body-sm font-body-sm" data-path="meu-calendario" href="#">Meu Calendário</a><a class="px-space-md py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all text-body-sm font-body-sm" data-path="agenda-diaria" href="#">Agenda Diária</a><a class="px-space-md py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all text-body-sm font-body-sm" data-path="relatorios-e-equipe" href="#">Relatórios & Equipe</a></nav></div><div class="flex items-center gap-space-md"><div class="hidden lg:flex items-center gap-space-sm"><button class="h-8 px-space-md rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-on-surface text-label-md font-label-md border border-white/[0.08] flex items-center gap-1.5 transition-colors"><span class="material-symbols-outlined text-[15px] text-on-surface-variant">share</span>Compartilhar Escala</button><button class="h-8 px-space-md rounded-lg bg-primary-container/20 hover:bg-primary-container/30 text-primary text-label-md font-label-md border border-primary/30 flex items-center gap-1.5 transition-colors"><span class="material-symbols-outlined text-[15px] text-primary">admin_panel_settings</span>Acesso da Liderança</button></div><div class="h-5 w-px bg-white/[0.08] hidden lg:block"></div><div class="flex items-center gap-space-md pl-1"><div class="hidden md:flex flex-col text-right"><span class="text-body-sm font-body-sm text-on-surface font-medium leading-none">Daniel Antonio da Silva</span><span class="text-label-sm font-label-sm text-on-surface-variant tracking-wider uppercase pt-1">Prestador / Gestor</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></div></header><main class="w-full pt-16 bg-surface min-h-[calc(100vh-4rem)] relative"><div class="flex flex-col w-full">
+<!-- Subtle Ambient Aura Scrim (Notion / Craft Desktop Depth) -->
+<div class="relative w-full overflow-hidden bg-surface-container-lowest">
+<div class="absolute -top-32 left-1/4 h-96 w-96 rounded-full bg-primary/10 blur-[120px] pointer-events-none"></div>
+<div class="absolute -top-20 right-1/4 h-80 w-80 rounded-full bg-secondary-container/20 blur-[130px] pointer-events-none"></div>
+<div class="relative z-10 w-full px-margin py-space-lg flex flex-col gap-space-lg max-w-[1760px] mx-auto">
+<!-- Top Control Bar & Context Header -->
+<section class="flex flex-col xl:flex-row xl:items-end justify-between gap-space-lg pb-space-sm border-b border-white/[0.05]">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm">
+<span class="px-2 py-0.5 rounded text-label-sm font-label-sm uppercase tracking-wider bg-surface-container-high text-on-surface-variant">Escala 12x36 • Setor Clínico</span>
+<span class="text-white/20">•</span>
+<div class="flex items-center gap-1.5 text-label-sm font-label-sm text-primary">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+              Sincronizado há 4 min
+            </div>
+</div>
+<div class="flex items-baseline gap-space-md">
+<h1 class="font-display text-display text-on-surface tracking-tight font-semibold">Meu Calendário</h1>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Outubro de 2026</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+            Visão consolidada de escalas presenciais, plantões diurnos e intervalos regulamentares de descanso hospitalar.
+          </p>
+</div>
+<!-- Month Navigation, Segmented Switcher & Quick Actions -->
+<div class="flex flex-wrap items-center gap-space-md">
+<!-- Calendar Selector -->
+<div class="flex items-center rounded-xl bg-surface-container-high p-1 shadow-sm">
+<button aria-label="Mês Anterior" class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-white/[0.06] transition-colors" id="prevMonthBtn">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<div class="px-space-md flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[17px]">calendar_month</span>
+<span class="font-headline-sm text-headline-sm text-on-surface tracking-tight font-semibold">OUTUBRO 2026</span>
+</div>
+<button aria-label="Próximo Mês" class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-white/[0.06] transition-colors" id="nextMonthBtn">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+<button class="h-10 px-space-md rounded-xl bg-surface-container text-on-surface text-label-md font-label-md hover:bg-surface-container-highest transition-colors flex items-center gap-1.5" id="todayBtn">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">today</span>
+            Hoje
+          </button>
+<!-- View Mode Toggle -->
+<div class="flex items-center p-1 rounded-xl bg-surface-container-low">
+<button class="h-8 px-space-md rounded-lg bg-surface-container-highest text-primary font-label-md text-label-md flex items-center gap-1.5 shadow-sm">
+<span class="material-symbols-outlined text-[16px]">grid_view</span>
+              Grade Mensal
+            </button>
+<button class="h-8 px-space-md rounded-lg text-on-surface-variant hover:text-on-surface font-label-md text-label-md flex items-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-[16px]">view_timeline</span>
+              Lista Detalhada
+            </button>
+</div>
+<!-- Utility Dropdown Actions -->
+<div class="flex items-center gap-space-xs">
+<button class="h-10 px-space-md rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-on-surface font-label-md text-label-md flex items-center gap-1.5 transition-colors" title="Sincronizar Google Calendar ou iCal">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">sync_alt</span>
+<span class="hidden sm:inline">Sync iCal</span>
+</button>
+<button class="h-10 px-space-md rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-label-md text-label-md flex items-center gap-1.5 transition-colors" title="Solicitar Troca de Plantão">
+<span class="material-symbols-outlined text-[16px]">swap_horiz</span>
+<span class="hidden md:inline">Pedir Troca</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Calendar Legend & Provider Filter Strip -->
+<section class="flex flex-wrap items-center justify-between gap-space-md py-space-xs">
+<div class="flex flex-wrap items-center gap-space-sm text-label-sm font-label-sm">
+<span class="text-on-surface-variant font-code-sm text-code-sm uppercase tracking-wider pr-1">Legenda:</span>
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-primary/10 text-primary">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-code-sm text-code-sm font-medium">Trabalha (T)</span>
+<span class="text-on-surface-variant text-[10px] pl-1">07h00 - 19h00</span>
+</div>
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-surface-variant"></span>
+<span class="font-code-sm text-code-sm font-medium">Descanso (D)</span>
+<span class="text-on-surface-variant text-[10px] pl-1">Folga 36h</span>
+</div>
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-secondary-container/20 text-secondary">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-code-sm text-code-sm font-medium">Home Office / Telemedicina (HO)</span>
+</div>
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-tertiary-container/20 text-tertiary">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="font-code-sm text-code-sm font-medium">Sobreaviso (S)</span>
+</div>
+</div>
+<div class="flex items-center gap-space-md text-label-sm font-label-sm text-on-surface-variant">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-primary">verified_user</span>
+            Conforme escala da Coordenação UTI Adulto
+          </span>
+<span class="text-white/10 hidden sm:inline">|</span>
+<span class="hidden sm:inline font-code-sm text-code-sm text-on-surface-variant">ID: ESC-2026-10-UTI</span>
+</div>
+</section>
+<!-- Calendar Main Layout (Desktop Grid 7 Columns) -->
+<section class="flex flex-col w-full rounded-2xl bg-surface-container-low p-2 shadow-xl">
+<!-- Day-of-Week Column Headers -->
+<div class="grid grid-cols-7 gap-gutter-dense mb-1 text-center font-code-sm text-code-sm uppercase tracking-wider text-on-surface-variant">
+<div class="py-2.5 rounded-lg bg-surface-container-lowest font-medium text-error/80">DOM</div>
+<div class="py-2.5 rounded-lg bg-surface-container-lowest font-medium">SEG</div>
+<div class="py-2.5 rounded-lg bg-surface-container-lowest font-medium">TER</div>
+<div class="py-2.5 rounded-lg bg-surface-container-lowest font-medium">QUA</div>
+<div class="py-2.5 rounded-lg bg-surface-container-lowest font-medium">QUI</div>
+<div class="py-2.5 rounded-lg bg-surface-container-lowest font-medium">SEX</div>
+<div class="py-2.5 rounded-lg bg-surface-container-lowest font-medium text-error/80">SÁB</div>
+</div>
+<!-- 35-Cell Month Grid (October 2026 starting on Thursday = Day 1) -->
+<div class="grid grid-cols-7 gap-gutter-dense">
+<!-- Week 1: Empty padding (Sunday Sep 27 to Wed Sep 30) -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-surface-container-lowest/40 opacity-30 flex flex-col justify-between">
+<span class="font-code-sm text-code-sm text-on-surface-variant">27</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Setembro</span>
+</div>
+<div class="min-h-[128px] p-2.5 rounded-xl bg-surface-container-lowest/40 opacity-30 flex flex-col justify-between">
+<span class="font-code-sm text-code-sm text-on-surface-variant">28</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Setembro</span>
+</div>
+<div class="min-h-[128px] p-2.5 rounded-xl bg-surface-container-lowest/40 opacity-30 flex flex-col justify-between">
+<span class="font-code-sm text-code-sm text-on-surface-variant">29</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Setembro</span>
+</div>
+<div class="min-h-[128px] p-2.5 rounded-xl bg-surface-container-lowest/40 opacity-30 flex flex-col justify-between">
+<span class="font-code-sm text-code-sm text-on-surface-variant">30</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Setembro</span>
+</div>
+<!-- Day 01 (QUI) -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-surface-container flex flex-col justify-between hover:bg-surface-container-high transition-colors group">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-on-surface">01</span>
+<span class="material-symbols-outlined text-white/0 group-hover:text-white/40 text-[16px] transition-colors">add_circle</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-surface-variant/40 flex items-center justify-between">
+<span class="font-code-sm text-code-sm text-on-surface-variant">FOLGA</span>
+<span class="text-[10px] text-on-surface-variant">Descanso</span>
+</div>
+</div>
+</div>
+<!-- Day 02 (SEX) -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-surface-container flex flex-col justify-between hover:bg-surface-container-high transition-colors group">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-on-surface">02</span>
+<span class="material-symbols-outlined text-white/0 group-hover:text-white/40 text-[16px] transition-colors">add_circle</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-surface-variant/40 flex items-center justify-between">
+<span class="font-code-sm text-code-sm text-on-surface-variant">FOLGA</span>
+<span class="text-[10px] text-on-surface-variant">Descanso</span>
+</div>
+</div>
+</div>
+<!-- Day 03 (SÁB) -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-surface-container flex flex-col justify-between hover:bg-surface-container-high transition-colors group">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-on-surface">03</span>
+<span class="material-symbols-outlined text-white/0 group-hover:text-white/40 text-[16px] transition-colors">add_circle</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-surface-variant/40 flex items-center justify-between">
+<span class="font-code-sm text-code-sm text-on-surface-variant">FOLGA</span>
+<span class="text-[10px] text-on-surface-variant">Fim de sem.</span>
+</div>
+</div>
+</div>
+<!-- Week 2: Days 04 to 10 -->
+<!-- Day 04 (DOM) -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-surface-container flex flex-col justify-between hover:bg-surface-container-high transition-colors group">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-error/80">04</span>
+<span class="material-symbols-outlined text-white/0 group-hover:text-white/40 text-[16px] transition-colors">add_circle</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-surface-variant/40 flex items-center justify-between">
+<span class="font-code-sm text-code-sm text-on-surface-variant">FOLGA</span>
+<span class="text-[10px] text-on-surface-variant">Descanso</span>
+</div>
+</div>
+</div>
+<!-- Day 05 (SEG) - TRABALHA -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-primary/10 shadow-sm flex flex-col justify-between hover:bg-primary/[0.14] transition-colors group relative overflow-hidden">
+<div class="absolute top-0 right-0 w-8 h-8 bg-primary/10 rounded-bl-xl pointer-events-none flex items-center justify-center">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-bold text-primary">05</span>
+<span class="font-label-sm text-label-sm text-primary font-medium">12h</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-primary/20 text-on-surface flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-primary">TRABALHA</span>
+<span class="font-code-sm text-[10px] text-primary">07h-19h</span>
+</div>
+<span class="text-[10px] text-on-surface-variant truncate">UTI Geral • Leitos 01-10</span>
+</div>
+</div>
+<!-- Day 06 (TER) - FOLGA -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-surface-container flex flex-col justify-between hover:bg-surface-container-high transition-colors group">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-on-surface">06</span>
+<span class="material-symbols-outlined text-white/0 group-hover:text-white/40 text-[16px] transition-colors">add_circle</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-surface-variant/40 flex items-center justify-between">
+<span class="font-code-sm text-code-sm text-on-surface-variant">FOLGA</span>
+<span class="text-[10px] text-on-surface-variant">Descanso</span>
+</div>
+<span class="text-[10px] text-on-surface-variant truncate">Intervalo Legal 36h</span>
+</div>
+</div>
+<!-- Day 07 (QUA) - TRABALHA -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-primary/10 shadow-sm flex flex-col justify-between hover:bg-primary/[0.14] transition-colors group relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-bold text-primary">07</span>
+<span class="font-label-sm text-label-sm text-primary font-medium">12h</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-primary/20 text-on-surface flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-primary">TRABALHA</span>
+<span class="font-code-sm text-[10px] text-primary">07h-19h</span>
+</div>
+<span class="text-[10px] text-on-surface-variant truncate">UTI Geral • Plantão Diurno</span>
+</div>
+</div>
+<!-- Day 08 (QUI) - FOLGA -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-surface-container flex flex-col justify-between hover:bg-surface-container-high transition-colors group">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-on-surface">08</span>
+<span class="material-symbols-outlined text-white/0 group-hover:text-white/40 text-[16px] transition-colors">add_circle</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-surface-variant/40 flex items-center justify-between">
+<span class="font-code-sm text-code-sm text-on-surface-variant">FOLGA</span>
+<span class="text-[10px] text-on-surface-variant">Descanso</span>
+</div>
+</div>
+</div>
+<!-- Day 09 (SEX) - TRABALHA -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-primary/10 shadow-sm flex flex-col justify-between hover:bg-primary/[0.14] transition-colors group relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-bold text-primary">09</span>
+<span class="font-label-sm text-label-sm text-primary font-medium">12h</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-primary/20 text-on-surface flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-primary">TRABALHA</span>
+<span class="font-code-sm text-[10px] text-primary">07h-19h</span>
+</div>
+<span class="text-[10px] text-on-surface-variant truncate">UTI Geral • Plantão Diurno</span>
+</div>
+</div>
+<!-- Day 10 (SÁB) - FOLGA -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-surface-container flex flex-col justify-between hover:bg-surface-container-high transition-colors group">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-on-surface">10</span>
+<span class="material-symbols-outlined text-white/0 group-hover:text-white/40 text-[16px] transition-colors">add_circle</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-surface-variant/40 flex items-center justify-between">
+<span class="font-code-sm text-code-sm text-on-surface-variant">FOLGA</span>
+<span class="text-[10px] text-on-surface-variant">Descanso</span>
+</div>
+</div>
+</div>
+<!-- Week 3: Days 11 to 17 -->
+<!-- Day 11 (DOM) - FOLGA -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-surface-container flex flex-col justify-between hover:bg-surface-container-high transition-colors group">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-error/80">11</span>
+<span class="material-symbols-outlined text-white/0 group-hover:text-white/40 text-[16px] transition-colors">add_circle</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-surface-variant/40 flex items-center justify-between">
+<span class="font-code-sm text-code-sm text-on-surface-variant">FOLGA</span>
+<span class="text-[10px] text-on-surface-variant">Descanso</span>
+</div>
+</div>
+</div>
+<!-- Day 12 (SEG) - FOLGA FERIADO -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-surface-container flex flex-col justify-between hover:bg-surface-container-high transition-colors group">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="font-code-sm text-code-sm font-semibold text-on-surface">12</span>
+<span class="text-[10px] px-1 py-0.2 rounded bg-tertiary-container/30 text-tertiary">Feriado</span>
+</div>
+<span class="material-symbols-outlined text-white/0 group-hover:text-white/40 text-[16px] transition-colors">add_circle</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-surface-variant/40 flex items-center justify-between">
+<span class="font-code-sm text-code-sm text-on-surface-variant">FOLGA</span>
+<span class="text-[10px] text-on-surface-variant">N. S. Aparecida</span>
+</div>
+</div>
+</div>
+<!-- Day 13 (TER) - TRABALHA -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-primary/10 shadow-sm flex flex-col justify-between hover:bg-primary/[0.14] transition-colors group relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-bold text-primary">13</span>
+<span class="font-label-sm text-label-sm text-primary font-medium">12h</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-primary/20 text-on-surface flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-primary">TRABALHA</span>
+<span class="font-code-sm text-[10px] text-primary">07h-19h</span>
+</div>
+<span class="text-[10px] text-on-surface-variant truncate">UTI Geral • Posto A</span>
+</div>
+</div>
+<!-- Day 14 (QUA) - FOLGA -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-surface-container flex flex-col justify-between hover:bg-surface-container-high transition-colors group">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-on-surface">14</span>
+<span class="material-symbols-outlined text-white/0 group-hover:text-white/40 text-[16px] transition-colors">add_circle</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-surface-variant/40 flex items-center justify-between">
+<span class="font-code-sm text-code-sm text-on-surface-variant">FOLGA</span>
+<span class="text-[10px] text-on-surface-variant">Descanso</span>
+</div>
+</div>
+</div>
+<!-- Day 15 (QUI) - TRABALHA -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-primary/10 shadow-sm flex flex-col justify-between hover:bg-primary/[0.14] transition-colors group relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-bold text-primary">15</span>
+<span class="font-label-sm text-label-sm text-primary font-medium">12h</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-primary/20 text-on-surface flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-primary">TRABALHA</span>
+<span class="font-code-sm text-[10px] text-primary">07h-19h</span>
+</div>
+<span class="text-[10px] text-on-surface-variant truncate">UTI Geral • Plantão Diurno</span>
+</div>
+</div>
+<!-- Day 16 (SEX) - FOLGA -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-surface-container flex flex-col justify-between hover:bg-surface-container-high transition-colors group">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-on-surface">16</span>
+<span class="material-symbols-outlined text-white/0 group-hover:text-white/40 text-[16px] transition-colors">add_circle</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-surface-variant/40 flex items-center justify-between">
+<span class="font-code-sm text-code-sm text-on-surface-variant">FOLGA</span>
+<span class="text-[10px] text-on-surface-variant">Descanso</span>
+</div>
+</div>
+</div>
+<!-- Day 17 (SÁB) - TRABALHA -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-primary/10 shadow-sm flex flex-col justify-between hover:bg-primary/[0.14] transition-colors group relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-bold text-primary">17</span>
+<span class="font-label-sm text-label-sm text-primary font-medium">12h</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-primary/20 text-on-surface flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-primary">TRABALHA</span>
+<span class="font-code-sm text-[10px] text-primary">07h-19h</span>
+</div>
+<span class="text-[10px] text-on-surface-variant truncate">UTI Geral • Fim de Semana</span>
+</div>
+</div>
+<!-- Week 4: Days 18 to 24 -->
+<!-- Day 18 (DOM) - FOLGA -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-surface-container flex flex-col justify-between hover:bg-surface-container-high transition-colors group">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-error/80">18</span>
+<span class="material-symbols-outlined text-white/0 group-hover:text-white/40 text-[16px] transition-colors">add_circle</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-surface-variant/40 flex items-center justify-between">
+<span class="font-code-sm text-code-sm text-on-surface-variant">FOLGA</span>
+<span class="text-[10px] text-on-surface-variant">Descanso</span>
+</div>
+</div>
+</div>
+<!-- Day 19 (SEG) - TRABALHA -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-primary/10 shadow-sm flex flex-col justify-between hover:bg-primary/[0.14] transition-colors group relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-bold text-primary">19</span>
+<span class="font-label-sm text-label-sm text-primary font-medium">12h</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-primary/20 text-on-surface flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-primary">TRABALHA</span>
+<span class="font-code-sm text-[10px] text-primary">07h-19h</span>
+</div>
+<span class="text-[10px] text-on-surface-variant truncate">UTI Geral • Plantão Diurno</span>
+</div>
+</div>
+<!-- Day 20 (TER) - FOLGA -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-surface-container flex flex-col justify-between hover:bg-surface-container-high transition-colors group">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-on-surface">20</span>
+<span class="material-symbols-outlined text-white/0 group-hover:text-white/40 text-[16px] transition-colors">add_circle</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-surface-variant/40 flex items-center justify-between">
+<span class="font-code-sm text-code-sm text-on-surface-variant">FOLGA</span>
+<span class="text-[10px] text-on-surface-variant">Descanso</span>
+</div>
+</div>
+</div>
+<!-- Day 21 (QUA) - TRABALHA (HO / TELEMEDICINA) -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-secondary-container/15 shadow-sm flex flex-col justify-between hover:bg-secondary-container/25 transition-colors group relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-bold text-secondary">21</span>
+<span class="font-label-sm text-label-sm text-secondary font-medium">HO</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-secondary-container/30 text-secondary flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold">TELEMEDICINA</span>
+<span class="font-code-sm text-[10px]">08h-18h</span>
+</div>
+<span class="text-[10px] text-on-surface-variant truncate">Triagem Regulada Remota</span>
+</div>
+</div>
+<!-- Day 22 (QUI) - FOLGA (HOJE INDICATOR) -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-surface-container-high shadow-lg flex flex-col justify-between ring-2 ring-primary/40 relative overflow-hidden">
+<div class="absolute top-1.5 right-1.5 flex items-center gap-1 px-1.5 py-0.5 rounded bg-primary text-on-primary font-code-sm text-[10px] font-semibold">
+              HOJE
+            </div>
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-bold text-on-surface">22</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-surface-variant/70 flex items-center justify-between">
+<span class="font-code-sm text-code-sm text-on-surface font-medium">FOLGA</span>
+<span class="text-[10px] text-on-surface-variant">Intervalo Atual</span>
+</div>
+<span class="text-[10px] text-primary truncate">Próximo: Plantão Amanhã</span>
+</div>
+</div>
+<!-- Day 23 (SEX) - TRABALHA -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-primary/10 shadow-sm flex flex-col justify-between hover:bg-primary/[0.14] transition-colors group relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-bold text-primary">23</span>
+<span class="font-label-sm text-label-sm text-primary font-medium">12h</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-primary/20 text-on-surface flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-primary">TRABALHA</span>
+<span class="font-code-sm text-[10px] text-primary">07h-19h</span>
+</div>
+<span class="text-[10px] text-on-surface-variant truncate">UTI Geral • Plantão Diurno</span>
+</div>
+</div>
+<!-- Day 24 (SÁB) - FOLGA -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-surface-container flex flex-col justify-between hover:bg-surface-container-high transition-colors group">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-on-surface">24</span>
+<span class="material-symbols-outlined text-white/0 group-hover:text-white/40 text-[16px] transition-colors">add_circle</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-surface-variant/40 flex items-center justify-between">
+<span class="font-code-sm text-code-sm text-on-surface-variant">FOLGA</span>
+<span class="text-[10px] text-on-surface-variant">Descanso</span>
+</div>
+</div>
+</div>
+<!-- Week 5: Days 25 to 31 -->
+<!-- Day 25 (DOM) - TRABALHA -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-primary/10 shadow-sm flex flex-col justify-between hover:bg-primary/[0.14] transition-colors group relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-bold text-primary">25</span>
+<span class="font-label-sm text-label-sm text-primary font-medium">12h</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-primary/20 text-on-surface flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-primary">TRABALHA</span>
+<span class="font-code-sm text-[10px] text-primary">07h-19h</span>
+</div>
+<span class="text-[10px] text-on-surface-variant truncate">UTI Geral • Plantão Domingo</span>
+</div>
+</div>
+<!-- Day 26 (SEG) - FOLGA -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-surface-container flex flex-col justify-between hover:bg-surface-container-high transition-colors group">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-on-surface">26</span>
+<span class="material-symbols-outlined text-white/0 group-hover:text-white/40 text-[16px] transition-colors">add_circle</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-surface-variant/40 flex items-center justify-between">
+<span class="font-code-sm text-code-sm text-on-surface-variant">FOLGA</span>
+<span class="text-[10px] text-on-surface-variant">Descanso</span>
+</div>
+</div>
+</div>
+<!-- Day 27 (TER) - TRABALHA -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-primary/10 shadow-sm flex flex-col justify-between hover:bg-primary/[0.14] transition-colors group relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-bold text-primary">27</span>
+<span class="font-label-sm text-label-sm text-primary font-medium">12h</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-primary/20 text-on-surface flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-primary">TRABALHA</span>
+<span class="font-code-sm text-[10px] text-primary">07h-19h</span>
+</div>
+<span class="text-[10px] text-on-surface-variant truncate">UTI Geral • Plantão Diurno</span>
+</div>
+</div>
+<!-- Day 28 (QUA) - FOLGA (Dia do Servidor Público) -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-surface-container flex flex-col justify-between hover:bg-surface-container-high transition-colors group">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-on-surface">28</span>
+<span class="material-symbols-outlined text-white/0 group-hover:text-white/40 text-[16px] transition-colors">add_circle</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-surface-variant/40 flex items-center justify-between">
+<span class="font-code-sm text-code-sm text-on-surface-variant">FOLGA</span>
+<span class="text-[10px] text-on-surface-variant">Descanso</span>
+</div>
+</div>
+</div>
+<!-- Day 29 (QUI) - TRABALHA -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-primary/10 shadow-sm flex flex-col justify-between hover:bg-primary/[0.14] transition-colors group relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-bold text-primary">29</span>
+<span class="font-label-sm text-label-sm text-primary font-medium">12h</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-primary/20 text-on-surface flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-primary">TRABALHA</span>
+<span class="font-code-sm text-[10px] text-primary">07h-19h</span>
+</div>
+<span class="text-[10px] text-on-surface-variant truncate">UTI Geral • Plantão Diurno</span>
+</div>
+</div>
+<!-- Day 30 (SEX) - FOLGA -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-surface-container flex flex-col justify-between hover:bg-surface-container-high transition-colors group">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-on-surface">30</span>
+<span class="material-symbols-outlined text-white/0 group-hover:text-white/40 text-[16px] transition-colors">add_circle</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-surface-variant/40 flex items-center justify-between">
+<span class="font-code-sm text-code-sm text-on-surface-variant">FOLGA</span>
+<span class="text-[10px] text-on-surface-variant">Descanso</span>
+</div>
+</div>
+</div>
+<!-- Day 31 (SÁB) - TRABALHA -->
+<div class="min-h-[128px] p-2.5 rounded-xl bg-primary/10 shadow-sm flex flex-col justify-between hover:bg-primary/[0.14] transition-colors group relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-bold text-primary">31</span>
+<span class="font-label-sm text-label-sm text-primary font-medium">12h</span>
+</div>
+<div class="flex flex-col gap-1 mt-auto">
+<div class="px-2 py-1 rounded bg-primary/20 text-on-surface flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-semibold text-primary">TRABALHA</span>
+<span class="font-code-sm text-[10px] text-primary">07h-19h</span>
+</div>
+<span class="text-[10px] text-on-surface-variant truncate">Fechamento do Mês</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom Summary Analytics Panel (Inspired by Atul HQ Bento / Notion Style) -->
+<section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-md pt-space-xs">
+<!-- Metric 1: Total Hours with SVG Sparkline Ring -->
+<div class="p-space-lg rounded-2xl bg-surface-container-low shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-code-sm text-code-sm uppercase tracking-wider text-on-surface-variant">Carga Mensal</span>
+<span class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[17px]">schedule</span>
+</span>
+</div>
+<div class="flex items-end justify-between">
+<div>
+<div class="font-display text-display text-on-surface font-semibold tracking-tight">156<span class="text-headline-sm font-normal text-on-surface-variant">h</span></div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">100% da meta de 156h cumprida</p>
+</div>
+<!-- Minimal SVG Ring visualization -->
+<div class="relative w-12 h-12 flex items-center justify-center">
+<svg class="w-12 h-12 transform -rotate-90" viewbox="0 0 36 36">
+<path class="text-surface-variant" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"></path>
+<path class="text-primary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="100, 100" stroke-linecap="round" stroke-width="3"></path>
+</svg>
+<span class="absolute text-[10px] font-code-sm text-primary font-bold">100%</span>
+</div>
+</div>
+</div>
+<!-- Metric 2: Plantões Realizados e Previstos -->
+<div class="p-space-lg rounded-2xl bg-surface-container-low shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-code-sm text-code-sm uppercase tracking-wider text-on-surface-variant">Plantões Previstos</span>
+<span class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[17px]">local_hospital</span>
+</span>
+</div>
+<div>
+<div class="flex items-baseline gap-2">
+<span class="font-display text-display text-on-surface font-semibold tracking-tight">13</span>
+<span class="font-body-md text-body-md text-on-surface-variant">escalados (12 presenciais + 1 HO)</span>
+</div>
+<!-- Progression bar -->
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden mt-3">
+<div class="bg-primary h-full rounded-full w-[69%] transition-all duration-500"></div>
+</div>
+<div class="flex justify-between items-center text-[11px] font-code-sm text-on-surface-variant mt-1.5">
+<span>9 executados</span>
+<span>4 restantes</span>
+</div>
+</div>
+</div>
+<!-- Metric 3: Folgas & Intervalos -->
+<div class="p-space-lg rounded-2xl bg-surface-container-low shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-code-sm text-code-sm uppercase tracking-wider text-on-surface-variant">Folgas & Descanso</span>
+<span class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[17px]">hotel</span>
+</span>
+</div>
+<div>
+<div class="font-display text-display text-on-surface font-semibold tracking-tight">18 <span class="text-headline-sm font-normal text-on-surface-variant">dias</span></div>
+<div class="flex items-center gap-2 mt-1">
+<span class="w-2 h-2 rounded-full bg-surface-variant"></span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Interjornada 36h 100% auditada</span>
+</div>
+</div>
+</div>
+<!-- Metric 4: Próximo Plantão com Ação Direta -->
+<div class="p-space-lg rounded-2xl bg-surface-container-high shadow-sm flex flex-col justify-between relative overflow-hidden">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-code-sm text-code-sm uppercase tracking-wider text-primary">Próximo Plantão</span>
+<span class="w-7 h-7 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[17px]">alarm</span>
+</span>
+</div>
+<div>
+<div class="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight">
+              Amanhã, 23/10
+            </div>
+<div class="font-code-sm text-code-sm text-primary font-medium mt-0.5">
+              07:00 às 19:00 • Setor UTI Geral
+            </div>
+</div>
+<div class="pt-3 flex items-center gap-2">
+<button class="w-full h-8 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-on-surface text-label-sm font-label-sm flex items-center justify-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[14px]">swap_calls</span>
+              Transferir Plantão
+            </button>
+</div>
+</div>
+</section>
+<!-- Atul-inspired Visual Cards Section (Photo Rich Reference Integration) -->
+<section class="mt-space-md pt-space-lg border-t border-white/[0.05]">
+<div class="flex items-center justify-between mb-space-md">
+<div class="flex flex-col">
+<span class="font-code-sm text-code-sm uppercase tracking-wider text-on-surface-variant">Espaços de Prática & Protocolos</span>
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold">Atividades Vinculadas ao Prestador</h2>
+</div>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Equipe Dr. José Frazão</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<!-- Card 1: UTI Adulto -->
+<div class="relative group rounded-2xl overflow-hidden h-44 bg-surface-container shadow-md">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="High-tech contemporary hospital intensive care unit interior with ambient cyan lighting, precision medical monitoring screens, and modern stainless clinical work stations in a tranquil sober mood." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBQ_g5GXM7w-iJjhZm7RFlAn3IBRQNAIpD3F9AiJCs1LJi0Lh_Q0fSYri3EMUcnl7AntIBOwRhRrstUrYnTg-7WZhIu7w4UbAZlr_YoKKL0I1563Rdz0UWlhB-7ggH3PLrmtNGLyR0z7hyFq2X_3Jd9NrBoErTP0Jz1CiBLSEMydlMAe5BnPbJnQgkzX7B2EP5dhSh1vWJLTjNc51fHU42LTsOkbf-u3mWs8kF1ZM23')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/60 to-transparent"></div>
+<div class="relative z-10 p-space-md h-full flex flex-col justify-end">
+<div class="flex items-center gap-1.5 mb-1">
+<span class="px-2 py-0.5 rounded text-[10px] font-code-sm bg-primary/20 text-primary">Leitos 01-10</span>
+<span class="text-white/40 text-[10px]">•</span>
+<span class="text-on-surface-variant text-[11px] font-body-sm">8 plantões alocados</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">UTI Geral Adulto</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Plantões diurnos de suporte intensivo</p>
+</div>
+</div>
+<!-- Card 2: Telemedicina & Regulação -->
+<div class="relative group rounded-2xl overflow-hidden h-44 bg-surface-container shadow-md">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="Modern clinical teleconsultation doctor workstation with multiple minimalist monitors showing medical data, warm subtle ambient room illumination and sleek ergonomic dark graphite desk setup." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCiq94di-Wi0j0GzpMUExt0Ioz8yrZ7M6t1ePR8F1YzFnSIhNZjEHF_GmYQVb9qKAE_9a4UZ0IWxOjI2CENqxJLVpxUSu2u9pW0xhvE0HnMU3Kk3qt1WtH_fhSDmyyt_kLfCDDqgEnslssRXSfa5_PR9t2-r2kSoX3E4FKVECt8KqG6PdIg5JTiwFWDp7rdrfbIP3WLGDQKMvF4ZwWDkgbCmjNRlLOlRJhk2lnOArLC')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/60 to-transparent"></div>
+<div class="relative z-10 p-space-md h-full flex flex-col justify-end">
+<div class="flex items-center gap-1.5 mb-1">
+<span class="px-2 py-0.5 rounded text-[10px] font-code-sm bg-secondary-container/30 text-secondary">Remoto</span>
+<span class="text-white/40 text-[10px]">•</span>
+<span class="text-on-surface-variant text-[11px] font-body-sm">1 plantão alocado</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Regulação & Telemedicina</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Atendimento de triagem e encaminhamento</p>
+</div>
+</div>
+<!-- Card 3: Comitê de Ética e Rounds -->
+<div class="relative group rounded-2xl overflow-hidden h-44 bg-surface-container shadow-md">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="Sleek conference room with doctors and healthcare managers gathered around a dark table reviewing digital medical records under gentle diffused soft overhead lighting." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAuqRgKBZkANEEcOcdHfngq3U9YzcEwRyfK9sk84Cu8gk9KSgIokGda7z2ihzvEucRjty8YiCjgmINEH2KOw-njDm4rf62ZXzB8RlPtNcJYdihs9QQUxDd8r8fRGoz8NTAsX-_a5aYA4h3zF2VdUliqFBuYYdtf7OmjD-6Qa6mnDGaXbX4MTQz5VW7YOGkzt0to2EiMzPzjfuQlJ6CwRk2Jfk9JJUnjI_d9nI5UHh7X')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/60 to-transparent"></div>
+<div class="relative z-10 p-space-md h-full flex flex-col justify-end">
+<div class="flex items-center gap-1.5 mb-1">
+<span class="px-2 py-0.5 rounded text-[10px] font-code-sm bg-tertiary-container/30 text-tertiary">Coordenação</span>
+<span class="text-white/40 text-[10px]">•</span>
+<span class="text-on-surface-variant text-[11px] font-body-sm">Quartas-feiras</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Rounds Clínicos & Auditoria</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Reuniões de alinhamento com a diretoria</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</div>
+<script>
+  (function initCalendarMicroInteractions() {
+    const todayBtn = document.getElementById('todayBtn');
+    if (todayBtn) {
+      todayBtn.addEventListener('click', () => {
+        const todayCell = document.querySelector('.ring-primary\\/40');
+        if (todayCell) {
+          todayCell.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          todayCell.classList.add('bg-primary/20');
+          setTimeout(() => {
+            todayCell.classList.remove('bg-primary/20');
+          }, 800);
+        }
+      });
+    }
+
+    const prevMonthBtn = document.getElementById('prevMonthBtn');
+    const nextMonthBtn = document.getElementById('nextMonthBtn');
+    [prevMonthBtn, nextMonthBtn].forEach(btn => {
+      if (btn) {
+        btn.addEventListener('click', () => {
+          btn.classList.add('scale-95');
+          setTimeout(() => btn.classList.remove('scale-95'), 120);
+        });
+      }
+    });
+  })();
+</script></main><footer class="w-full bg-surface-container-lowest border-t border-white/[0.05] py-space-lg"><div class="w-full px-margin flex flex-col md:flex-row items-center justify-between gap-space-sm text-on-surface-variant text-label-sm font-label-sm"><div class="flex items-center gap-space-md"><span>© 2025 EscalaPro • Gestão Humanizada de Escalas</span><span class="hidden sm:inline">•</span><span class="hidden sm:inline font-code-sm text-code-sm">v2.4.1 (build 940)</span></div><div class="flex items-center gap-space-lg"><span>Plantões Auditados</span><span>Conformidade Médica</span><span>Suporte 24/7</span></div></div></footer></body></html>

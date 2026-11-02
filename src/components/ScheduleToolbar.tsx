@@ -84,58 +84,58 @@ export const ScheduleToolbar: React.FC<ScheduleToolbarProps> = ({
   const todayRestingCount = Math.max(0, regimeProviders.length - todayWorkingCount);
 
   return (
-    <div className="bg-[#141c28] border border-[#1e2a3a] rounded-2xl py-2.5 px-3.5 sm:px-4 text-slate-200 shadow-md">
+    <div className="bg-[#12141A] border border-white/[0.08] rounded-2xl py-2.5 px-3.5 sm:px-4 text-zinc-200 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3">
         
         {/* Left: Escalador Title / Month Navigator + Regime Switcher + Status */}
         <div className="flex items-center gap-2.5 flex-wrap">
-          <div className="text-sm font-black tracking-tight text-white pr-2 border-r border-slate-800 hidden sm:block">
+          <div className="text-sm font-black tracking-tight text-white pr-2 border-r border-white/[0.08] hidden sm:block">
             Escalador
           </div>
 
           {/* Navigator arrows */}
-          <div className="flex items-center bg-[#0c121c] p-0.5 rounded-xl border border-[#1e2a3a]">
+          <div className="flex items-center bg-[#1A1D24] p-0.5 rounded-xl border border-white/[0.08]">
             <button
               onClick={goToPreviousMonth}
-              className="p-1.5 text-slate-400 hover:text-cyan-400 hover:bg-slate-800 rounded-lg transition-all cursor-pointer"
+              className="p-1.5 text-zinc-400 hover:text-white hover:bg-white/[0.05] rounded-lg transition-all cursor-pointer"
               title="Mês anterior"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <div className="px-3 text-center min-w-[120px]">
-              <span className="text-xs font-extrabold text-white capitalize">
+              <span className="text-xs font-bold text-white capitalize">
                 {MONTH_NAMES_PT[currentMonthIndex]}
               </span>{' '}
-              <span className="text-xs font-semibold text-cyan-400">
+              <span className="text-xs font-semibold text-[#00d2d3]">
                 {currentYear}
               </span>
             </div>
             <button
               onClick={goToNextMonth}
-              className="p-1.5 text-slate-400 hover:text-cyan-400 hover:bg-slate-800 rounded-lg transition-all cursor-pointer"
+              className="p-1.5 text-zinc-400 hover:text-white hover:bg-white/[0.05] rounded-lg transition-all cursor-pointer"
               title="Próximo mês"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
 
-          {/* Electric Blue & Cyan "Hoje" Button */}
+          {/* "Hoje" Button */}
           <button
             onClick={goToToday}
-            className="px-3 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 active:scale-95 border border-blue-400/40 rounded-xl transition-all cursor-pointer shadow-sm shadow-blue-950/50"
+            className="px-3 py-1.5 text-xs font-bold text-zinc-200 bg-[#1A1D24] hover:bg-[#252830] border border-white/[0.08] rounded-xl transition-all cursor-pointer"
             title="Ir para o mês atual"
           >
             Hoje
           </button>
 
-          {/* Regime Switcher Toggle (12x36 vs 5x2) in Cyan/Electric Blue */}
-          <div className="flex items-center bg-[#0c121c] p-0.5 rounded-xl border border-[#1e2a3a]">
+          {/* Regime Switcher Toggle (12x36 vs 5x2) */}
+          <div className="flex items-center bg-[#1A1D24] p-0.5 rounded-xl border border-white/[0.08]">
             <button
               onClick={() => setActiveRegime('12x36')}
               className={`px-3 py-1 rounded-lg text-xs font-black transition-all cursor-pointer ${
                 activeRegime === '12x36'
-                  ? 'bg-cyan-500 text-slate-950 shadow-md font-black'
-                  : 'text-slate-400 hover:text-cyan-400'
+                  ? 'bg-[#00d2d3] text-[#003731] shadow-xs font-black'
+                  : 'text-zinc-400 hover:text-white'
               }`}
               title="Escala Técnica 12x36"
             >
@@ -145,8 +145,8 @@ export const ScheduleToolbar: React.FC<ScheduleToolbarProps> = ({
               onClick={() => setActiveRegime('5x2')}
               className={`px-3 py-1 rounded-lg text-xs font-black transition-all cursor-pointer ${
                 activeRegime === '5x2'
-                  ? 'bg-cyan-500 text-slate-950 shadow-md font-black'
-                  : 'text-slate-400 hover:text-cyan-400'
+                  ? 'bg-[#00d2d3] text-[#003731] shadow-xs font-black'
+                  : 'text-zinc-400 hover:text-white'
               }`}
               title="Escala 5x2 (Segunda a Sexta)"
             >
@@ -154,20 +154,20 @@ export const ScheduleToolbar: React.FC<ScheduleToolbarProps> = ({
             </button>
           </div>
 
-          {/* Publication status badge in Electric Blue & Cyan */}
+          {/* Publication status badge */}
           {role === 'supervisor' ? (
             <button
               onClick={() => toggleMonthPublishStatus(currentYear, currentMonthIndex)}
               className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
                 isCurrentMonthPublished
-                  ? 'bg-cyan-500/15 text-cyan-300 border-cyan-400/50 hover:bg-cyan-500/25 shadow-sm shadow-cyan-950/40'
-                  : 'bg-amber-950/50 text-amber-300 border-amber-800/80 hover:bg-amber-900/60'
+                  ? 'bg-[#00d2d3]/15 text-[#00d2d3] border-[#00d2d3]/40 hover:bg-[#00d2d3]/25'
+                  : 'bg-amber-950/40 text-amber-300 border-amber-800/80 hover:bg-amber-900/60'
               }`}
               title="Clique para alternar entre Escala Oficial e Rascunho"
             >
               <span
                 className={`w-2 h-2 rounded-full ${
-                  isCurrentMonthPublished ? 'bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.9)]' : 'bg-amber-400'
+                  isCurrentMonthPublished ? 'bg-[#00d2d3] shadow-[0_0_6px_#00d2d3]' : 'bg-amber-400'
                 }`}
               />
               <span>
@@ -177,12 +177,12 @@ export const ScheduleToolbar: React.FC<ScheduleToolbarProps> = ({
           ) : (
             <div className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold border ${
               isCurrentMonthPublished
-                ? 'bg-cyan-500/15 text-cyan-300 border-cyan-400/50 shadow-sm shadow-cyan-950/40'
-                : 'bg-amber-950/50 text-amber-300 border-amber-800/80'
+                ? 'bg-[#00d2d3]/15 text-[#00d2d3] border-[#00d2d3]/40'
+                : 'bg-amber-950/40 text-amber-300 border-amber-800/80'
             }`}>
               <span
                 className={`w-2 h-2 rounded-full ${
-                  isCurrentMonthPublished ? 'bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.9)]' : 'bg-amber-400'
+                  isCurrentMonthPublished ? 'bg-[#00d2d3] shadow-[0_0_6px_#00d2d3]' : 'bg-amber-400'
                 }`}
               />
               <span>
@@ -192,13 +192,13 @@ export const ScheduleToolbar: React.FC<ScheduleToolbarProps> = ({
           )}
         </div>
 
-        {/* Center: Live Today Duty Numerical Metric in Cyan */}
-        <div className="hidden xl:flex items-center gap-2 bg-[#0c121c] px-3.5 py-1.5 rounded-xl border border-[#1e2a3a] text-xs">
-          <div className="flex items-center gap-1.5 font-bold text-slate-300">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.9)] animate-pulse" />
+        {/* Center: Live Today Duty Numerical Metric */}
+        <div className="hidden xl:flex items-center gap-2 bg-[#1A1D24] px-3.5 py-1.5 rounded-xl border border-white/[0.06] text-xs">
+          <div className="flex items-center gap-1.5 font-bold text-zinc-300">
+            <span className="w-2 h-2 rounded-full bg-[#00d2d3] shadow-[0_0_6px_#00d2d3] animate-pulse" />
             <span>Hoje ({todayWeekDayShort}, {todayDayNum}/{MONTH_NAMES_PT[todayMonthIdx].substring(0, 3)}):</span>
           </div>
-          <span className="font-black text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded-md border border-cyan-700/60 shadow-xs">
+          <span className="font-bold text-[#00d2d3] bg-[#00d2d3]/10 px-2 py-0.5 rounded-md border border-[#00d2d3]/20 shadow-xs">
             {todayWorkingCount} Plantonistas
           </span>
           {todayHoCount > 0 && (
@@ -206,24 +206,24 @@ export const ScheduleToolbar: React.FC<ScheduleToolbarProps> = ({
               ({todayPresencialCount} Presencial • {todayHoCount} HO)
             </span>
           )}
-          <span className="text-slate-600">•</span>
-          <span className="text-slate-400 text-xs font-medium">
+          <span className="text-zinc-600">•</span>
+          <span className="text-zinc-400 text-xs font-medium">
             {todayRestingCount} de Folga
           </span>
         </div>
 
-        {/* Right: Imprimir, Buscar, and Tools in Electric Blue & Cyan */}
+        {/* Right: Imprimir, Buscar, and Tools */}
         <div className="flex items-center gap-2 flex-wrap text-xs">
           {/* Supervisor Tools */}
           {role === 'supervisor' && (
-            <div className="flex items-center gap-1.5 pr-2 border-r border-[#1e2a3a]">
+            <div className="flex items-center gap-1.5 pr-2 border-r border-white/[0.08]">
               {onOpenExecutiveReportModal && (
                 <button
                   onClick={onOpenExecutiveReportModal}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-white bg-blue-600 hover:bg-blue-500 border border-blue-400/40 rounded-xl transition-all font-bold shadow-md shadow-blue-950/40 cursor-pointer active:scale-98"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#003731] bg-[#00d2d3] hover:bg-[#57f1db] rounded-xl transition-all font-bold shadow-sm shadow-[#00d2d3]/20 cursor-pointer active:scale-98"
                   title="Gerar Relatório Executivo Mensal para RH e Diretoria em 1 Clique"
                 >
-                  <FileSpreadsheet className="w-3.5 h-3.5 text-cyan-200" />
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-[#003731]" />
                   <span>Relatório RH</span>
                 </button>
               )}
@@ -240,63 +240,63 @@ export const ScheduleToolbar: React.FC<ScheduleToolbarProps> = ({
               {onOpenProviderModal && (
                 <button
                   onClick={onOpenProviderModal}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-slate-300 hover:text-cyan-400 bg-[#0c121c] hover:bg-slate-800 border border-[#1e2a3a] rounded-xl transition-all font-bold cursor-pointer"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-zinc-300 hover:text-white bg-[#1A1D24] hover:bg-[#252830] border border-white/[0.08] rounded-xl transition-all font-bold cursor-pointer"
                   title="Cadastrar, editar ou remover pessoas da equipe"
                 >
-                  <Users className="w-3.5 h-3.5 text-slate-400" />
+                  <Users className="w-3.5 h-3.5 text-zinc-400" />
                   <span>Equipe</span>
                 </button>
               )}
               {onOpenBalanceModal && (
                 <button
                   onClick={onOpenBalanceModal}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-cyan-300 bg-cyan-950/50 hover:bg-cyan-900/60 border border-cyan-800/80 rounded-xl transition-all font-bold cursor-pointer"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-[#00d2d3] bg-[#00d2d3]/10 hover:bg-[#00d2d3]/20 border border-[#00d2d3]/30 rounded-xl transition-all font-bold cursor-pointer"
                   title="Auditoria de Horas e Balanceamento da Equipe"
                 >
-                  <Scale className="w-3.5 h-3.5 text-cyan-400" />
+                  <Scale className="w-3.5 h-3.5 text-[#00d2d3]" />
                   <span className="hidden sm:inline">Carga Horária</span>
                 </button>
               )}
               {onOpenQuickSwapModal && (
                 <button
                   onClick={onOpenQuickSwapModal}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-slate-300 hover:text-cyan-400 bg-[#0c121c] hover:bg-slate-800 border border-[#1e2a3a] rounded-xl transition-all font-semibold cursor-pointer"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-zinc-300 hover:text-white bg-[#1A1D24] hover:bg-[#252830] border border-white/[0.08] rounded-xl transition-all font-semibold cursor-pointer"
                   title="Troca direta de plantão entre dois colaboradores"
                 >
-                  <ArrowLeftRight className="w-3.5 h-3.5 text-slate-400" />
+                  <ArrowLeftRight className="w-3.5 h-3.5 text-zinc-400" />
                   <span className="hidden sm:inline">Troca</span>
                 </button>
               )}
               {onOpenCloneModal && (
                 <button
                   onClick={onOpenCloneModal}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-slate-300 hover:text-cyan-400 bg-[#0c121c] hover:bg-slate-800 border border-[#1e2a3a] rounded-xl transition-all font-semibold cursor-pointer"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-zinc-300 hover:text-white bg-[#1A1D24] hover:bg-[#252830] border border-white/[0.08] rounded-xl transition-all font-semibold cursor-pointer"
                   title="Copiar mês anterior"
                 >
-                  <Copy className="w-3.5 h-3.5 text-slate-400" />
+                  <Copy className="w-3.5 h-3.5 text-zinc-400" />
                   <span className="hidden sm:inline">Copiar</span>
                 </button>
               )}
               {onOpenAutoScheduleModal && (
                 <button
                   onClick={onOpenAutoScheduleModal}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-slate-300 hover:text-cyan-400 bg-[#0c121c] hover:bg-slate-800 border border-[#1e2a3a] rounded-xl transition-all font-semibold cursor-pointer"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-zinc-300 hover:text-white bg-[#1A1D24] hover:bg-[#252830] border border-white/[0.08] rounded-xl transition-all font-semibold cursor-pointer"
                   title="Gerador automático de escalas"
                 >
-                  <Wand2 className="w-3.5 h-3.5 text-slate-400" />
+                  <Wand2 className="w-3.5 h-3.5 text-zinc-400" />
                   <span className="hidden sm:inline">Auto</span>
                 </button>
               )}
             </div>
           )}
 
-          {/* Electric Blue Imprimir Button */}
+          {/* Imprimir Button */}
           <button
             onClick={onOpenPrintModal || (() => window.print())}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-white bg-blue-600 hover:bg-blue-500 border border-blue-400/40 rounded-xl transition-all font-bold cursor-pointer shadow-sm shadow-blue-950/40"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-zinc-200 bg-[#1A1D24] hover:bg-[#252830] border border-white/[0.08] rounded-xl transition-all font-bold cursor-pointer"
             title="Imprimir ou Salvar em PDF (Formato A4 Paisagem)"
           >
-            <Printer className="w-3.5 h-3.5 text-cyan-200" />
+            <Printer className="w-3.5 h-3.5 text-zinc-400" />
             <span>Imprimir</span>
           </button>
 
@@ -304,34 +304,34 @@ export const ScheduleToolbar: React.FC<ScheduleToolbarProps> = ({
           <select
             value={filters.providerId}
             onChange={e => setFilters(prev => ({ ...prev, providerId: e.target.value }))}
-            className="bg-[#0c121c] border border-[#1e2a3a] text-slate-200 py-1.5 px-2.5 rounded-xl text-xs focus:border-cyan-400 focus:outline-none max-w-[130px] sm:max-w-[170px] cursor-pointer shadow-sm font-medium"
+            className="bg-[#1A1D24] border border-white/[0.08] text-zinc-200 py-1.5 px-2.5 rounded-xl text-xs focus:border-[#00d2d3] focus:outline-none max-w-[130px] sm:max-w-[170px] cursor-pointer shadow-sm font-medium"
           >
             <option value="all">Todos colaboradores</option>
             {providers
               .filter(p => (p.regime || '12x36') === activeRegime)
               .map(p => (
-                <option key={p.id} value={p.id} className="bg-[#0c121c] text-slate-200">
+                <option key={p.id} value={p.id} className="bg-[#12141A] text-zinc-200">
                   {p.name}
                 </option>
               ))}
           </select>
 
-          {/* Electric Blue / Cyan Buscar Box */}
+          {/* Buscar Box */}
           <div className="relative">
-            <Search className="w-3.5 h-3.5 text-cyan-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               placeholder="Buscar..."
               value={filters.searchQuery}
               onChange={e => setFilters(prev => ({ ...prev, searchQuery: e.target.value }))}
-              className="pl-7 pr-2.5 py-1.5 bg-[#0c121c] border border-[#1e2a3a] text-slate-200 rounded-xl text-xs placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none w-20 sm:w-28 shadow-sm font-medium"
+              className="pl-7 pr-2.5 py-1.5 bg-[#1A1D24] border border-white/[0.08] text-white rounded-xl text-xs placeholder:text-zinc-500 focus:border-[#00d2d3] focus:outline-none w-20 sm:w-28 shadow-sm font-medium"
             />
           </div>
 
           {isFilterActive && (
             <button
               onClick={resetFilters}
-              className="p-1.5 text-slate-400 hover:text-cyan-400 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+              className="p-1.5 text-zinc-400 hover:text-white hover:bg-white/[0.05] rounded-lg transition-colors cursor-pointer"
               title="Limpar busca"
             >
               <X className="w-3.5 h-3.5" />

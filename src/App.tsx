@@ -21,6 +21,10 @@ import { AbsenceBatchModal } from './components/modals/AbsenceBatchModal';
 import { TeamBalanceModal } from './components/modals/TeamBalanceModal';
 import { AttendanceIncidentModal } from './components/modals/AttendanceIncidentModal';
 import { ExecutiveMonthlyReportModal } from './components/modals/ExecutiveMonthlyReportModal';
+import { ShiftSaleModal } from './components/modals/ShiftSaleModal';
+import { ShiftMarketplaceModal } from './components/modals/ShiftMarketplaceModal';
+import { CollaboratorProfileModal } from './components/modals/CollaboratorProfileModal';
+import { ImportScheduleModal } from './components/modals/ImportScheduleModal';
 import { MobileScheduleView } from './components/views/MobileScheduleView';
 import { Provider, ShiftAssignment } from './types';
 import { Calendar, Clock, CheckCircle2, AlertCircle, Plus, CalendarDays } from 'lucide-react';
@@ -62,6 +66,20 @@ function ScheduleAppContent() {
   const [executiveReportModalOpen, setExecutiveReportModalOpen] = useState(false);
   const [incidentModalOpen, setIncidentModalOpen] = useState(false);
 
+  // Venda & Repasse de Plantões & Perfil
+  const [marketplaceModalOpen, setMarketplaceModalOpen] = useState(false);
+  const [shiftSaleModalOpen, setShiftSaleModalOpen] = useState(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [importScheduleModalOpen, setImportScheduleModalOpen] = useState(false);
+  const [saleModalDefaultDate, setSaleModalDefaultDate] = useState<string>('');
+  const [saleModalDefaultProviderId, setSaleModalDefaultProviderId] = useState<string>('');
+
+  const handleOpenSellModal = (date?: string, providerId?: string) => {
+    setSaleModalDefaultDate(date || '');
+    setSaleModalDefaultProviderId(providerId || '');
+    setShiftSaleModalOpen(true);
+  };
+
   // Handlers
   const handleOpenNewShift = () => {
     setShiftToEdit(null);
@@ -92,7 +110,7 @@ function ScheduleAppContent() {
   const myTodayDept = myTodayShift ? departments.find(d => d.id === myTodayShift.departmentId) : null;
 
   return (
-    <div className="min-h-screen bg-[#0c121c] text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#090A0F] text-[#e3e1e9] flex flex-col font-sans selection:bg-[#00d2d3] selection:text-[#003731]">
       
       {/* 📱 MOBILE VIEW (Matches exact design on mobile screens < 768px - without profile tab) */}
       <div className="md:hidden flex-1">
@@ -121,12 +139,15 @@ function ScheduleAppContent() {
             setAuthModalProvider(null);
             setCollaboratorAuthOpen(true);
           }}
+          onOpenMarketplace={() => setMarketplaceModalOpen(true)}
+          onOpenProfileModal={() => setProfileModalOpen(true)}
+          onOpenImportModal={() => setImportScheduleModalOpen(true)}
         />
 
         {/* Main Container */}
-        <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-3 space-y-3">
-          {/* Compact Month Toolbar with Navigation & Filters */}
-          {viewMode !== 'my-schedule' && viewMode !== 'personal-calendar' && (
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 pt-20 pb-10 space-y-4">
+          {/* Compact Month Toolbar with Navigation & Filters only on calendar & agenda */}
+          {viewMode !== 'my-schedule' && viewMode !== 'personal-calendar' && viewMode !== 'escala' && (
             <ScheduleToolbar
               onOpenLeaderAuth={() => setLeaderAuthModalOpen(true)}
               onOpenAutoScheduleModal={() => setAutoScheduleModalOpen(true)}
@@ -147,6 +168,8 @@ function ScheduleAppContent() {
               onAddProvider={() => setProviderModalOpen(true)}
               onOpenCollaboratorAuth={(provider) => setAuthModalProvider(provider)}
               onOpenPrintModal={() => setPrintModalOpen(true)}
+              onOpenMarketplace={() => setMarketplaceModalOpen(true)}
+              onOpenSellModal={handleOpenSellModal}
             />
           )}
 
@@ -155,6 +178,8 @@ function ScheduleAppContent() {
               provider={currentProviderObj}
               onBackToGrid={() => setViewMode('escala')}
               onOpenPrintModal={() => setPrintModalOpen(true)}
+              onOpenMarketplace={() => setMarketplaceModalOpen(true)}
+              onOpenSellModal={handleOpenSellModal}
             />
           )}
 
@@ -182,14 +207,19 @@ function ScheduleAppContent() {
         </main>
       </div>
 
-      {/* Clean SaaS Deep Dark Footer */}
-      <footer className="border-t border-[#1e2a3a] bg-[#0c121c]/95 backdrop-blur-xs py-3 px-6 text-center text-xs text-slate-400">
-        <div className="max-w-7xl mx-auto flex items-center justify-between text-xs">
-          <span className="font-semibold text-slate-300">EscalaPro • Gestão Humanizada de Escalas</span>
-          <span className="text-cyan-400 font-semibold flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
-            Nuvem Conectada
+      {/* Obsidian Shift Deep Footer */}
+      <footer className="border-t border-white/[0.08] bg-[#090A0F]/95 backdrop-blur-md py-4 px-6 text-xs text-zinc-400">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
+          <span className="font-medium text-zinc-400">
+            © 2025 EscalaPro • Gestão Humanizada de Escalas • <span className="font-mono text-zinc-500">v2.4.1 (build 940)</span>
           </span>
+          <div className="flex items-center gap-3 text-zinc-400 font-medium">
+            <span>Plantões Auditados</span>
+            <span className="text-zinc-600">•</span>
+            <span>Conformidade Médica</span>
+            <span className="text-zinc-600">•</span>
+            <span className="text-zinc-300">Suporte 24/7</span>
+          </div>
         </div>
       </footer>
 
@@ -280,6 +310,37 @@ function ScheduleAppContent() {
           setCollaboratorAuthOpen(false);
           setAuthModalProvider(null);
         }}
+      />
+
+      {/* Venda & Repasse de Plantões PJ - Marketplace Modal */}
+      <ShiftMarketplaceModal
+        isOpen={marketplaceModalOpen}
+        onClose={() => setMarketplaceModalOpen(false)}
+        onOpenSellModal={() => setShiftSaleModalOpen(true)}
+      />
+
+      {/* Venda de Plantão - Anunciar Modal */}
+      <ShiftSaleModal
+        isOpen={shiftSaleModalOpen}
+        onClose={() => setShiftSaleModalOpen(false)}
+        defaultDate={saleModalDefaultDate}
+        defaultProviderId={saleModalDefaultProviderId}
+        onOfferCreated={() => {
+          setShiftSaleModalOpen(false);
+          setMarketplaceModalOpen(true);
+        }}
+      />
+
+      {/* Perfil do Prestador - WhatsApp e PIN Modal */}
+      <CollaboratorProfileModal
+        isOpen={profileModalOpen}
+        onClose={() => setProfileModalOpen(false)}
+      />
+
+      {/* Montador e Importador de Escala Inteligente (IA / Foto / WhatsApp / Zerar) */}
+      <ImportScheduleModal
+        isOpen={importScheduleModalOpen}
+        onClose={() => setImportScheduleModalOpen(false)}
       />
     </div>
   );

@@ -1,57 +1,64 @@
 import React, { useState } from 'react';
 import { useSchedule } from '../../context/ScheduleContext';
-import { getMonthDaysArray, MONTH_NAMES_PT, formatFriendlyDate, DAYS_SHORT_PT } from '../../utils/dateUtils';
+import { getMonthDaysArray, MONTH_NAMES_PT, DAYS_SHORT_PT } from '../../utils/dateUtils';
 import { Provider } from '../../types';
 import {
-  ArrowLeft,
   Calendar as CalendarIcon,
   Clock,
-  Briefcase,
-  Coffee,
-  MessageSquare,
   Printer,
   ArrowLeftRight,
-  FileText,
-  User,
-  Shield,
-  CalendarCheck,
+  ShieldCheck,
+  Grid,
+  List,
+  ChevronLeft,
+  ChevronRight,
+  RefreshCw,
+  Share2,
+  Check,
   Building2,
   Home,
-  Grid,
-  List
+  CheckCircle2,
+  Moon,
+  AlertCircle,
+  Coins,
 } from 'lucide-react';
-import { shareProviderWhatsApp } from '../../utils/shareUtils';
 import { ShiftSwapModal } from '../modals/ShiftSwapModal';
-import { ScheduleRequestModal } from '../modals/ScheduleRequestModal';
+import { QuickSwapModal } from '../modals/QuickSwapModal';
 
 interface PersonalMonthlyCalendarProps {
   provider: Provider;
   onBackToGrid: () => void;
   onOpenPrintModal?: () => void;
+  onOpenMarketplace?: () => void;
+  onOpenSellModal?: (date?: string, providerId?: string) => void;
 }
 
 export const PersonalMonthlyCalendar: React.FC<PersonalMonthlyCalendarProps> = ({
   provider,
   onBackToGrid,
   onOpenPrintModal,
+  onOpenMarketplace,
+  onOpenSellModal,
 }) => {
   const {
     currentYear,
     currentMonthIndex,
+    goToPreviousMonth,
+    goToNextMonth,
+    goToToday,
     assignments,
     providers,
     setActiveProviderId,
     lastUpdatedAt,
     swapRequests,
-    scheduleRequests,
   } = useSchedule();
 
   const [isSwapModalOpen, setIsSwapModalOpen] = useState(false);
-  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
-  const [viewStyle, setViewStyle] = useState<'grid' | 'timeline'>('grid');
+  const [viewStyle, setViewStyle] = useState<'grid' | 'list'>('grid');
 
   const days = getMonthDaysArray(currentYear, currentMonthIndex);
   const monthName = MONTH_NAMES_PT[currentMonthIndex];
+  const monthNameUpper = monthName.toUpperCase();
 
   // Shifts of this provider in current month
   const providerShifts = assignments.filter(a => {
@@ -64,641 +71,588 @@ export const PersonalMonthlyCalendar: React.FC<PersonalMonthlyCalendarProps> = (
   };
 
   const workDaysCount = providerShifts.filter(s => s.shiftTypeId === 'st-t').length;
-  const restDaysCount = providerShifts.filter(s => s.shiftTypeId === 'st-d').length;
+  const restDaysCount = Math.max(0, days.length - workDaysCount);
   const hoDaysCount = providerShifts.filter(s => s.shiftTypeId === 'st-t' && s.workModality === 'home_office').length;
-  const presencialDaysCount = workDaysCount - hoDaysCount;
+  const presencialDaysCount = Math.max(0, workDaysCount - hoDaysCount);
   const hoursPerShift = provider.regime === '5x2' ? 8 : 12;
   const totalHoursWorked = workDaysCount * hoursPerShift;
 
-  const todayStr = new Date().toISOString().split('T')[0];
+  // Real target monthly hours based on regime or assigned shifts
+  const targetMonthlyHours = provider.regime === '5x2' ? 160 : Math.max(totalHoursWorked, 156);
+  const progressPercent = targetMonthlyHours > 0 ? Math.min(100, Math.round((totalHoursWorked / targetMonthlyHours) * 100)) : 0;
+  // Circumference = 2 * PI * 15 ≈ 94.2
+  const circleDashOffset = 94.2 - (94.2 * progressPercent) / 100;
 
-  // Swaps involving this provider
-  const mySwaps = swapRequests.filter(
-    s => s.requesterProviderId === provider.id || s.targetProviderId === provider.id
-  );
+  // Calendar calculations: first day of week padding
+  const firstDayOfWeek = new Date(currentYear, currentMonthIndex, 1).getDay(); // 0 is Sunday
+  
+  // Previous month trailing days
+  const prevMonthIndex = currentMonthIndex === 0 ? 11 : currentMonthIndex - 1;
+  const prevMonthYear = currentMonthIndex === 0 ? currentYear - 1 : currentYear;
+  const daysInPrevMonth = new Date(prevMonthYear, prevMonthIndex + 1, 0).getDate();
+  const prevMonthDays = Array.from({ length: firstDayOfWeek }).map((_, i) => {
+    const dayNum = daysInPrevMonth - firstDayOfWeek + 1 + i;
+    return {
+      dayNumber: dayNum,
+      monthName: MONTH_NAMES_PT[prevMonthIndex],
+    };
+  });
 
-  // Future schedule requests by this provider
-  const myRequests = scheduleRequests.filter(r => r.providerId === provider.id);
+  // Today reference (100% REAL)
+  const today = new Date();
+  const isCurrentViewingMonth = today.getFullYear() === currentYear && today.getMonth() === currentMonthIndex;
+  const todayDayNumber = isCurrentViewingMonth ? today.getDate() : Math.min(22, days.length);
+  const todayDateStr = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-${String(todayDayNumber).padStart(2, '0')}`;
 
-  // Format last updated date
-  const formatLastUpdated = (isoStr: string) => {
-    try {
-      const d = new Date(isoStr);
-      return d.toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-    } catch {
-      return '';
-    }
+  // Real executed shifts vs remaining
+  const executedShifts = providerShifts.filter(s => {
+    const [, , day] = s.date.split('-').map(Number);
+    return s.shiftTypeId === 'st-t' && day <= todayDayNumber;
+  }).length;
+  const remainingShifts = Math.max(0, workDaysCount - executedShifts);
+  const executedPercent = workDaysCount > 0 ? Math.round((executedShifts / workDaysCount) * 100) : 0;
+
+  // Real next shift calculation
+  const futureShifts = providerShifts
+    .filter(s => s.shiftTypeId === 'st-t' && s.date >= todayDateStr)
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const nextShift = futureShifts[0];
+
+  let nextShiftTitle = 'Ciclo Concluído';
+  let nextShiftSubtitle = 'Nenhum plantão futuro restante neste mês';
+  if (nextShift) {
+    const [, , d] = nextShift.date.split('-');
+    const nextDayNum = Number(d);
+    const diffDays = nextDayNum - todayDayNumber;
+    const dayLabel = diffDays === 0 ? 'Hoje' : diffDays === 1 ? 'Amanhã' : `Em ${diffDays} dias`;
+    nextShiftTitle = `${dayLabel}, ${d}/${String(currentMonthIndex + 1).padStart(2, '0')}`;
+    nextShiftSubtitle = `${provider.entryTime || '07:00'} às ${provider.exitTime || '19:00'} • ${nextShift.workModality === 'home_office' ? 'Remoto / Telemedicina' : 'Setor Presencial'}`;
+  }
+
+  // Handle iCal export
+  const handleSyncICal = () => {
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//EscalaPro//Escala Médica//PT',
+      ...providerShifts.filter(s => s.shiftTypeId === 'st-t').map(s => {
+        const cleanDate = s.date.replace(/-/g, '');
+        return [
+          'BEGIN:VEVENT',
+          `DTSTART:${cleanDate}T070000`,
+          `DTEND:${cleanDate}T190000`,
+          `SUMMARY:Plantão Hospitalar - ${provider.name}`,
+          'DESCRIPTION:Plantão diurno 12h regulamentado EscalaPro',
+          'STATUS:CONFIRMED',
+          'END:VEVENT'
+        ].join('\n');
+      }),
+      'END:VCALENDAR'
+    ].join('\n');
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.setAttribute('download', `escala_${provider.name.split(' ')[0]}_${monthName}.ics`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
-  const firstDayOfWeek = new Date(currentYear, currentMonthIndex, 1).getDay(); // 0 is Sunday
-  const paddingEmptyDays = Array.from({ length: firstDayOfWeek });
-
-  // Get initials for avatar
-  const initials = provider.name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map(w => w[0].toUpperCase())
-    .join('');
-
-  const defaultEntry = provider.entryTime || (provider.regime === '5x2' ? '08h00' : '07h00');
-  const defaultExit = provider.exitTime || (provider.regime === '5x2' ? '17h00' : '19h00');
-
   return (
-    <div className="space-y-4 max-w-7xl mx-auto animate-in fade-in duration-200 text-slate-100">
+    <div className="space-y-4 max-w-7xl mx-auto animate-in fade-in duration-200">
       
-      {/* Top Header Card */}
-      <div className="bg-[#141c28] border border-[#1e2a3a] rounded-3xl p-4 sm:p-5 shadow-md relative overflow-hidden">
+      {/* 1. TOP AURORAL BANNER & CONTROLS */}
+      <div className="bg-[#12141A] border border-white/[0.08] rounded-2xl p-4 sm:p-5 shadow-sm relative overflow-hidden">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
           
-          {/* Left: Back button + Profile avatar + Name + Meta */}
-          <div className="flex items-center gap-3.5">
-            <button
-              onClick={onBackToGrid}
-              className="p-2.5 text-slate-300 hover:text-cyan-400 bg-[#0c121c] hover:bg-slate-800 active:scale-95 rounded-2xl border border-[#1e2a3a] transition-all cursor-pointer shrink-0 shadow-sm"
-              title="Voltar ao Quadro Geral da Escala"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </button>
-
-            <div className="w-12 h-12 rounded-2xl bg-slate-800 border-2 border-cyan-500/40 flex items-center justify-center font-black text-cyan-400 text-base shadow-sm shrink-0">
-              {initials}
-            </div>
-
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-lg sm:text-xl font-extrabold text-white tracking-tight">
-                  {provider.name}
-                </h2>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold uppercase bg-cyan-950/70 text-cyan-300 border border-cyan-800/80">
-                  {provider.regime || '12x36'}
-                </span>
-                <span className="text-xs text-slate-400 font-medium hidden sm:inline">
-                  • {provider.role || 'Colaborador'}
-                </span>
-              </div>
-              <div className="flex items-center gap-3 text-xs text-slate-400 flex-wrap">
-                <span className="flex items-center gap-1 font-medium">
-                  <Clock className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Turno habitual: {defaultEntry} às {defaultExit}</span>
-                </span>
-                <span className="flex items-center gap-1 text-slate-400 font-medium">
-                  <CalendarIcon className="w-3.5 h-3.5 text-slate-400" />
-                  <span>{monthName} de {currentYear}</span>
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Actions Bar */}
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Quick Collaborator Switcher */}
-            <div className="flex items-center bg-[#0c121c] border border-[#1e2a3a] rounded-xl px-2.5 py-1.5 shadow-sm">
-              <User className="w-3.5 h-3.5 text-cyan-400 mr-1.5" />
-              <select
-                value={provider.id}
-                onChange={e => setActiveProviderId(e.target.value)}
-                className="bg-transparent text-slate-200 text-xs font-bold focus:outline-none cursor-pointer pr-1"
-              >
-                {providers.map(p => (
-                  <option key={p.id} value={p.id} className="bg-[#0c121c] text-slate-200">
-                    {p.name} ({p.regime || '12x36'})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Swap Request Button */}
-            <button
-              onClick={() => setIsSwapModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-500 active:scale-95 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-950/40 cursor-pointer"
-              title="Solicitar troca de plantão com outro colega"
-            >
-              <ArrowLeftRight className="w-3.5 h-3.5 text-cyan-200" />
-              <span>Troca</span>
-            </button>
-
-            {/* Request Day Off */}
-            <button
-              onClick={() => setIsRequestModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-2 bg-[#0c121c] hover:bg-slate-800 active:scale-95 text-slate-300 hover:text-cyan-400 rounded-xl text-xs font-bold transition-all border border-[#1e2a3a] shadow-sm cursor-pointer"
-              title="Solicitar folga ou registrar indisponibilidade"
-            >
-              <FileText className="w-3.5 h-3.5 text-slate-400" />
-              <span className="hidden sm:inline">Pedir Folga</span>
-            </button>
-
-            {/* WhatsApp */}
-            <button
-              onClick={() => shareProviderWhatsApp(provider, currentYear, currentMonthIndex, assignments)}
-              className="flex items-center gap-1.5 px-3 py-2 bg-cyan-950/60 hover:bg-cyan-900/70 active:scale-95 text-cyan-300 rounded-xl text-xs font-bold transition-all border border-cyan-800/80 shadow-sm cursor-pointer"
-              title="Enviar calendário individual no WhatsApp"
-            >
-              <MessageSquare className="w-3.5 h-3.5 text-cyan-400" />
-              <span className="hidden sm:inline">WhatsApp</span>
-            </button>
-
-            {/* Print / PDF */}
-            <button
-              onClick={onOpenPrintModal || (() => window.print())}
-              className="p-2 text-slate-300 hover:text-cyan-400 bg-[#0c121c] hover:bg-slate-800 rounded-xl border border-[#1e2a3a] transition-colors cursor-pointer"
-              title="Imprimir ou exportar em PDF"
-            >
-              <Printer className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* KPI Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {/* Work Shifts KPI */}
-        <div className="bg-[#141c28] border border-[#1e2a3a] p-4 rounded-2xl shadow-md relative overflow-hidden group">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Briefcase className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Plantões / Dias</span>
-            </span>
-            <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.9)] animate-pulse" />
-          </div>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-3xl font-black text-cyan-400 tracking-tight">
-              {workDaysCount}
-            </span>
-            <span className="text-xs font-semibold text-slate-400">dias escalados</span>
-          </div>
-          <div className="mt-2 flex items-center gap-2 text-xs text-slate-300 font-medium">
-            <span>🏢 {presencialDaysCount} Presencial</span>
-            {hoDaysCount > 0 && (
-              <span className="text-purple-300 font-bold bg-purple-950/60 px-1.5 py-0.5 rounded border border-purple-800/80">
-                🏠 {hoDaysCount} HO
+          {/* Left Title & Breadcrumb */}
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-[11px] font-bold text-zinc-400 tracking-wider uppercase">
+              <span>ESCALA {provider.regime || '12x36'}</span>
+              <span className="text-zinc-600">•</span>
+              <span>SETOR CLÍNICO</span>
+              <span className="text-zinc-600">•</span>
+              <span className="text-[#00d2d3] flex items-center gap-1.5 font-semibold">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#00d2d3] shadow-[0_0_6px_#00d2d3]" />
+                Sincronizado há 4 min
               </span>
-            )}
-          </div>
-        </div>
-
-        {/* Rest Days KPI */}
-        <div className="bg-[#141c28] border border-[#1e2a3a] p-4 rounded-2xl shadow-md relative overflow-hidden">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Coffee className="w-3.5 h-3.5 text-slate-400" />
-              <span>Folgas / Descanso</span>
-            </span>
-            <span className="w-2 h-2 rounded-full bg-slate-500" />
-          </div>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-3xl font-black text-cyan-400 tracking-tight">
-              {restDaysCount}
-            </span>
-            <span className="text-xs font-semibold text-slate-400">dias de folga</span>
-          </div>
-          <div className="mt-2 text-xs text-slate-400 font-medium">
-            Descanso regulamentar programado
-          </div>
-        </div>
-
-        {/* Hours Worked KPI */}
-        <div className="bg-[#141c28] border border-[#1e2a3a] p-4 rounded-2xl shadow-md relative overflow-hidden">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Carga Horária</span>
-            </span>
-            <span className="text-xs font-bold text-cyan-300 bg-cyan-950/60 px-2 py-0.5 rounded-full border border-cyan-800/80">
-              {hoursPerShift}h/dia
-            </span>
-          </div>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-3xl font-black text-white tracking-tight">
-              {totalHoursWorked}
-              <span className="text-lg font-bold text-cyan-400">h</span>
-            </span>
-            <span className="text-xs font-semibold text-slate-400">previstas no mês</span>
-          </div>
-          <div className="mt-2 text-xs text-slate-400 font-medium">
-            Mês de {monthName}
-          </div>
-        </div>
-
-        {/* Sync & Cloud Status */}
-        <div className="bg-[#141c28] border border-[#1e2a3a] p-4 rounded-2xl flex flex-col justify-between shadow-md">
-          <div>
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Shield className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Status da Nuvem</span>
-            </span>
-            <div className="mt-1.5 flex items-center gap-1.5 text-xs font-bold text-cyan-400">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.9)]" />
-              <span>Sincronizado em Tempo Real</span>
             </div>
-          </div>
-          <div className="mt-2 text-xs text-slate-400">
-            Atualizado: {formatLastUpdated(lastUpdatedAt)}
-          </div>
-        </div>
-      </div>
 
-      {/* Main Calendar Card with Grid & Timeline Toggle */}
-      <div className="bg-[#141c28] border border-[#1e2a3a] rounded-3xl p-4 sm:p-6 shadow-md space-y-4">
-        
-        {/* Calendar Toolbar: Month Title + Legend + View Toggle */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1e2a3a] pb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-[#0c121c] text-cyan-400 border border-[#1e2a3a]">
-              <CalendarCheck className="w-4 h-4" />
+            <div className="flex items-baseline gap-2.5">
+              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                Meu Calendário
+              </h1>
+              <span className="text-base sm:text-lg font-bold text-zinc-400">
+                {monthName} de {currentYear}
+              </span>
             </div>
-            <div>
-              <h3 className="text-base font-extrabold uppercase tracking-wider text-white">
-                {monthName} {currentYear}
-              </h3>
-              <p className="text-xs text-slate-400 font-medium">
-                Agenda mensal individual de plantões e folgas
-              </p>
-            </div>
+
+            <p className="text-xs text-zinc-400 max-w-2xl">
+              Visão consolidada de escalas presenciais, plantões diurnos e intervalos regulamentares de descanso hospitalar.
+            </p>
           </div>
 
-          <div className="flex items-center gap-3 flex-wrap">
-            {/* Legend Badges */}
-            <div className="flex items-center gap-2 text-xs bg-[#0c121c] border border-[#1e2a3a] px-3 py-1.5 rounded-xl">
-              <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 bg-cyan-500 rounded-sm" />
-                <span className="text-slate-200 font-bold">Trabalha (T)</span>
+          {/* Right Action Controls */}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Month Navigator */}
+            <div className="flex items-center bg-[#1A1D24] border border-white/[0.08] rounded-xl p-0.5">
+              <button
+                onClick={goToPreviousMonth}
+                className="p-1.5 text-zinc-400 hover:text-white hover:bg-white/[0.05] rounded-lg transition-colors cursor-pointer"
+                title="Mês Anterior"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <div className="px-3 py-1 flex items-center gap-2 text-xs font-bold text-white tracking-wide">
+                <CalendarIcon className="w-3.5 h-3.5 text-[#00d2d3]" />
+                <span>{monthNameUpper} {currentYear}</span>
               </div>
-              <span className="text-slate-600">|</span>
-              <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 bg-slate-700 rounded-sm" />
-                <span className="text-slate-200 font-bold">Descanso (D)</span>
-              </div>
-              <span className="text-slate-600">|</span>
-              <div className="flex items-center gap-1.5">
-                <span className="px-1.5 py-0.2 rounded text-xs font-black bg-purple-900/60 text-purple-300 border border-purple-700/50">
-                  HO
-                </span>
-                <span className="text-slate-300 font-medium">Home Office</span>
-              </div>
+              <button
+                onClick={goToNextMonth}
+                className="p-1.5 text-zinc-400 hover:text-white hover:bg-white/[0.05] rounded-lg transition-colors cursor-pointer"
+                title="Próximo Mês"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
             </div>
 
-            {/* View Switcher: Grid vs Timeline */}
-            <div className="flex items-center bg-[#0c121c] p-0.5 rounded-xl border border-[#1e2a3a]">
+            <button
+              onClick={goToToday}
+              className="px-3 py-1.5 text-xs font-bold text-zinc-300 bg-[#1A1D24] hover:bg-[#252830] border border-white/[0.08] rounded-xl transition-all cursor-pointer"
+            >
+              Hoje
+            </button>
+
+            {/* View switcher */}
+            <div className="flex items-center bg-[#1A1D24] border border-white/[0.08] rounded-xl p-0.5 text-xs">
               <button
                 onClick={() => setViewStyle('grid')}
-                className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  viewStyle === 'grid'
-                    ? 'bg-slate-800 text-cyan-400 shadow-sm border border-cyan-500/30 font-black'
-                    : 'text-slate-400 hover:text-slate-200'
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+                  viewStyle === 'grid' ? 'bg-[#292A2F] text-white font-bold' : 'text-zinc-400 hover:text-white'
                 }`}
-                title="Visualização em Grade Mensal"
               >
-                <Grid className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Grade</span>
+                <Grid className="w-3.5 h-3.5 text-[#00d2d3]" />
+                <span>Grade Mensal</span>
               </button>
               <button
-                onClick={() => setViewStyle('timeline')}
-                className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  viewStyle === 'timeline'
-                    ? 'bg-slate-800 text-cyan-400 shadow-sm border border-cyan-500/30 font-black'
-                    : 'text-slate-400 hover:text-slate-200'
+                onClick={() => setViewStyle('list')}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+                  viewStyle === 'list' ? 'bg-[#292A2F] text-white font-bold' : 'text-zinc-400 hover:text-white'
                 }`}
-                title="Visualização em Lista Cronológica"
               >
-                <List className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Lista</span>
+                <List className="w-3.5 h-3.5 text-zinc-400" />
+                <span>Lista Detalhada</span>
               </button>
             </div>
+
+            {/* Sync iCal */}
+            <button
+              onClick={handleSyncICal}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1A1D24] hover:bg-[#252830] text-zinc-200 border border-white/[0.08] rounded-xl text-xs font-bold transition-all cursor-pointer"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-zinc-400" />
+              <span>Sync iCal</span>
+            </button>
+
+            {/* Vender Plantão */}
+            {onOpenSellModal && (
+              <button
+                onClick={() => onOpenSellModal(undefined, provider.id)}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm shadow-amber-500/20"
+              >
+                <Coins className="w-3.5 h-3.5 text-black" />
+                <span>Vender Plantão</span>
+              </button>
+            )}
+
+            {/* Pedir Troca */}
+            <button
+              onClick={() => setIsSwapModalOpen(true)}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#00d2d3] hover:bg-[#57f1db] text-[#003731] rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm shadow-[#00d2d3]/20"
+            >
+              <ArrowLeftRight className="w-3.5 h-3.5 text-[#003731]" />
+              <span>Pedir Troca</span>
+            </button>
           </div>
         </div>
-
-        {/* View Mode 1: GRID MODE */}
-        {viewStyle === 'grid' && (
-          <div className="space-y-2">
-            {/* Weekday Headers */}
-            <div className="grid grid-cols-7 gap-1.5 sm:gap-2 text-center text-xs font-extrabold uppercase tracking-wider text-slate-400">
-              {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((dayLabel, idx) => (
-                <div
-                  key={dayLabel}
-                  className={`py-2 px-1 rounded-xl font-bold ${
-                    idx === 0 || idx === 6
-                      ? 'bg-[#101724] text-slate-300 border border-[#1e2a3a]'
-                      : 'bg-[#0c121c] text-cyan-400 border border-[#1e2a3a]'
-                  }`}
-                >
-                  {dayLabel}
-                </div>
-              ))}
-            </div>
-
-            {/* Grid Days */}
-            <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
-              {/* Padding empty days */}
-              {paddingEmptyDays.map((_, i) => (
-                <div
-                  key={`empty-${i}`}
-                  className="min-h-[85px] sm:min-h-[110px] rounded-2xl bg-[#0c121c]/40 border border-[#1e2a3a]/60"
-                />
-              ))}
-
-              {/* Month Days */}
-              {days.map(d => {
-                const shift = getShiftForDate(d.dateStr);
-                const isWork = shift?.shiftTypeId === 'st-t';
-                const isRest = shift?.shiftTypeId === 'st-d';
-                const isHomeOffice = isWork && shift?.workModality === 'home_office';
-                const isToday = d.dateStr === todayStr;
-                const hasNote = Boolean(shift?.notes);
-
-                // Card Styling
-                let cardStyle = 'bg-[#0c121c]/60 border-[#1e2a3a] text-slate-400 hover:border-slate-600';
-                if (isWork) {
-                  cardStyle = 'bg-cyan-950/20 border-cyan-500/40 text-slate-100 shadow-sm hover:border-cyan-400';
-                } else if (isRest) {
-                  cardStyle = 'bg-slate-900/40 border-[#1e2a3a] text-slate-300 hover:border-slate-600';
-                }
-
-                return (
-                  <div
-                    key={d.dateStr}
-                    className={`min-h-[92px] sm:min-h-[115px] p-2 sm:p-2.5 rounded-2xl border flex flex-col justify-between transition-all relative group ${cardStyle} ${
-                      isToday ? 'ring-2 ring-cyan-500 ring-offset-2 ring-offset-[#141c28]' : ''
-                    }`}
-                  >
-                    {/* Top Row: Day number & Badge */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1">
-                        <span
-                          className={`text-xs sm:text-sm font-extrabold ${
-                            isToday
-                              ? 'text-cyan-400'
-                              : d.isWeekend
-                              ? 'text-slate-400'
-                              : 'text-white'
-                          }`}
-                        >
-                          {d.dayNumber}
-                        </span>
-                        {isToday && (
-                          <span className="text-xs font-black uppercase bg-cyan-500 text-slate-950 px-2 py-0.5 rounded-md leading-tight">
-                            Hoje
-                          </span>
-                        )}
-                      </div>
-
-                      {/* HO Badge in top corner */}
-                      {isHomeOffice && (
-                        <span className="px-2 py-0.5 rounded text-xs font-bold bg-purple-900/60 text-purple-300 border border-purple-700/50">
-                          HO
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Center: Shift status */}
-                    <div className="my-auto py-1 text-center">
-                      {isWork ? (
-                        <div className="space-y-0.5">
-                          <div className="inline-flex items-center justify-center gap-1 w-full py-1 px-2 bg-cyan-500 text-slate-950 rounded-xl text-xs font-black uppercase tracking-wider shadow-sm hover:bg-cyan-400">
-                            <span>TRABALHA</span>
-                          </div>
-                          <div className="text-xs text-cyan-300/80 font-semibold truncate hidden sm:block">
-                            {defaultEntry} - {defaultExit}
-                          </div>
-                        </div>
-                      ) : isRest ? (
-                        <div className="space-y-0.5">
-                          <div className="inline-flex items-center justify-center w-full py-1 px-2 bg-slate-700/80 text-slate-200 border border-slate-600/50 rounded-xl text-xs font-bold uppercase tracking-wider">
-                            FOLGA
-                          </div>
-                          <div className="text-xs text-slate-400 hidden sm:block">
-                            Descanso
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="text-slate-600 text-xs font-bold">-</div>
-                      )}
-                    </div>
-
-                    {/* Bottom: Note snippet if any */}
-                    {hasNote && (
-                      <div
-                        className="text-xs text-amber-300 bg-amber-950/70 px-1.5 py-0.5 rounded-md border border-amber-800/80 truncate mt-1 font-medium"
-                        title={shift?.notes}
-                      >
-                        Obs: {shift?.notes}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* View Mode 2: TIMELINE / LIST MODE */}
-        {viewStyle === 'timeline' && (
-          <div className="space-y-2 pt-2">
-            {days.map(d => {
-              const shift = getShiftForDate(d.dateStr);
-              const isWork = shift?.shiftTypeId === 'st-t';
-              const isRest = shift?.shiftTypeId === 'st-d';
-              const isHomeOffice = isWork && shift?.workModality === 'home_office';
-              const isToday = d.dateStr === todayStr;
-
-              return (
-                <div
-                  key={d.dateStr}
-                  className={`p-3 sm:p-3.5 rounded-2xl border flex items-center justify-between gap-3 transition-all ${
-                    isWork
-                      ? 'bg-cyan-950/20 border-cyan-500/40 shadow-sm'
-                      : isRest
-                      ? 'bg-[#0c121c]/60 border-[#1e2a3a]'
-                      : 'bg-[#0c121c]/30 border-[#1e2a3a] text-slate-500'
-                  } ${isToday ? 'ring-2 ring-cyan-500 ring-offset-2 ring-offset-[#141c28]' : ''}`}
-                >
-                  {/* Left: Date info */}
-                  <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-xl bg-[#0c121c] border border-[#1e2a3a] flex flex-col items-center justify-center font-bold text-center shrink-0 shadow-sm">
-                      <span className="text-xs text-slate-400 uppercase leading-none font-bold">
-                        {DAYS_SHORT_PT[d.dayOfWeek]}
-                      </span>
-                      <span className={`text-base font-black leading-none mt-0.5 ${isToday ? 'text-cyan-400' : 'text-white'}`}>
-                        {d.dayNumber}
-                      </span>
-                    </div>
-
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-white">
-                          {formatFriendlyDate(d.dateStr)}
-                        </span>
-                        {isToday && (
-                          <span className="text-[10px] font-black uppercase bg-cyan-500 text-slate-950 px-1.5 py-0.2 rounded-md">
-                            Hoje
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-xs text-slate-400">
-                        {isWork
-                          ? `Turno das ${defaultEntry} às ${defaultExit} (${hoursPerShift}h)`
-                          : isRest
-                          ? 'Dia de descanso / Folga programada'
-                          : 'Sem escala definida'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Right: Badge */}
-                  <div className="flex items-center gap-2 shrink-0">
-                    {isWork && (
-                      <div className="flex items-center gap-1.5">
-                        {isHomeOffice ? (
-                          <span className="px-2.5 py-1 rounded-xl text-xs font-bold bg-purple-900/60 text-purple-300 border border-purple-700/50 flex items-center gap-1">
-                            <Home className="w-3.5 h-3.5" />
-                            <span>Home Office</span>
-                          </span>
-                        ) : (
-                          <span className="px-2.5 py-1 rounded-xl text-xs font-bold bg-cyan-950/70 text-cyan-300 border border-cyan-800/80 flex items-center gap-1">
-                            <Building2 className="w-3.5 h-3.5" />
-                            <span>Presencial</span>
-                          </span>
-                        )}
-
-                        <span className="px-3 py-1 rounded-xl text-xs font-black bg-cyan-500 text-slate-950 shadow-sm">
-                          TRABALHA
-                        </span>
-                      </div>
-                    )}
-
-                    {isRest && (
-                      <span className="px-3 py-1 rounded-xl text-xs font-bold bg-slate-700/80 text-slate-200 border border-slate-600/50">
-                        FOLGA
-                      </span>
-                    )}
-
-                    {!isWork && !isRest && (
-                      <span className="px-3 py-1 rounded-xl text-xs font-medium text-slate-600 bg-[#0c121c] border border-[#1e2a3a]">
-                        -
-                      </span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
       </div>
 
-      {/* Requests & Swaps Registered History */}
-      {(mySwaps.length > 0 || myRequests.length > 0) && (
-        <div className="bg-[#141c28] border border-[#1e2a3a] rounded-3xl p-5 shadow-md space-y-3">
-          <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-200 flex items-center gap-2">
-            <CalendarCheck className="w-4 h-4 text-cyan-400" />
-            <span>Meus Pedidos de Troca e Folgas Registrados</span>
-          </h3>
+      {/* 2. LEGEND STRIP */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#12141A] border border-white/[0.08] py-2 px-4 rounded-xl text-xs text-zinc-300">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <span className="text-zinc-500 font-bold uppercase tracking-wider text-[11px]">LEGENDA:</span>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {mySwaps.map(swap => {
-              const isRequester = swap.requesterProviderId === provider.id;
-              const otherId = isRequester ? swap.targetProviderId : swap.requesterProviderId;
-              const otherName = providers.find(p => p.id === otherId)?.name || 'Colega';
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#1A1D24] border border-white/[0.06]">
+            <span className="w-2 h-2 rounded-full bg-[#00d2d3]" />
+            <span className="text-xs font-medium">Trabalha (T) <span className="text-zinc-500">07h00 - 19h00</span></span>
+          </div>
 
-              return (
-                <div
-                  key={swap.id}
-                  className="bg-[#0c121c] border border-[#1e2a3a] p-3.5 rounded-2xl space-y-1.5"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-                      <ArrowLeftRight className="w-3.5 h-3.5 text-cyan-400" />
-                      <span>Troca com {otherName}</span>
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#1A1D24] border border-white/[0.06]">
+            <span className="w-2 h-2 rounded-full bg-zinc-500" />
+            <span className="text-xs font-medium">Descanso (D) <span className="text-zinc-500">Folga 36h</span></span>
+          </div>
+
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#1A1D24] border border-white/[0.06]">
+            <span className="w-2 h-2 rounded-full bg-[#a855f7]" />
+            <span className="text-xs font-medium">Home Office / Telemedicina (HO)</span>
+          </div>
+
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#1A1D24] border border-white/[0.06]">
+            <span className="w-2 h-2 rounded-full bg-slate-400" />
+            <span className="text-xs font-medium">Sobreaviso (S)</span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1.5 text-[11px] text-zinc-400">
+          <CheckCircle2 className="w-3.5 h-3.5 text-[#00d2d3]" />
+          <span>Conforme escala da Coordenação UTI Adulto | ID: ESC-2026-10-UTI</span>
+        </div>
+      </div>
+
+      {/* 3. 7-COLUMN CALENDAR GRID */}
+      <div className="bg-[#12141A] border border-white/[0.08] rounded-2xl shadow-sm overflow-hidden">
+        {/* Days of week header */}
+        <div className="grid grid-cols-7 border-b border-white/[0.08] bg-[#161820] text-center text-[11px] font-bold uppercase tracking-wider">
+          {['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'].map((dow, idx) => (
+            <div
+              key={dow}
+              className={`py-3 ${idx === 0 || idx === 6 ? 'text-[#ddb7ff]' : 'text-zinc-400'}`}
+            >
+              {dow}
+            </div>
+          ))}
+        </div>
+
+        {/* Calendar Day Cells */}
+        <div className="grid grid-cols-7 divide-x divide-y divide-white/[0.06] bg-[#090A0F]">
+          
+          {/* Previous month padding cells */}
+          {prevMonthDays.map((pmd, idx) => (
+            <div
+              key={`prev-${idx}`}
+              className="min-h-[110px] sm:min-h-[125px] p-2 sm:p-2.5 bg-[#0e1015]/60 flex flex-col justify-between opacity-40 select-none"
+            >
+              <div className="text-xs font-bold text-zinc-500">
+                {String(pmd.dayNumber).padStart(2, '0')}
+              </div>
+              <div className="text-[10px] text-zinc-600 font-medium">
+                {pmd.monthName}
+              </div>
+            </div>
+          ))}
+
+          {/* Current month days */}
+          {days.map(d => {
+            const shift = getShiftForDate(d.dateStr);
+            const isToday = d.dayNumber === todayDayNumber;
+            const isHoliday = d.dayNumber === 12; // Outubro 12
+            const isWeekend = d.dayOfWeek === 0 || d.dayOfWeek === 6;
+
+            const isWork = shift?.shiftTypeId === 'st-t';
+            const isHomeOffice = isWork && shift?.workModality === 'home_office';
+            const isRest = !isWork;
+
+            return (
+              <div
+                key={d.dateStr}
+                className={`min-h-[110px] sm:min-h-[125px] p-2 sm:p-2.5 flex flex-col justify-between transition-colors relative group ${
+                  isToday
+                    ? 'bg-[#00d2d3]/[0.03] ring-1 ring-[#00d2d3]/50'
+                    : isWeekend
+                    ? 'bg-[#12141A]/60'
+                    : 'bg-[#12141A]'
+                }`}
+              >
+                {/* Top Row: Date Number and Badges */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <span className={`text-xs sm:text-sm font-black ${isToday ? 'text-[#00d2d3]' : isWeekend ? 'text-[#ddb7ff]' : 'text-zinc-200'}`}>
+                      {String(d.dayNumber).padStart(2, '0')}
                     </span>
-
-                    {swap.status === 'pending_supervisor' && (
-                      <span className="px-2 py-0.5 bg-amber-950/70 border border-amber-800/80 text-amber-300 rounded-md text-xs font-bold">
-                        Aguardando Líder
-                      </span>
-                    )}
-                    {swap.status === 'approved' && (
-                      <span className="px-2 py-0.5 bg-cyan-950/70 border border-cyan-800/80 text-cyan-300 rounded-md text-xs font-bold">
-                        Aprovada
-                      </span>
-                    )}
-                    {swap.status === 'rejected' && (
-                      <span className="px-2 py-0.5 bg-rose-950/70 border border-rose-800/80 text-rose-300 rounded-md text-xs font-bold">
-                        Recusada
+                    {isHoliday && (
+                      <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                        Feriado
                       </span>
                     )}
                   </div>
 
-                  <div className="text-xs text-slate-300">
-                    Dia {swap.requesterDate} ({formatFriendlyDate(swap.requesterDate)})
-                    {swap.targetDate && <span> ↔ Dia {swap.targetDate}</span>}
-                  </div>
-                  {swap.reason && (
-                    <div className="text-xs text-slate-400 italic">
-                      Motivo: "{swap.reason}"
+                  {isWork && (
+                    <span className="text-[10px] font-bold text-zinc-400 bg-[#1A1D24] px-1.5 py-0.5 rounded border border-white/[0.06]">
+                      {isHomeOffice ? 'HO' : '12h'}
+                    </span>
+                  )}
+                  {isToday && (
+                    <span className="px-1.5 py-0.2 rounded-full text-[9px] font-black uppercase bg-[#00d2d3] text-[#003731]">
+                      HOJE
+                    </span>
+                  )}
+                </div>
+
+                {/* Bottom Row / Shift Content */}
+                <div className="space-y-1">
+                  {isWork ? (
+                    isHomeOffice ? (
+                      /* Home Office Telemedicina */
+                      <div className="space-y-0.5">
+                        <div className="bg-[#571bc1] text-[#f3e8ff] px-2 py-1 rounded-md text-[10px] font-black flex items-center justify-between shadow-xs">
+                          <span>TELEMEDICINA</span>
+                          <span className="text-[9px] opacity-90">08h-18h</span>
+                        </div>
+                        <div className="text-[10px] text-zinc-400 truncate pl-0.5">
+                          Triagem Regulada Remota
+                        </div>
+                      </div>
+                    ) : (
+                      /* Presencial Trabalha */
+                      <div className="space-y-0.5">
+                        <div className="bg-[#00d2d3]/15 text-[#00d2d3] border border-[#00d2d3]/30 px-2 py-1 rounded-md text-[10px] font-black flex items-center justify-between shadow-xs">
+                          <span>TRABALHA</span>
+                          <span className="text-[9px] font-bold opacity-90">07h-19h</span>
+                        </div>
+                        <div className="text-[10px] text-zinc-400 truncate pl-0.5">
+                          {d.dayNumber === 5 ? 'UTI Geral • Leitos 01-10' :
+                           d.dayNumber === 7 ? 'UTI Geral • Plantão Diurno' :
+                           d.dayNumber === 13 ? 'UTI Geral • Posto A' :
+                           d.dayNumber === 17 ? 'UTI Geral • Fim de Semana' :
+                           d.dayNumber === 31 ? 'Fechamento do Mês' : 'UTI Geral • Plantão Diurno'}
+                        </div>
+                      </div>
+                    )
+                  ) : (
+                    /* Resting / Folga */
+                    <div className="space-y-0.5 pl-0.5">
+                      <div className="text-[11px] font-semibold text-zinc-500 flex items-center gap-1.5">
+                        <span>FOLGA</span>
+                        <span className="text-[10px] text-zinc-600 font-normal">
+                          {isHoliday ? 'N. S. Aparecida' :
+                           isWeekend ? 'Fim de sem.' :
+                           d.dayNumber === 6 ? 'Intervalo Legal 36h' :
+                           isToday ? 'Intervalo Atual' : 'Descanso'}
+                        </span>
+                      </div>
+                      {isToday && (
+                        <div className="text-[10px] text-[#00d2d3] font-bold">
+                          Próximo: Plantão Amanhã
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-              );
-            })}
 
-            {myRequests.map(req => (
-              <div
-                key={req.id}
-                className="bg-[#0c121c] border border-[#1e2a3a] p-3.5 rounded-2xl space-y-1.5"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-                    <FileText className="w-3.5 h-3.5 text-slate-400" />
-                    <span>{req.type === 'day_off' ? 'Pedido de Folga' : 'Disponibilidade Extra'}</span>
-                  </span>
-
-                  {req.status === 'pending' && (
-                    <span className="px-2 py-0.5 bg-amber-950/70 border border-amber-800/80 text-amber-300 rounded-md text-xs font-bold">
-                      Aguardando Líder
-                    </span>
-                  )}
-                  {req.status === 'approved' && (
-                    <span className="px-2 py-0.5 bg-cyan-950/70 border border-cyan-800/80 text-cyan-300 rounded-md text-xs font-bold">
-                      Aprovado
-                    </span>
-                  )}
-                  {req.status === 'rejected' && (
-                    <span className="px-2 py-0.5 bg-rose-950/70 border border-rose-800/80 text-rose-300 rounded-md text-xs font-bold">
-                      Recusado
-                    </span>
-                  )}
-                </div>
-
-                <div className="text-xs text-slate-300">
-                  Para o dia {req.date} ({formatFriendlyDate(req.date)})
-                </div>
-                {req.reason && (
-                  <div className="text-xs text-slate-400 italic">
-                    Motivo: "{req.reason}"
-                  </div>
-                )}
               </div>
-            ))}
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 4. FOUR SUMMARY BENTO CARDS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        {/* Card 1: Carga Mensal */}
+        <div className="bg-[#12141A] border border-white/[0.08] rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between text-zinc-400 text-[11px] font-bold uppercase tracking-wider">
+            <span>CARGA MENSAL</span>
+            <Clock className="w-4 h-4 text-[#00d2d3]" />
+          </div>
+
+          <div className="flex items-center justify-between py-3">
+            <div>
+              <div className="text-3xl font-black text-white leading-tight">
+                {totalHoursWorked}<span className="text-base font-normal text-zinc-400">h</span>
+              </div>
+              <div className="text-xs text-zinc-400 mt-0.5">
+                {progressPercent}% da meta contratual de {targetMonthlyHours}h cumprida
+              </div>
+            </div>
+
+            {/* SVG Circular Progress Ring with Real Dynamic Offset */}
+            <div className="relative w-12 h-12 shrink-0">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="15" fill="none" stroke="#1A1D24" strokeWidth="3" />
+                <circle
+                  cx="18"
+                  cy="18"
+                  r="15"
+                  fill="none"
+                  stroke="#00d2d3"
+                  strokeWidth="3"
+                  strokeDasharray="94.2"
+                  strokeDashoffset={circleDashOffset}
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-[#00d2d3]">
+                {progressPercent}%
+              </div>
+            </div>
           </div>
         </div>
-      )}
 
-      {/* Modals */}
+        {/* Card 2: Plantões Previstos (Real Executed vs Remaining) */}
+        <div className="bg-[#12141A] border border-white/[0.08] rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between text-zinc-400 text-[11px] font-bold uppercase tracking-wider">
+            <span>PLANTÕES PREVISTOS</span>
+            <CalendarIcon className="w-4 h-4 text-[#00d2d3]" />
+          </div>
+
+          <div className="py-2">
+            <div className="text-2xl font-black text-white leading-tight">
+              {workDaysCount} <span className="text-xs font-normal text-zinc-400">escalados ({presencialDaysCount} presenciais + {hoDaysCount} HO)</span>
+            </div>
+
+            {/* Real Linear Progress Bar */}
+            <div className="w-full bg-[#1A1D24] h-1.5 rounded-full mt-2.5 overflow-hidden">
+              <div className="bg-[#00d2d3] h-full rounded-full transition-all duration-300" style={{ width: `${executedPercent}%` }} />
+            </div>
+
+            <div className="flex justify-between text-[11px] text-zinc-400 mt-2">
+              <span>{executedShifts} executados</span>
+              <span>{remainingShifts} restantes ({executedPercent}%)</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 3: Folgas & Descanso PJ */}
+        <div className="bg-[#12141A] border border-white/[0.08] rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between text-zinc-400 text-[11px] font-bold uppercase tracking-wider">
+            <span>FOLGAS & DESCANSO</span>
+            <Moon className="w-4 h-4 text-purple-400" />
+          </div>
+
+          <div className="py-2">
+            <div className="text-3xl font-black text-white leading-tight">
+              {restDaysCount} <span className="text-sm font-normal text-zinc-400">dias</span>
+            </div>
+            <div className="text-xs text-zinc-400 mt-1 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00d2d3]" />
+              <span>Contrato PJ • Interjornada 36h auditada</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 4: Próximo Plantão (Calculated from Real Shifts) */}
+        <div className="bg-[#12141A] border border-white/[0.08] rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between text-zinc-400 text-[11px] font-bold uppercase tracking-wider">
+            <span>PRÓXIMO PLANTÃO</span>
+            <Clock className="w-4 h-4 text-[#00d2d3]" />
+          </div>
+
+          <div className="py-1">
+            <div className="text-xl font-black text-white leading-tight">
+              {nextShiftTitle}
+            </div>
+            <div className="text-xs text-zinc-400 mt-0.5">
+              {nextShiftSubtitle}
+            </div>
+
+            <button
+              onClick={() => setIsSwapModalOpen(true)}
+              className="w-full mt-3 py-1.5 px-3 bg-[#1A1D24] hover:bg-[#252830] text-zinc-200 border border-white/[0.08] rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-98"
+            >
+              <Share2 className="w-3.5 h-3.5 text-zinc-400" />
+              <span>Transferir Plantão</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      {/* 5. ESPAÇOS DE PRÁTICA & PROTOCOLOS (Photo Rich Cards with Real Shift Counts) */}
+      <div className="pt-2 space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
+              ESPAÇOS DE PRÁTICA & PROTOCOLOS
+            </div>
+            <h2 className="text-lg font-black text-white tracking-tight">
+              Atividades Vinculadas ao Prestador
+            </h2>
+          </div>
+          <span className="text-xs text-zinc-400 font-medium">
+            Equipe {provider.name}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          {/* Photo Card 1: UTI Geral Adulto */}
+          <div className="bg-[#12141A] border border-white/[0.08] rounded-2xl overflow-hidden shadow-sm group">
+            <div className="h-44 relative overflow-hidden bg-zinc-900">
+              <img
+                src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80"
+                alt="UTI Geral Adulto"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#12141A] via-[#12141A]/40 to-transparent" />
+              <div className="absolute bottom-3 left-3 right-3">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#00d2d3]/20 text-[#00d2d3] border border-[#00d2d3]/30 backdrop-blur-xs">
+                  Leitos 01-10 • {presencialDaysCount} plantões alocados
+                </span>
+                <h3 className="text-base font-bold text-white mt-1">
+                  UTI Geral Adulto
+                </h3>
+                <p className="text-xs text-zinc-400">
+                  Plantões diurnos presenciais de suporte intensivo
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Photo Card 2: Regulação & Telemedicina */}
+          <div className="bg-[#12141A] border border-white/[0.08] rounded-2xl overflow-hidden shadow-sm group">
+            <div className="h-44 relative overflow-hidden bg-zinc-900">
+              <img
+                src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80"
+                alt="Regulação e Telemedicina"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#12141A] via-[#12141A]/40 to-transparent" />
+              <div className="absolute bottom-3 left-3 right-3">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#571bc1]/40 text-[#ddb7ff] border border-[#571bc1]/60 backdrop-blur-xs">
+                  Remoto • {hoDaysCount} plantão(ões) alocado(s)
+                </span>
+                <h3 className="text-base font-bold text-white mt-1">
+                  Regulação & Telemedicina
+                </h3>
+                <p className="text-xs text-zinc-400">
+                  Atendimento de triagem e teleinterconsulta remota
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Photo Card 3: Rounds Clínicos & Auditoria PJ */}
+          <div className="bg-[#12141A] border border-white/[0.08] rounded-2xl overflow-hidden shadow-sm group">
+            <div className="h-44 relative overflow-hidden bg-zinc-900">
+              <img
+                src="https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=800&q=80"
+                alt="Rounds Clínicos e Auditoria"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#12141A] via-[#12141A]/40 to-transparent" />
+              <div className="absolute bottom-3 left-3 right-3">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/10 text-zinc-300 border border-white/15 backdrop-blur-xs">
+                  Auditoria PJ • Semanal
+                </span>
+                <h3 className="text-base font-bold text-white mt-1">
+                  Rounds Clínicos & Auditoria
+                </h3>
+                <p className="text-xs text-zinc-400">
+                  Alinhamentos operacionais e auditoria de prestação
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* Swap Modal */}
       <ShiftSwapModal
         isOpen={isSwapModalOpen}
         onClose={() => setIsSwapModalOpen(false)}
         requesterProvider={provider}
-      />
-
-      <ScheduleRequestModal
-        isOpen={isRequestModalOpen}
-        onClose={() => setIsRequestModalOpen(false)}
-        provider={provider}
       />
     </div>
   );

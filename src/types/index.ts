@@ -14,6 +14,7 @@ export interface Provider {
   exitTime?: string; // e.g., "19h00" ou "17h00"
   email: string;
   phone: string;
+  whatsapp?: string; // WhatsApp para contato e venda de escalas
   color: string;
   pin?: string; // Collaborator personal 4-digit PIN for private schedule access
   badgeColor?: {
@@ -29,6 +30,24 @@ export interface Provider {
   deductionPerMinuteLate?: number; // Desconto por minuto de atraso (R$ ou %)
   deductionPerAbsence?: number; // Desconto por falta injustificada (R$ ou %)
   status: 'active' | 'vacation' | 'inactive';
+}
+
+export type ShiftSaleStatus = 'available' | 'sold' | 'cancelled';
+
+export interface ShiftSaleOffer {
+  id: string;
+  shiftAssignmentId: string;
+  providerId: string; // Vendedor do plantão
+  providerName: string;
+  date: string; // "YYYY-MM-DD"
+  price: number; // Valor que o anunciante vai pagar para quem assumir (ex: 1200)
+  note?: string; // Observação do plantão
+  sellerWhatsapp?: string; // WhatsApp de contato do vendedor
+  status: ShiftSaleStatus;
+  buyerProviderId?: string; // Quem comprou/assumiu o plantão
+  buyerProviderName?: string;
+  createdAt: string;
+  soldAt?: string;
 }
 
 export interface ShiftType {

@@ -9,6 +9,11 @@ import {
   Calendar,
   LayoutGrid,
   UserCheck,
+  Shield,
+  FileSpreadsheet,
+  User as UserIcon,
+  Coins,
+  Sparkles,
 } from 'lucide-react';
 import { useSchedule } from '../context/ScheduleContext';
 
@@ -20,6 +25,10 @@ interface NavbarProps {
   onOpenProviderModal?: () => void;
   onOpenShareModal?: () => void;
   onOpenCollaboratorAuth?: () => void;
+  onOpenExecutiveReportModal?: () => void;
+  onOpenMarketplace?: () => void;
+  onOpenProfileModal?: () => void;
+  onOpenImportModal?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -27,15 +36,21 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenRequestsCenter,
   onOpenShareModal,
   onOpenCollaboratorAuth,
+  onOpenExecutiveReportModal,
+  onOpenMarketplace,
+  onOpenProfileModal,
+  onOpenImportModal,
 }) => {
   const {
     providers,
     isLeaderAuthenticated,
     authenticatedProviderId,
+    activeProviderId,
     logoutProvider,
     isSyncing,
     swapRequests,
     scheduleRequests,
+    shiftSaleOffers,
     viewMode,
     setViewMode,
   } = useSchedule();
@@ -43,183 +58,231 @@ export const Navbar: React.FC<NavbarProps> = ({
   const pendingSwapsCount = swapRequests.filter(s => s.status === 'pending_supervisor').length;
   const pendingRequestsCount = scheduleRequests.filter(r => r.status === 'pending').length;
   const totalPending = pendingSwapsCount + pendingRequestsCount;
+  const availableSalesCount = shiftSaleOffers.filter(s => s.status === 'available').length;
 
+  // Active or authenticated collaborator profile
   const authProviderObj = providers.find(p => p.id === authenticatedProviderId);
+  const activeProviderObj = providers.find(p => p.id === activeProviderId) || providers[0];
+  const displayUser = authProviderObj || (isLeaderAuthenticated ? { name: 'Daniel Antonio da Silva', role: 'PRESTADOR / GESTOR' } : activeProviderObj);
 
   return (
-    <header className="bg-[#0c121c]/95 backdrop-blur-md border-b border-[#1a2538] sticky top-0 z-40 text-slate-100 shadow-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-15 gap-4">
+    <header className="fixed top-0 inset-x-0 z-50 bg-[#0d0e13]/85 backdrop-blur-xl border-b border-white/[0.07] text-[#e3e2e7]">
+      <div className="h-16 w-full px-4 sm:px-8 flex items-center justify-between gap-4">
+        
+        {/* Left: Brand + Nuvem Status + Desktop Navigation Pill */}
+        <div className="flex items-center gap-6 xl:gap-8">
           
-          {/* Brand + Clean Cyan Identity with Grey Calendar Icon */}
+          {/* Brand Identity */}
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-slate-800/90 border border-slate-700/80 flex items-center justify-center text-slate-400 font-black text-sm shadow-md transition-colors hover:text-cyan-400 hover:border-cyan-500/50">
-              <Calendar className="w-5 h-5 text-slate-400" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-lg font-black tracking-tight text-cyan-400 flex items-center gap-0.5">
-                  EscalaPro
-                </span>
-                <span
-                  className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-cyan-400 bg-slate-900/80 border border-slate-800 px-2.5 py-0.5 rounded-full font-medium transition-colors cursor-default"
-                  title="Sincronização em tempo real ativa na nuvem"
-                >
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full ${
-                      isSyncing ? 'bg-amber-400 animate-pulse' : 'bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.9)]'
-                    }`}
-                  />
-                  <span className="hidden sm:inline">Nuvem Conectada</span>
-                </span>
-              </div>
-              <p className="text-xs text-slate-400 font-medium hidden sm:block">
-                Gestão Humanizada de Escalas & Plantões
-              </p>
-            </div>
-          </div>
-
-          {/* Center: Neutral Grey Navigation Icons turning Cyan on Hover */}
-          <div className="hidden lg:flex items-center p-1 bg-[#141c28] rounded-xl border border-[#1e2a3a] text-xs font-semibold">
             <button
               onClick={() => setViewMode('escala')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                viewMode === 'escala'
-                  ? 'bg-slate-800/90 text-cyan-400 shadow-sm border border-cyan-500/30 font-bold'
-                  : 'text-slate-400 hover:text-cyan-400 hover:bg-slate-800/50'
-              }`}
+              className="flex items-center gap-2.5 cursor-pointer group text-left"
             >
-              <LayoutGrid className="w-3.5 h-3.5" />
-              <span>Quadro Geral</span>
-            </button>
-
-            <button
-              onClick={() => setViewMode('personal-calendar')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                viewMode === 'personal-calendar'
-                  ? 'bg-slate-800/90 text-cyan-400 shadow-sm border border-cyan-500/30 font-bold'
-                  : 'text-slate-400 hover:text-cyan-400 hover:bg-slate-800/50'
-              }`}
-            >
-              <Calendar className="w-3.5 h-3.5" />
-              <span>Meu Calendário</span>
-            </button>
-
-            <button
-              onClick={() => setViewMode('agenda')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                viewMode === 'agenda'
-                  ? 'bg-slate-800/90 text-cyan-400 shadow-sm border border-cyan-500/30 font-bold'
-                  : 'text-slate-400 hover:text-cyan-400 hover:bg-slate-800/50'
-              }`}
-            >
-              <CalendarDays className="w-3.5 h-3.5" />
-              <span>Agenda Diária</span>
+              <img
+                src="/assets/aistudio/image_fb26a50f.png"
+                alt="EscalaPro Logo"
+                className="w-8 h-8 object-contain rounded-lg shadow-sm group-hover:scale-105 transition-transform"
+              />
+              <span className="font-semibold text-white tracking-tight text-base">
+                EscalaPro
+              </span>
             </button>
           </div>
 
-          {/* Right Controls */}
-          <div className="flex items-center gap-2">
-            {/* If supervisor, show Leader Central de Pedidos button */}
-            {isLeaderAuthenticated && onOpenRequestsCenter && (
-              <button
-                onClick={onOpenRequestsCenter}
-                className="relative flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-cyan-400 bg-[#141c28] hover:bg-slate-800 border border-[#1e2a3a] rounded-xl transition-colors cursor-pointer"
-                title="Central de pedidos de folga e trocas"
-              >
-                <Inbox className="w-4 h-4 text-slate-400" />
-                <span className="hidden md:inline">Pedidos & Trocas</span>
-                {totalPending > 0 && (
-                  <span className="px-1.5 py-0.2 bg-cyan-500 text-slate-950 rounded-full text-xs font-black shadow-xs">
-                    {totalPending}
-                  </span>
-                )}
-              </button>
-            )}
+          {/* Center Navigation Tabs (Obsidian Segmented Menu) */}
+          <nav className="hidden xl:flex items-center gap-1 p-1 rounded-xl bg-[#1a1b20] border border-white/[0.04]">
+            <button
+              type="button"
+              onClick={() => setViewMode('escala')}
+              className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium ${
+                viewMode === 'escala'
+                  ? 'bg-[#343439] text-white font-semibold shadow-sm'
+                  : 'text-[#bacac5] hover:text-white hover:bg-[#292a2e]'
+              }`}
+            >
+              Quadro Geral
+            </button>
 
-            {/* If collaborator is identified, show their badge with switch / disconnect */}
-            {!isLeaderAuthenticated && authProviderObj && (
-              <div className="flex items-center gap-1.5 bg-[#141c28] border border-[#1e2a3a] px-2.5 py-1 rounded-xl text-xs shadow-sm">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setViewMode('personal-calendar');
-                  }}
-                  className="flex items-center gap-1.5 text-slate-200 hover:text-cyan-300 font-bold transition-colors cursor-pointer"
-                  title="Abrir meu calendário individual"
-                >
-                  <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.9)]" />
-                  <span className="truncate max-w-[120px]">{authProviderObj.name.split(' ')[0]} (Você)</span>
-                </button>
-                {onOpenCollaboratorAuth && (
-                  <button
-                    type="button"
-                    onClick={onOpenCollaboratorAuth}
-                    className="text-slate-400 hover:text-cyan-300 p-0.5 rounded transition-colors cursor-pointer ml-1"
-                    title="Trocar de colaborador"
-                  >
-                    <UserCheck className="w-3.5 h-3.5" />
-                  </button>
-                )}
+            <button
+              type="button"
+              onClick={() => setViewMode('personal-calendar')}
+              className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium ${
+                viewMode === 'personal-calendar'
+                  ? 'bg-[#343439] text-white font-semibold shadow-sm'
+                  : 'text-[#bacac5] hover:text-white hover:bg-[#292a2e]'
+              }`}
+            >
+              Meu Calendário
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setViewMode('agenda')}
+              className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium ${
+                viewMode === 'agenda'
+                  ? 'bg-[#343439] text-white font-semibold shadow-sm'
+                  : 'text-[#bacac5] hover:text-white hover:bg-[#292a2e]'
+              }`}
+            >
+              Agenda Diária
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (onOpenExecutiveReportModal) onOpenExecutiveReportModal();
+                else setViewMode('escala');
+              }}
+              className="px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer text-[#bacac5] hover:text-white hover:bg-[#292a2e] font-medium"
+            >
+              Relatórios & Equipe
+            </button>
+          </nav>
+        </div>
+
+        {/* Right Actions & User Profile */}
+        <div className="flex items-center gap-3">
+          
+          {/* Pending Requests Badge (Leader) */}
+          {isLeaderAuthenticated && onOpenRequestsCenter && (
+            <button
+              type="button"
+              onClick={onOpenRequestsCenter}
+              className="relative flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#e3e2e7] hover:text-[#57f1db] bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] rounded-lg transition-colors cursor-pointer"
+              title="Central de pedidos de folga e trocas pendentes"
+            >
+              <Inbox className="w-3.5 h-3.5 text-[#bacac5]" />
+              <span className="hidden md:inline">Pedidos</span>
+              {totalPending > 0 && (
+                <span className="px-1.5 py-0.2 bg-[#57f1db] text-[#003731] rounded-full text-xs font-black shadow-xs">
+                  {totalPending}
+                </span>
+              )}
+            </button>
+          )}
+
+          {/* Venda & Repasse de Plantões PJ */}
+          {onOpenMarketplace && (
+            <button
+              type="button"
+              onClick={onOpenMarketplace}
+              className="h-8 px-2.5 sm:px-3 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 text-xs font-semibold border border-amber-500/30 flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Mural de venda e compra de plantões remunerados PJ"
+            >
+              <Coins className="w-3.5 h-3.5 text-amber-400" />
+              <span className="hidden sm:inline">Venda de Plantões</span>
+              <span className="sm:hidden">Repasses</span>
+              {availableSalesCount > 0 && (
+                <span className="px-1.5 py-0.2 bg-amber-400 text-black rounded-full text-[10px] font-black">
+                  {availableSalesCount}
+                </span>
+              )}
+            </button>
+          )}
+
+          {/* Import / Generate Schedule Action Button (Supervisor Only) */}
+          {isLeaderAuthenticated && onOpenImportModal && (
+            <button
+              type="button"
+              onClick={onOpenImportModal}
+              className="h-8 px-3 rounded-lg bg-[#00d2d3] hover:bg-[#57f1db] text-[#003731] text-xs font-bold shadow-md shadow-[#00d2d3]/20 flex items-center gap-1.5 transition-all cursor-pointer"
+              title="Importar escala por foto (IA), copiar texto do WhatsApp, gerar por turmas ou zerar escala"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#003731]" />
+              <span className="hidden md:inline">Montar / Importar Escala</span>
+              <span className="md:hidden">Importar</span>
+            </button>
+          )}
+
+          {/* Share Schedule Action Button */}
+          {onOpenShareModal && (
+            <button
+              type="button"
+              onClick={onOpenShareModal}
+              className="hidden sm:flex h-8 px-3 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-white text-xs font-medium border border-white/[0.08] items-center gap-1.5 transition-colors cursor-pointer"
+              title="Compartilhar Escala com a equipe"
+            >
+              <Share2 className="w-3.5 h-3.5 text-[#bacac5]" />
+              <span>Compartilhar Escala</span>
+            </button>
+          )}
+
+          {/* Leadership Access Button */}
+          {isLeaderAuthenticated ? (
+            <button
+              type="button"
+              onClick={onOpenLeaderAuth}
+              className="h-8 px-3 rounded-lg bg-[#2dd4bf]/20 hover:bg-[#2dd4bf]/30 text-[#57f1db] text-xs font-semibold border border-[#57f1db]/30 flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Líder autenticado. Clique para alterar PIN ou sair."
+            >
+              <Unlock className="w-3.5 h-3.5 text-[#57f1db]" />
+              <span>Acesso da Liderança</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onOpenLeaderAuth}
+              className="h-8 px-3 rounded-lg bg-[#2dd4bf]/20 hover:bg-[#2dd4bf]/30 text-[#57f1db] text-xs font-semibold border border-[#57f1db]/30 flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Apenas a líder pode fazer alterações na escala."
+            >
+              <Lock className="w-3.5 h-3.5 text-[#57f1db]" />
+              <span className="hidden sm:inline">Acesso da Liderança</span>
+              <span className="sm:hidden">Líder</span>
+            </button>
+          )}
+
+          {/* Hairline Divider */}
+          <div className="h-5 w-px bg-white/[0.08] hidden sm:block" />
+
+          {/* Collaborator Profile Information Block */}
+          <div className="flex items-center gap-2.5 pl-1">
+            <button
+              type="button"
+              onClick={() => {
+                if (onOpenProfileModal) onOpenProfileModal();
+                else if (onOpenCollaboratorAuth) onOpenCollaboratorAuth();
+              }}
+              className="hidden md:flex flex-col text-right cursor-pointer group text-left hover:opacity-90"
+              title="Ver meu perfil, cadastrar WhatsApp e gerenciar PIN"
+            >
+              <span className="text-xs text-white font-medium leading-none group-hover:text-[#57f1db] transition-colors">
+                {displayUser.name}
+              </span>
+              <span className="text-[11px] font-mono text-[#bacac5] tracking-wider uppercase pt-1">
+                {isLeaderAuthenticated ? 'GESTOR DA ESCALA' : authProviderObj ? 'PRESTADOR (VER PERFIL)' : 'PRESTADOR PJ'}
+              </span>
+            </button>
+
+            {/* Profile Avatar / Trigger for Profile */}
+            <div className="relative group">
+              <button
+                type="button"
+                onClick={() => {
+                  if (onOpenProfileModal) onOpenProfileModal();
+                  else if (onOpenCollaboratorAuth) onOpenCollaboratorAuth();
+                }}
+                className="w-8 h-8 rounded-full bg-[#57f1db] hover:brightness-110 active:scale-95 transition-all flex items-center justify-center text-[#003731] font-bold shadow-md cursor-pointer"
+                title="Meu Perfil de Prestador (WhatsApp & PIN)"
+              >
+                <UserIcon className="w-4 h-4 text-[#003731]" />
+              </button>
+
+              {/* Logout button if collaborator is explicitly authenticated */}
+              {authProviderObj && (
                 <button
                   type="button"
                   onClick={logoutProvider}
-                  className="text-slate-400 hover:text-rose-400 p-0.5 rounded transition-colors cursor-pointer"
-                  title="Desconectar deste aparelho"
+                  className="hidden group-hover:flex absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-rose-600 text-white items-center justify-center hover:bg-rose-500 cursor-pointer shadow-sm"
+                  title="Desconectar perfil deste aparelho"
                 >
-                  <LogOut className="w-3.5 h-3.5" />
+                  <LogOut className="w-2.5 h-2.5" />
                 </button>
-              </div>
-            )}
-
-            {/* If collaborator is NOT identified, show Identificar-me button */}
-            {!isLeaderAuthenticated && !authProviderObj && onOpenCollaboratorAuth && (
-              <button
-                type="button"
-                onClick={onOpenCollaboratorAuth}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-cyan-300 hover:text-white bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-800/80 rounded-xl transition-all cursor-pointer shadow-sm"
-                title="Conectar seu perfil de prestador neste aparelho"
-              >
-                <UserCheck className="w-3.5 h-3.5 text-cyan-400" />
-                <span className="hidden sm:inline">Identificar-me</span>
-              </button>
-            )}
-
-            {/* Share with Team button in electric blue/cyan */}
-            {onOpenShareModal && (
-              <button
-                onClick={onOpenShareModal}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 border border-cyan-400/30 rounded-xl transition-all cursor-pointer shadow-md shadow-cyan-950/40 active:scale-98"
-                title="Compartilhar link de acesso com a equipe ou enviar no WhatsApp"
-              >
-                <Share2 className="w-3.5 h-3.5 text-cyan-200" />
-                <span className="hidden sm:inline">Compartilhar Escala</span>
-              </button>
-            )}
-
-            {/* Leader Access Button */}
-            {isLeaderAuthenticated ? (
-              <button
-                onClick={onOpenLeaderAuth}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-200 bg-[#141c28] hover:bg-slate-800 border border-[#1e2a3a] hover:border-cyan-500/40 rounded-xl transition-all cursor-pointer"
-                title="Você está com permissão de edição. Clique para opções de senha ou sair."
-              >
-                <Unlock className="w-3.5 h-3.5 text-cyan-400" />
-                <span className="text-slate-100">Modo Líder</span>
-              </button>
-            ) : (
-              <button
-                onClick={onOpenLeaderAuth}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-300 hover:text-cyan-400 bg-[#141c28] hover:bg-slate-800 border border-[#1e2a3a] rounded-xl transition-all cursor-pointer shadow-sm"
-                title="Apenas a líder pode fazer alterações na escala. Clique para digitar o PIN."
-              >
-                <Lock className="w-3.5 h-3.5 text-slate-400" />
-                <span>Acesso da Líder</span>
-              </button>
-            )}
+              )}
+            </div>
           </div>
 
         </div>
+
       </div>
     </header>
   );

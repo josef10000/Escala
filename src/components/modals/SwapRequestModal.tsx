@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ArrowRightLeft, Calendar, User, Clock, AlertCircle } from 'lucide-react';
+import { X, ArrowRightLeft } from 'lucide-react';
 import { useSchedule } from '../../context/ScheduleContext';
 import { ShiftAssignment } from '../../types';
 import { formatFriendlyDate } from '../../utils/dateUtils';
@@ -22,8 +22,6 @@ export const SwapRequestModal: React.FC<SwapRequestModalProps> = ({
     shiftTypes,
     departments,
     requestSwap,
-    currentYear,
-    currentMonthIndex,
   } = useSchedule();
 
   const [selectedShiftId, setSelectedShiftId] = useState<string>('');
@@ -59,61 +57,59 @@ export const SwapRequestModal: React.FC<SwapRequestModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedShiftId || !targetProviderId || !reason.trim()) return;
+    const myShift = assignments.find(a => a.id === selectedShiftId);
+    if (!myShift || !targetProviderId) return;
 
-    const chosenRequesterShift = assignments.find(a => a.id === selectedShiftId);
-    const chosenTargetShift = targetShiftId ? assignments.find(a => a.id === targetShiftId) : undefined;
+    const targetShift = isExchangeShift ? assignments.find(a => a.id === targetShiftId) : null;
 
     requestSwap({
-      requesterShiftId: selectedShiftId,
-      requesterDate: chosenRequesterShift?.date || '',
+      requesterShiftId: myShift.id,
+      requesterDate: myShift.date,
       targetProviderId,
-      targetDate: isExchangeShift && chosenTargetShift ? chosenTargetShift.date : undefined,
-      targetShiftId: isExchangeShift && targetShiftId ? targetShiftId : undefined,
-      reason,
+      targetDate: targetShift ? targetShift.date : undefined,
+      targetShiftId: targetShift ? targetShift.id : undefined,
+      reason: reason.trim(),
     });
 
-    setReason('');
     onClose();
   };
 
-  const selectedShift = assignments.find(a => a.id === selectedShiftId);
-  const selectedShiftType = selectedShift ? shiftTypes.find(s => s.id === selectedShift.shiftTypeId) : null;
   const currentProvider = providers.find(p => p.id === activeProviderId);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
-        <div className="p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center">
-              <ArrowRightLeft className="w-4 h-4" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="bg-[#0e1017] border border-white/[0.09] text-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+        {/* Header */}
+        <div className="px-6 py-5 border-b border-white/[0.08] flex items-center justify-between bg-[#12141c]">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#00d2d3]/15 border border-[#00d2d3]/30 text-[#00d2d3] flex items-center justify-center font-bold">
+              <ArrowRightLeft className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900">
+              <h3 className="text-base font-semibold text-white tracking-tight">
                 Solicitar Troca de Plantão / Permuta
               </h3>
-              <p className="text-xs text-slate-500">
-                Solicitante: <strong className="text-slate-700">{currentProvider?.name}</strong>
+              <p className="text-xs text-neutral-400">
+                Solicitante: <strong className="text-[#00d2d3]">{currentProvider?.name}</strong>
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-200/60 transition-colors"
+            className="p-1.5 text-neutral-400 hover:text-white rounded-lg hover:bg-white/[0.06] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
           {/* Select which shift to swap */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-neutral-300 font-medium mb-1.5">
               1. Qual plantão seu você deseja trocar ou passar?
             </label>
             {myShifts.length === 0 ? (
-              <p className="text-xs text-rose-600 bg-rose-50 p-2.5 rounded-lg border border-rose-200">
+              <p className="text-xs text-rose-300 bg-rose-500/10 p-3 rounded-xl border border-rose-500/20">
                 Você não possui nenhum plantão alocado para solicitar troca.
               </p>
             ) : (
@@ -121,7 +117,7 @@ export const SwapRequestModal: React.FC<SwapRequestModalProps> = ({
                 required
                 value={selectedShiftId}
                 onChange={e => setSelectedShiftId(e.target.value)}
-                className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full bg-[#161922] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-white font-semibold text-xs focus:outline-none focus:border-[#00d2d3]/50"
               >
                 {myShifts.map(s => {
                   const st = shiftTypes.find(t => t.id === s.shiftTypeId);
@@ -138,106 +134,102 @@ export const SwapRequestModal: React.FC<SwapRequestModalProps> = ({
 
           {/* Target Colleague to propose to */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              2. Para qual colega você deseja propor a cobertura/troca?
+            <label className="block text-neutral-300 font-medium mb-1.5">
+              2. Para qual colega prestador deseja enviar a proposta?
             </label>
             <select
               required
               value={targetProviderId}
-              onChange={e => setTargetProviderId(e.target.value)}
-              className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              onChange={e => {
+                setTargetProviderId(e.target.value);
+                setTargetShiftId('');
+              }}
+              className="w-full bg-[#161922] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-white font-semibold text-xs focus:outline-none focus:border-[#00d2d3]/50"
             >
               {providers
                 .filter(p => p.id !== activeProviderId)
                 .map(p => (
                   <option key={p.id} value={p.id}>
-                    {p.name} — {p.role}
+                    {p.name} ({p.role})
                   </option>
                 ))}
             </select>
           </div>
 
-          {/* Toggle bilateral exchange */}
-          <div className="pt-1">
-            <label className="flex items-center gap-2 cursor-pointer">
+          {/* Exchange options toggle */}
+          <div className="p-3.5 rounded-xl bg-[#141720] border border-white/[0.06] space-y-2">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={isExchangeShift}
                 onChange={e => setIsExchangeShift(e.target.checked)}
-                className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                className="rounded border-white/20 bg-[#161922] text-[#00d2d3] focus:ring-0"
               />
-              <span className="text-xs font-medium text-slate-700">
-                Troca bilateral (eu assumo um plantão dele em outra data)
+              <span className="text-xs font-medium text-white">
+                Desejo pegar um plantão dele em troca (Permuta Mútua)
               </span>
             </label>
-          </div>
 
-          {isExchangeShift && (
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
-              <label className="block text-xs font-semibold text-slate-700">
-                Plantão do colega que você pretende assumir em troca:
-              </label>
-              {targetProviderShifts.length === 0 ? (
-                <p className="text-xs text-slate-500 italic">
-                  Este colega não possui plantões escalados para troca mútua. Você pode enviar a solicitação como cobertura simples.
-                </p>
-              ) : (
-                <select
-                  value={targetShiftId}
-                  onChange={e => setTargetShiftId(e.target.value)}
-                  className="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg"
-                >
-                  <option value="">Selecione o plantão dele em contrapartida...</option>
-                  {targetProviderShifts.map(ts => {
-                    const st = shiftTypes.find(t => t.id === ts.shiftTypeId);
-                    return (
-                      <option key={ts.id} value={ts.id}>
-                        {formatFriendlyDate(ts.date)} ({st?.name})
-                      </option>
-                    );
-                  })}
-                </select>
-              )}
-            </div>
-          )}
+            {isExchangeShift && (
+              <div className="pt-2">
+                <label className="block text-[11px] text-neutral-400 font-medium mb-1">
+                  Selecione o plantão do colega que você quer assumir:
+                </label>
+                {targetProviderShifts.length === 0 ? (
+                  <p className="text-[11px] text-amber-300">
+                    Este colega não tem plantões escalados para permuta neste mês.
+                  </p>
+                ) : (
+                  <select
+                    value={targetShiftId}
+                    onChange={e => setTargetShiftId(e.target.value)}
+                    className="w-full bg-[#1b1f2b] border border-white/[0.08] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-[#00d2d3]/50"
+                  >
+                    <option value="">Selecione o plantão do colega...</option>
+                    {targetProviderShifts.map(s => {
+                      const st = shiftTypes.find(t => t.id === s.shiftTypeId);
+                      return (
+                        <option key={s.id} value={s.id}>
+                          {formatFriendlyDate(s.date)} — {st?.code} ({st?.startTime}-{st?.endTime})
+                        </option>
+                      );
+                    })}
+                  </select>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Reason */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              3. Justificativa / Motivo da Solicitação
+            <label className="block text-neutral-300 font-medium mb-1.5">
+              Motivo ou Justificativa:
             </label>
             <textarea
               required
-              rows={3}
+              rows={2}
               value={reason}
               onChange={e => setReason(e.target.value)}
-              placeholder="Ex: Consulta médica agendada, compromisso familiar urgente, plantão já pré-acordado com o colega..."
-              className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Ex: Acordo pessoal entre as partes, compromisso acadêmico..."
+              className="w-full bg-[#161922] border border-white/[0.08] rounded-xl px-3.5 py-2 text-white text-xs focus:outline-none focus:border-[#00d2d3]/50 resize-none"
             />
           </div>
 
-          <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl text-xs text-amber-800 flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-            <span>
-              Toda solicitação de permuta é encaminhada diretamente ao supervisor para homologação na escala oficial.
-            </span>
-          </div>
-
-          {/* Footer buttons */}
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+          {/* Actions */}
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/[0.06]">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-lg"
+              className="px-4 py-2.5 rounded-xl text-xs font-medium text-neutral-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              disabled={myShifts.length === 0}
-              className="px-5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 rounded-lg shadow-2xs transition-colors"
+              disabled={!selectedShiftId || !targetProviderId || !reason.trim()}
+              className="px-5 py-2.5 rounded-xl bg-[#00d2d3] hover:bg-[#57f1db] text-[#003731] font-bold text-xs transition-all shadow-md shadow-[#00d2d3]/20 disabled:opacity-50 cursor-pointer"
             >
-              Enviar Solicitação de Troca
+              Enviar Pedido de Troca
             </button>
           </div>
         </form>

@@ -68,21 +68,21 @@ export const LeaderAuthModal: React.FC<LeaderAuthModalProps> = ({ isOpen, onClos
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-100">
-      <div className="bg-[#141c28] text-slate-100 rounded-3xl p-6 border border-[#1e2a3a] shadow-2xl max-w-sm w-full space-y-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-100">
+      <div className="bg-[#12141A] text-zinc-100 rounded-3xl p-6 border border-white/[0.08] shadow-2xl max-w-sm w-full space-y-5">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#1e2a3a] pb-3">
+        <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
           <div className="flex items-center gap-3">
             <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shadow-sm ${
-              isLeaderAuthenticated ? 'bg-cyan-950/70 text-cyan-300 border border-cyan-800' : 'bg-blue-950/70 text-cyan-300 border border-blue-800'
+              isLeaderAuthenticated ? 'bg-[#00d2d3]/15 text-[#00d2d3] border border-[#00d2d3]/30' : 'bg-[#1A1D24] text-zinc-300 border border-white/[0.08]'
             }`}>
               {isLeaderAuthenticated ? <Unlock className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
             </div>
             <div>
-              <h3 className="text-base font-extrabold text-white">
+              <h3 className="text-base font-bold text-white">
                 {isLeaderAuthenticated ? 'Painel da Liderança' : 'Acesso da Liderança'}
               </h3>
-              <p className="text-xs text-slate-400 font-medium">
+              <p className="text-xs text-zinc-400 font-medium">
                 {isLeaderAuthenticated ? 'Edição e gestão autorizada' : 'Digite a senha para destravar a edição'}
               </p>
             </div>
@@ -90,7 +90,7 @@ export const LeaderAuthModal: React.FC<LeaderAuthModalProps> = ({ isOpen, onClos
 
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors cursor-pointer"
+            className="p-1.5 text-zinc-400 hover:text-white rounded-xl hover:bg-white/[0.05] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -99,13 +99,13 @@ export const LeaderAuthModal: React.FC<LeaderAuthModalProps> = ({ isOpen, onClos
         {/* If already authenticated, show options to Logout or Change PIN */}
         {isLeaderAuthenticated ? (
           <div className="space-y-4">
-            <div className="bg-cyan-950/40 border border-cyan-800/60 rounded-2xl p-3 text-xs text-cyan-200 flex items-start gap-2.5">
-              <Check className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-              <span>Conectada como <strong>{leaderName || 'Líder da Escala'}</strong>. Suas alterações são sincronizadas em tempo real.</span>
+            <div className="bg-[#00d2d3]/10 border border-[#00d2d3]/20 rounded-2xl p-3 text-xs text-zinc-200 flex items-start gap-2.5">
+              <Check className="w-4 h-4 text-[#00d2d3] shrink-0 mt-0.5" />
+              <span>Conectada como <strong className="text-white">{leaderName || 'Líder da Escala'}</strong>. Suas alterações são sincronizadas em tempo real.</span>
             </div>
 
             {successMsg && (
-              <div className="bg-cyan-950/60 border border-cyan-800 text-cyan-200 p-2.5 rounded-xl text-xs font-semibold">
+              <div className="bg-[#00d2d3]/15 border border-[#00d2d3]/30 text-[#00d2d3] p-2.5 rounded-xl text-xs font-semibold">
                 {successMsg}
               </div>
             )}
@@ -114,9 +114,9 @@ export const LeaderAuthModal: React.FC<LeaderAuthModalProps> = ({ isOpen, onClos
               <div className="space-y-2">
                 <button
                   onClick={() => setIsChangingPin(true)}
-                  className="w-full py-2.5 px-3 text-xs font-bold text-slate-200 bg-[#0c121c] hover:bg-slate-800 border border-[#1e2a3a] rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                  className="w-full py-2.5 px-3 text-xs font-bold text-zinc-200 bg-[#1A1D24] hover:bg-[#252830] border border-white/[0.08] rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                 >
-                  <KeyRound className="w-4 h-4 text-cyan-400" />
+                  <KeyRound className="w-4 h-4 text-[#00d2d3]" />
                   <span>Alterar Minha Senha / PIN</span>
                 </button>
 
@@ -125,7 +125,7 @@ export const LeaderAuthModal: React.FC<LeaderAuthModalProps> = ({ isOpen, onClos
                     logoutLeader();
                     onClose();
                   }}
-                  className="w-full py-2.5 px-3 text-xs font-bold text-rose-300 bg-rose-950/50 border border-rose-800/80 hover:bg-rose-900/60 rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                  className="w-full py-2.5 px-3 text-xs font-bold text-rose-300 bg-rose-950/40 border border-rose-800/60 hover:bg-rose-900/50 rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                 >
                   <Lock className="w-4 h-4" />
                   <span>Bloquear Edição (Modo Visualização)</span>
@@ -134,7 +134,7 @@ export const LeaderAuthModal: React.FC<LeaderAuthModalProps> = ({ isOpen, onClos
             ) : (
               <form onSubmit={handleChangePinSubmit} className="space-y-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1">
+                  <label className="block text-xs font-bold text-zinc-300 mb-1">
                     Nova Senha / PIN (mínimo 4 dígitos):
                   </label>
                   <input
@@ -143,12 +143,12 @@ export const LeaderAuthModal: React.FC<LeaderAuthModalProps> = ({ isOpen, onClos
                     value={newPin}
                     onChange={e => setNewPin(e.target.value)}
                     placeholder="Nova senha"
-                    className="w-full px-3 py-2 text-xs bg-[#0c121c] text-white border border-[#1e2a3a] rounded-xl focus:border-cyan-400 focus:outline-none"
+                    className="w-full px-3 py-2 text-xs bg-[#1A1D24] text-white border border-white/[0.08] rounded-xl focus:border-[#00d2d3] focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1">
+                  <label className="block text-xs font-bold text-zinc-300 mb-1">
                     Confirme a Nova Senha / PIN:
                   </label>
                   <input
@@ -157,7 +157,7 @@ export const LeaderAuthModal: React.FC<LeaderAuthModalProps> = ({ isOpen, onClos
                     value={confirmNewPin}
                     onChange={e => setConfirmNewPin(e.target.value)}
                     placeholder="Repita a nova senha"
-                    className="w-full px-3 py-2 text-xs bg-[#0c121c] text-white border border-[#1e2a3a] rounded-xl focus:border-cyan-400 focus:outline-none"
+                    className="w-full px-3 py-2 text-xs bg-[#1A1D24] text-white border border-white/[0.08] rounded-xl focus:border-[#00d2d3] focus:outline-none"
                   />
                 </div>
 
@@ -171,13 +171,13 @@ export const LeaderAuthModal: React.FC<LeaderAuthModalProps> = ({ isOpen, onClos
                   <button
                     type="button"
                     onClick={() => setIsChangingPin(false)}
-                    className="w-1/2 py-2 text-xs font-bold text-slate-400 hover:text-white rounded-xl transition-colors"
+                    className="w-1/2 py-2 text-xs font-bold text-zinc-400 hover:text-white rounded-xl transition-colors"
                   >
                     Voltar
                   </button>
                   <button
                     type="submit"
-                    className="w-1/2 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-md shadow-blue-950/40"
+                    className="w-1/2 py-2 text-xs font-bold text-[#003731] bg-[#00d2d3] hover:bg-[#57f1db] rounded-xl shadow-sm shadow-[#00d2d3]/20"
                   >
                     Salvar Senha
                   </button>
@@ -188,7 +188,7 @@ export const LeaderAuthModal: React.FC<LeaderAuthModalProps> = ({ isOpen, onClos
         ) : (
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1">
+              <label className="block text-xs font-bold text-zinc-300 mb-1">
                 Nome da Liderança / Coordenador(a):
               </label>
               <input
@@ -197,12 +197,12 @@ export const LeaderAuthModal: React.FC<LeaderAuthModalProps> = ({ isOpen, onClos
                 value={inputName}
                 onChange={e => setInputName(e.target.value)}
                 placeholder="Ex: Dra. Ana Souza"
-                className="w-full px-3 py-2 text-xs bg-[#0c121c] text-white border border-[#1e2a3a] rounded-xl focus:border-cyan-400 focus:outline-none font-semibold"
+                className="w-full px-3 py-2 text-xs bg-[#1A1D24] text-white border border-white/[0.08] rounded-xl focus:border-[#00d2d3] focus:outline-none font-medium"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1">
+              <label className="block text-xs font-bold text-zinc-300 mb-1">
                 Senha / PIN de Acesso:
               </label>
               <input
@@ -210,7 +210,7 @@ export const LeaderAuthModal: React.FC<LeaderAuthModalProps> = ({ isOpen, onClos
                 value={inputPin}
                 onChange={e => setInputPin(e.target.value)}
                 placeholder="Senha (padrão inicial: 1234)"
-                className="w-full px-3 py-2 text-xs bg-[#0c121c] text-white border border-[#1e2a3a] rounded-xl focus:border-cyan-400 focus:outline-none font-semibold"
+                className="w-full px-3 py-2 text-xs bg-[#1A1D24] text-white border border-white/[0.08] rounded-xl focus:border-[#00d2d3] focus:outline-none font-medium"
               />
             </div>
 
@@ -223,9 +223,9 @@ export const LeaderAuthModal: React.FC<LeaderAuthModalProps> = ({ isOpen, onClos
             <div className="pt-2">
               <button
                 type="submit"
-                className="w-full py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-md shadow-blue-950/40 transition-all cursor-pointer flex items-center justify-center gap-2"
+                className="w-full py-2.5 text-xs font-bold text-[#003731] bg-[#00d2d3] hover:bg-[#57f1db] rounded-xl shadow-sm shadow-[#00d2d3]/20 transition-all cursor-pointer flex items-center justify-center gap-2"
               >
-                <Unlock className="w-4 h-4 text-cyan-200" />
+                <Unlock className="w-4 h-4 text-[#003731]" />
                 <span>Destravar Edição</span>
               </button>
             </div>

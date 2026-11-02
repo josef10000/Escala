@@ -13,7 +13,9 @@ import {
   WorkModality,
   AbsenceType,
   TeamGroup,
-  AttendanceIncident
+  AttendanceIncident,
+  ShiftSaleOffer,
+  ShiftSaleStatus
 } from '../types';
 import {
   INITIAL_DEPARTMENTS,
@@ -93,11 +95,25 @@ interface ScheduleContextType {
   swapRequests: SwapRequest[];
   scheduleRequests: ScheduleRequest[];
   attendanceIncidents: AttendanceIncident[];
+  shiftSaleOffers: ShiftSaleOffer[];
   isPublished: boolean;
   setIsPublished: (published: boolean) => void;
   publishedMonths: Record<string, boolean>;
   isMonthPublished: (year: number, monthIndex: number) => boolean;
   toggleMonthPublishStatus: (year: number, monthIndex: number) => void;
+
+  // Venda & Compra de Escala (Marketplace de Plantões)
+  createShiftSaleOffer: (data: {
+    shiftAssignmentId: string;
+    providerId: string;
+    date: string;
+    price: number;
+    note?: string;
+    sellerWhatsapp?: string;
+  }) => string;
+  buyShiftSaleOffer: (offerId: string, buyerProviderId: string) => Promise<boolean>;
+  cancelShiftSaleOffer: (offerId: string) => void;
+  updateProviderWhatsapp: (providerId: string, whatsapp: string) => Promise<void>;
 
   // Actions
   addAssignment: (data: Omit<ShiftAssignment, 'id' | 'createdAt'>) => string;
@@ -182,6 +198,7 @@ const STORAGE_KEYS = {
   LAST_UPDATED: 'escalapro_last_updated_oct2026_v1',
   LAST_UPDATED_BY: 'escalapro_last_updated_by_oct2026_v1',
   REGIME: 'escalapro_regime_oct2026_v1',
+  SHIFT_SALES: 'escalapro_shift_sales_oct2026_v1',
 };
 
 export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -351,6 +368,20 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   });
 
+  const [shiftSaleOffers, setShiftSaleOffers] = useState<ShiftSaleOffer[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.SHIFT_SALES);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Filter out initial mock sale-1
+        return parsed.filter((o: ShiftSaleOffer) => o.id !== 'sale-1');
+      }
+      return [];
+    } catch {
+      return [];
+    }
+  });
+
   // Sync role with leader authentication
   useEffect(() => {
     if (isLeaderAuthenticated) {
@@ -436,6 +467,11 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             setAttendanceIncidents(data.attendanceIncidents);
             localStorage.setItem(STORAGE_KEYS.INCIDENTS, JSON.stringify(data.attendanceIncidents));
           }
+          if (data.shiftSaleOffers && Array.isArray(data.shiftSaleOffers)) {
+            const cleanSales = data.shiftSaleOffers.filter((o: any) => o.id !== 'sale-1');
+            setShiftSaleOffers(cleanSales);
+            localStorage.setItem(STORAGE_KEYS.SHIFT_SALES, JSON.stringify(cleanSales));
+          }
           if (data.publishedMonths && typeof data.publishedMonths === 'object') {
             setPublishedMonths(data.publishedMonths);
             localStorage.setItem(STORAGE_KEYS.PUBLISHED_MONTHS, JSON.stringify(data.publishedMonths));
@@ -519,6 +555,7 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     swapRequests?: SwapRequest[];
     scheduleRequests?: ScheduleRequest[];
     attendanceIncidents?: AttendanceIncident[];
+    shiftSaleOffers?: ShiftSaleOffer[];
     leaderPin?: string;
     publishedMonths?: Record<string, boolean>;
   }): Promise<boolean> => {
@@ -560,6 +597,10 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.REQUESTS, JSON.stringify(scheduleRequests));
   }, [scheduleRequests]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.SHIFT_SALES, JSON.stringify(shiftSaleOffers));
+  }, [shiftSaleOffers]);
 
   // Leader Authentication Methods
   const authenticateLeader = (name: string, pin: string): boolean => {
@@ -676,6 +717,134 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     setAuthenticatedProviderId(null);
     localStorage.removeItem(STORAGE_KEYS.AUTH_PROVIDER);
     sessionStorage.removeItem(STORAGE_KEYS.AUTH_PROVIDER);
+  };
+
+  const updateProviderWhatsapp = async (providerId: string, whatsapp: string): Promise<void> => {
+    const cleanPhone = whatsapp.trim();
+    const updated = providers.map(p => {
+      if (p.id === providerId) {
+        return { ...p, whatsapp: cleanPhone };
+      }
+      return p;
+    });
+    setProviders(updated);
+    localStorage.setItem(STORAGE_KEYS.PROVIDERS, JSON.stringify(updated));
+    await syncToFirebase({ providers: updated });
+  };
+
+  const createShiftSaleOffer = (data: {
+    shiftAssignmentId: string;
+    providerId: string;
+    date: string;
+    price: number;
+    note?: string;
+    sellerWhatsapp?: string;
+  }): string => {
+    const seller = providers.find(p => p.id === data.providerId);
+    const newOffer: ShiftSaleOffer = {
+      id: `sale-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      shiftAssignmentId: data.shiftAssignmentId,
+      providerId: data.providerId,
+      providerName: seller ? seller.name : 'Prestador',
+      date: data.date,
+      price: data.price,
+      note: data.note,
+      sellerWhatsapp: data.sellerWhatsapp || seller?.whatsapp,
+      status: 'available',
+      createdAt: new Date().toISOString(),
+    };
+
+    const updated = [newOffer, ...shiftSaleOffers];
+    setShiftSaleOffers(updated);
+    localStorage.setItem(STORAGE_KEYS.SHIFT_SALES, JSON.stringify(updated));
+
+    if (data.sellerWhatsapp && seller && (!seller.whatsapp || seller.whatsapp !== data.sellerWhatsapp)) {
+      updateProviderWhatsapp(data.providerId, data.sellerWhatsapp);
+    }
+
+    syncToFirebase({ shiftSaleOffers: updated });
+    return newOffer.id;
+  };
+
+  const buyShiftSaleOffer = async (offerId: string, buyerProviderId: string): Promise<boolean> => {
+    const offer = shiftSaleOffers.find(o => o.id === offerId);
+    if (!offer || offer.status !== 'available') return false;
+
+    const buyer = providers.find(p => p.id === buyerProviderId);
+    if (!buyer) return false;
+
+    // 1. Mark offer as sold
+    const updatedOffers: ShiftSaleOffer[] = shiftSaleOffers.map(o => {
+      if (o.id === offerId) {
+        return {
+          ...o,
+          status: 'sold' as ShiftSaleStatus,
+          buyerProviderId,
+          buyerProviderName: buyer.name,
+          soldAt: new Date().toISOString(),
+        };
+      }
+      return o;
+    });
+
+    // 2. Transfer the assignment to the buyer
+    let assignmentFound = false;
+    const formattedPrice = offer.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+    const updatedAssignments = assignments.map(a => {
+      if (a.id === offer.shiftAssignmentId || (a.providerId === offer.providerId && a.date === offer.date)) {
+        assignmentFound = true;
+        return {
+          ...a,
+          providerId: buyerProviderId,
+          notes: `Plantão adquirido de ${offer.providerName} (R$ ${formattedPrice})`,
+          workModality: (a.workModality || 'presencial') as WorkModality,
+          updatedAt: new Date().toISOString(),
+        };
+      }
+      return a;
+    });
+
+    let finalAssignments = updatedAssignments;
+    if (!assignmentFound) {
+      finalAssignments = [
+        ...updatedAssignments,
+        {
+          id: `asg-sale-${Date.now()}`,
+          providerId: buyerProviderId,
+          shiftTypeId: 'st-t',
+          departmentId: 'dept-1',
+          date: offer.date,
+          status: 'confirmed' as const,
+          workModality: 'presencial' as const,
+          notes: `Plantão adquirido de ${offer.providerName} (R$ ${formattedPrice})`,
+          createdAt: new Date().toISOString(),
+        }
+      ];
+    }
+
+    setShiftSaleOffers(updatedOffers);
+    setAssignments(finalAssignments);
+    localStorage.setItem(STORAGE_KEYS.SHIFT_SALES, JSON.stringify(updatedOffers));
+    localStorage.setItem(STORAGE_KEYS.ASSIGNMENTS, JSON.stringify(finalAssignments));
+
+    await syncToFirebase({
+      shiftSaleOffers: updatedOffers,
+      assignments: finalAssignments,
+    });
+
+    return true;
+  };
+
+  const cancelShiftSaleOffer = (offerId: string) => {
+    const updated: ShiftSaleOffer[] = shiftSaleOffers.map(o => {
+      if (o.id === offerId) {
+        return { ...o, status: 'cancelled' as ShiftSaleStatus };
+      }
+      return o;
+    });
+    setShiftSaleOffers(updated);
+    localStorage.setItem(STORAGE_KEYS.SHIFT_SALES, JSON.stringify(updated));
+    syncToFirebase({ shiftSaleOffers: updated });
   };
 
   const setRole = (newRole: UserRole) => {
@@ -1545,11 +1714,17 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
         swapRequests,
         scheduleRequests,
         attendanceIncidents,
+        shiftSaleOffers,
         isPublished,
         setIsPublished,
         publishedMonths,
         isMonthPublished,
         toggleMonthPublishStatus,
+
+        createShiftSaleOffer,
+        buyShiftSaleOffer,
+        cancelShiftSaleOffer,
+        updateProviderWhatsapp,
 
         addAssignment,
         updateAssignment,
