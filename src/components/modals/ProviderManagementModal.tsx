@@ -17,7 +17,9 @@ import {
   AlertCircle,
   User,
   DollarSign,
-  Award
+  Award,
+  KeyRound,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface ProviderManagementModalProps {
@@ -34,6 +36,7 @@ export const ProviderManagementModal: React.FC<ProviderManagementModalProps> = (
     addProvider,
     updateProvider,
     deleteProvider,
+    resetProviderPin,
     activeRegime,
     batchAddProviders,
   } = useSchedule();
@@ -539,8 +542,34 @@ export const ProviderManagementModal: React.FC<ProviderManagementModalProps> = (
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1 shrink-0">
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {/* PIN status badge and reset button */}
+                      {p.pin ? (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (window.confirm(`Deseja resetar o PIN de ${p.name}? O colaborador poderá criar um novo PIN no próximo acesso.`)) {
+                              await resetProviderPin(p.id);
+                            }
+                          }}
+                          className="flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-lg bg-emerald-950/70 hover:bg-emerald-900 text-emerald-300 border border-emerald-800/80 transition-colors cursor-pointer"
+                          title="PIN cadastrado. Clique para resetar o PIN deste colaborador."
+                        >
+                          <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                          <span>Resetar PIN</span>
+                        </button>
+                      ) : (
+                        <span
+                          className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg bg-[#141c28] text-slate-400 border border-[#1e2a3a]"
+                          title="Colaborador ainda não criou seu PIN de primeiro acesso."
+                        >
+                          <KeyRound className="w-3 h-3 text-slate-500" />
+                          <span>Sem PIN</span>
+                        </span>
+                      )}
+
                       <button
+                        type="button"
                         onClick={() => handleStartEdit(p)}
                         className="p-1.5 text-slate-400 hover:text-cyan-300 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
                         title="Editar prestador"
@@ -548,6 +577,7 @@ export const ProviderManagementModal: React.FC<ProviderManagementModalProps> = (
                         <Edit2 className="w-3.5 h-3.5" />
                       </button>
                       <button
+                        type="button"
                         onClick={() => handleDelete(p.id, p.name)}
                         className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
                         title="Remover prestador"

@@ -8,6 +8,7 @@ import {
   CalendarDays,
   Calendar,
   LayoutGrid,
+  UserCheck,
 } from 'lucide-react';
 import { useSchedule } from '../context/ScheduleContext';
 
@@ -18,12 +19,14 @@ interface NavbarProps {
   onOpenAutoScheduleModal?: () => void;
   onOpenProviderModal?: () => void;
   onOpenShareModal?: () => void;
+  onOpenCollaboratorAuth?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   onOpenLeaderAuth,
   onOpenRequestsCenter,
   onOpenShareModal,
+  onOpenCollaboratorAuth,
 }) => {
   const {
     providers,
@@ -134,21 +137,52 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             )}
 
-            {/* If collaborator is identified, show their badge */}
+            {/* If collaborator is identified, show their badge with switch / disconnect */}
             {!isLeaderAuthenticated && authProviderObj && (
-              <div className="flex items-center gap-1.5 bg-[#141c28] border border-[#1e2a3a] px-3 py-1 rounded-xl text-xs">
-                <span className="w-2 h-2 rounded-full bg-cyan-400" />
-                <span className="text-slate-200 font-semibold truncate max-w-[120px]">
-                  {authProviderObj.name}
-                </span>
+              <div className="flex items-center gap-1.5 bg-[#141c28] border border-[#1e2a3a] px-2.5 py-1 rounded-xl text-xs shadow-sm">
                 <button
+                  type="button"
+                  onClick={() => {
+                    setViewMode('personal-calendar');
+                  }}
+                  className="flex items-center gap-1.5 text-slate-200 hover:text-cyan-300 font-bold transition-colors cursor-pointer"
+                  title="Abrir meu calendário individual"
+                >
+                  <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.9)]" />
+                  <span className="truncate max-w-[120px]">{authProviderObj.name.split(' ')[0]} (Você)</span>
+                </button>
+                {onOpenCollaboratorAuth && (
+                  <button
+                    type="button"
+                    onClick={onOpenCollaboratorAuth}
+                    className="text-slate-400 hover:text-cyan-300 p-0.5 rounded transition-colors cursor-pointer ml-1"
+                    title="Trocar de colaborador"
+                  >
+                    <UserCheck className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                <button
+                  type="button"
                   onClick={logoutProvider}
-                  className="text-slate-400 hover:text-rose-400 p-0.5 rounded transition-colors"
-                  title="Sair do meu perfil"
+                  className="text-slate-400 hover:text-rose-400 p-0.5 rounded transition-colors cursor-pointer"
+                  title="Desconectar deste aparelho"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                 </button>
               </div>
+            )}
+
+            {/* If collaborator is NOT identified, show Identificar-me button */}
+            {!isLeaderAuthenticated && !authProviderObj && onOpenCollaboratorAuth && (
+              <button
+                type="button"
+                onClick={onOpenCollaboratorAuth}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-cyan-300 hover:text-white bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-800/80 rounded-xl transition-all cursor-pointer shadow-sm"
+                title="Conectar seu perfil de prestador neste aparelho"
+              >
+                <UserCheck className="w-3.5 h-3.5 text-cyan-400" />
+                <span className="hidden sm:inline">Identificar-me</span>
+              </button>
             )}
 
             {/* Share with Team button in electric blue/cyan */}

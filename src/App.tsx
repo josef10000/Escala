@@ -42,6 +42,7 @@ function ScheduleAppContent() {
   } = useSchedule();
 
   // Modals state
+  const [collaboratorAuthOpen, setCollaboratorAuthOpen] = useState(false);
   const [authModalProvider, setAuthModalProvider] = useState<Provider | null>(null);
   const [shiftModalOpen, setShiftModalOpen] = useState(false);
   const [shiftToEdit, setShiftToEdit] = useState<ShiftAssignment | null>(null);
@@ -99,6 +100,10 @@ function ScheduleAppContent() {
           onRequestSwap={() => setQuickSwapModalOpen(true)}
           onNotifyAbsence={() => setAbsenceModalOpen(true)}
           onOpenRequestsCenter={() => setRequestsCenterModalOpen(true)}
+          onOpenCollaboratorAuth={prov => {
+            setAuthModalProvider(prov || null);
+            setCollaboratorAuthOpen(true);
+          }}
         />
       </div>
 
@@ -112,6 +117,10 @@ function ScheduleAppContent() {
           onOpenAutoScheduleModal={() => setAutoScheduleModalOpen(true)}
           onOpenProviderModal={() => setProviderModalOpen(true)}
           onOpenShareModal={() => setWhatsAppModalOpen(true)}
+          onOpenCollaboratorAuth={() => {
+            setAuthModalProvider(null);
+            setCollaboratorAuthOpen(true);
+          }}
         />
 
         {/* Main Container */}
@@ -259,12 +268,16 @@ function ScheduleAppContent() {
 
       {/* Collaborator Authentication Modal */}
       <CollaboratorAuthModal
-        isOpen={Boolean(authModalProvider)}
+        isOpen={collaboratorAuthOpen || Boolean(authModalProvider)}
         targetProvider={authModalProvider}
-        onClose={() => setAuthModalProvider(null)}
+        onClose={() => {
+          setCollaboratorAuthOpen(false);
+          setAuthModalProvider(null);
+        }}
         onSuccess={prov => {
           setActiveProviderId(prov.id);
           setViewMode('personal-calendar');
+          setCollaboratorAuthOpen(false);
           setAuthModalProvider(null);
         }}
       />

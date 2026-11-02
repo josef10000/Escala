@@ -37,12 +37,14 @@ interface MobileScheduleViewProps {
   onNotifyAbsence?: () => void;
   onOpenRequestsCenter?: () => void;
   onSwitchToDesktopGrid?: () => void;
+  onOpenCollaboratorAuth?: (provider?: Provider) => void;
 }
 
 export const MobileScheduleView: React.FC<MobileScheduleViewProps> = ({
   onRequestSwap,
   onNotifyAbsence,
   onOpenRequestsCenter,
+  onOpenCollaboratorAuth,
 }) => {
   const {
     currentYear,
@@ -274,6 +276,21 @@ export const MobileScheduleView: React.FC<MobileScheduleViewProps> = ({
                   </button>
                 ))}
               </div>
+
+              {onOpenCollaboratorAuth && (
+                <div className="pt-2 border-t border-[#1e2a3a] mt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowUserPicker(false);
+                      onOpenCollaboratorAuth();
+                    }}
+                    className="w-full text-center px-2 py-1.5 bg-cyan-950/70 hover:bg-cyan-900 border border-cyan-800/80 rounded-xl text-xs font-bold text-cyan-300 transition-colors cursor-pointer"
+                  >
+                    🔍 Lista Completa & Gerenciar PIN
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

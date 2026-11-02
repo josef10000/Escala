@@ -78,7 +78,8 @@ interface ScheduleContextType {
   // Collaborator PIN & Auth
   authenticatedProviderId: string | null;
   authenticateProvider: (providerId: string, pin?: string) => boolean;
-  setupProviderPin: (providerId: string, pin?: string) => Promise<boolean>;
+  setupProviderPin: (providerId: string, pin: string) => Promise<boolean>;
+  resetProviderPin: (providerId: string) => Promise<boolean>;
   logoutProvider: () => void;
 
   // Data & Metadata
@@ -214,9 +215,9 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return sessionStorage.getItem(STORAGE_KEYS.LEADER_NAME) || localStorage.getItem(STORAGE_KEYS.LEADER_NAME) || null;
   });
 
-  // Authenticated collaborator session (if not leader)
+  // Authenticated collaborator session (if not leader) - persistent in localStorage
   const [authenticatedProviderId, setAuthenticatedProviderId] = useState<string | null>(() => {
-    return sessionStorage.getItem(STORAGE_KEYS.AUTH_PROVIDER) || null;
+    return localStorage.getItem(STORAGE_KEYS.AUTH_PROVIDER) || sessionStorage.getItem(STORAGE_KEYS.AUTH_PROVIDER) || null;
   });
 
   const [activeProviderId, setActiveProviderIdState] = useState<string>('prov-1');
@@ -598,26 +599,82 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     }
   };
 
-  // Collaborator Authentication & PIN Methods (Simplified - PIN check removed)
-  const authenticateProvider = (providerId: string, pin?: string): boolean => {
+  // Collaborator Authentication & PIN Methods (Hybrid Model)
+  const authenticateProvider = (providerId: string, enteredPin?: string): boolean => {
     const prov = providers.find(p => p.id === providerId);
     if (!prov) return false;
 
+    // If provider already has a PIN configured, it must match
+    if (prov.pin) {
+      if (!enteredPin || enteredPin.trim() !== prov.pin.trim()) {
+        return false;
+      }
+    }
+
     setAuthenticatedProviderId(providerId);
     setActiveProviderIdState(providerId);
+    localStorage.setItem(STORAGE_KEYS.AUTH_PROVIDER, providerId);
     sessionStorage.setItem(STORAGE_KEYS.AUTH_PROVIDER, providerId);
     return true;
   };
 
-  const setupProviderPin = async (providerId: string, pin?: string): Promise<boolean> => {
+  const setupProviderPin = async (providerId: string, newPin: string): Promise<boolean> => {
+    if (!newPin || newPin.trim().length !== 4) return false;
+    const cleanPin = newPin.trim();
+
+    const updatedProviders = providers.map(p => {
+      if (p.id === providerId) {
+        return { ...p, pin: cleanPin };
+      }
+      return p;
+    });
+
+    setProviders(updatedProviders);
+    localStorage.setItem(STORAGE_KEYS.PROVIDERS, JSON.stringify(updatedProviders));
+
     setAuthenticatedProviderId(providerId);
     setActiveProviderIdState(providerId);
+    localStorage.setItem(STORAGE_KEYS.AUTH_PROVIDER, providerId);
     sessionStorage.setItem(STORAGE_KEYS.AUTH_PROVIDER, providerId);
+
+    try {
+      await syncToFirebase({ providers: updatedProviders });
+    } catch (e) {
+      console.warn('Sync to Firebase failed, locally saved:', e);
+    }
+    return true;
+  };
+
+  const resetProviderPin = async (providerId: string): Promise<boolean> => {
+    const updatedProviders = providers.map(p => {
+      if (p.id === providerId) {
+        const copy = { ...p };
+        delete copy.pin;
+        return copy;
+      }
+      return p;
+    });
+
+    setProviders(updatedProviders);
+    localStorage.setItem(STORAGE_KEYS.PROVIDERS, JSON.stringify(updatedProviders));
+
+    if (authenticatedProviderId === providerId) {
+      setAuthenticatedProviderId(null);
+      localStorage.removeItem(STORAGE_KEYS.AUTH_PROVIDER);
+      sessionStorage.removeItem(STORAGE_KEYS.AUTH_PROVIDER);
+    }
+
+    try {
+      await syncToFirebase({ providers: updatedProviders });
+    } catch (e) {
+      console.warn('Sync to Firebase failed, locally saved:', e);
+    }
     return true;
   };
 
   const logoutProvider = () => {
     setAuthenticatedProviderId(null);
+    localStorage.removeItem(STORAGE_KEYS.AUTH_PROVIDER);
     sessionStorage.removeItem(STORAGE_KEYS.AUTH_PROVIDER);
   };
 
@@ -1475,6 +1532,7 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
         authenticatedProviderId,
         authenticateProvider,
         setupProviderPin,
+        resetProviderPin,
         logoutProvider,
 
         isSyncing,

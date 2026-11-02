@@ -877,15 +877,9 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                               onClick={() => {
                                 if (role === 'supervisor') {
                                   startEditingField(provider, 'name');
-                                } else if (isLeaderAuthenticated || authenticatedProviderId === provider.id) {
+                                } else {
                                   setActiveProviderId(provider.id);
                                   setViewMode('personal-calendar');
-                                } else {
-                                  if (authenticatedProviderId && authenticatedProviderId !== provider.id) {
-                                    alert(`Você está conectado como outro prestador. Para ver o calendário de ${provider.name}, desconecte seu perfil primeiro.`);
-                                  } else if (onOpenCollaboratorAuth) {
-                                    onOpenCollaboratorAuth(provider);
-                                  }
                                 }
                               }}
                               className={`cursor-pointer hover:underline hover:text-cyan-400 font-extrabold tracking-tight text-white whitespace-normal break-words ${
@@ -894,7 +888,7 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                               title={
                                 role === 'supervisor'
                                   ? 'Clique para renomear este prestador'
-                                  : 'Clique para abrir seu calendário mensal'
+                                  : 'Clique para abrir o calendário mensal deste colaborador'
                               }
                             >
                               {provider.name}
@@ -930,18 +924,10 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                           <button
                             onClick={e => {
                               e.stopPropagation();
-                              if (isLeaderAuthenticated || authenticatedProviderId === provider.id) {
-                                setActiveProviderId(provider.id);
-                                setViewMode('personal-calendar');
-                              } else {
-                                if (authenticatedProviderId && authenticatedProviderId !== provider.id) {
-                                  alert(`Você está conectado como outro prestador. Para ver o calendário de ${provider.name}, desconecte seu perfil primeiro.`);
-                                } else if (onOpenCollaboratorAuth) {
-                                  onOpenCollaboratorAuth(provider);
-                                }
-                              }
+                              setActiveProviderId(provider.id);
+                              setViewMode('personal-calendar');
                             }}
-                            className="text-slate-400 hover:text-cyan-400 p-1 rounded-lg hover:bg-slate-800 transition-colors"
+                            className="text-slate-400 hover:text-cyan-400 p-1 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
                             title="Ver calendário mensal deste colaborador"
                           >
                             <CalendarDays className="w-4 h-4" />
