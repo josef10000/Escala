@@ -163,10 +163,10 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
   const spotlightFolgasCount = Math.max(0, allDays.length - spotlightPlantõesCount);
   const spotlightHours = spotlightPlantõesCount * (spotlightProvider?.regime === '5x2' ? 8 : 12);
 
-  // Today calculations (100% REAL)
+  // Today / Reference calculations (100% REAL)
   const today = new Date();
   const isCurrentViewingMonth = today.getFullYear() === currentYear && today.getMonth() === currentMonthIndex;
-  const todayDayNumber = isCurrentViewingMonth ? today.getDate() : Math.min(12, allDays.length);
+  const todayDayNumber = isCurrentViewingMonth ? today.getDate() : 1;
   const todayDateStr = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-${String(todayDayNumber).padStart(2, '0')}`;
 
   const todayWorkersCount = assignments.filter(
@@ -468,7 +468,9 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#12141A] border border-white/[0.08] text-xs text-zinc-300 shadow-sm self-start sm:self-auto">
           <span className="w-2 h-2 rounded-full bg-[#00d2d3] shadow-[0_0_8px_#00d2d3]" />
           <span>
-            Hoje ({DAYS_SHORT_PT[today.getDay()] || 'Seg'}, {todayDayNumber}/{monthName.slice(0, 3)}):{' '}
+            {isCurrentViewingMonth
+              ? `Hoje (${DAYS_SHORT_PT[today.getDay()] || 'Seg'}, ${todayDayNumber}/${monthName.slice(0, 3)})`
+              : `Início do Mês (${todayDayNumber}/${monthName.slice(0, 3)})`}:{' '}
             <strong className="text-[#00d2d3] font-bold">{todayWorkersCount} em Turno</strong>
             <span className="text-zinc-500 mx-1">•</span>
             <span className="text-zinc-400">{todayOffCount} de Folga</span>
