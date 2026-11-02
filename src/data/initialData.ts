@@ -37,72 +37,114 @@ export const INITIAL_PROVIDERS: Provider[] = [
     id: 'prov-1',
     name: 'DANIEL ANTONIO DA SILVA',
     role: 'Prestador',
+    regime: '12x36',
+    teamGroup: 'turma_a',
     entryTime: '07h00',
     exitTime: '19h00',
     email: 'daniel.silva@escala.com',
     phone: '(11) 98711-2233',
     color: 'blue',
     maxMonthlyHours: 180,
+    baseSalaryOrFee: 3500,
+    bonusAmount: 600,
+    bonusFrequencyMonths: 3, // Trimestral
+    deductionPerMinuteLate: 0.50,
+    deductionPerAbsence: 150,
     status: 'active'
   },
   {
     id: 'prov-2',
     name: 'NATASHA AMARAL DE OLIVEIRA',
     role: 'Prestador',
+    regime: '12x36',
+    teamGroup: 'turma_b',
     entryTime: '07h00',
     exitTime: '19h00',
     email: 'natasha.oliveira@escala.com',
     phone: '(11) 98722-3344',
     color: 'emerald',
     maxMonthlyHours: 180,
+    baseSalaryOrFee: 3500,
+    bonusAmount: 600,
+    bonusFrequencyMonths: 3,
+    deductionPerMinuteLate: 0.50,
+    deductionPerAbsence: 150,
     status: 'active'
   },
   {
     id: 'prov-3',
     name: 'JOSE FRAZAO DA SILVA NETO',
     role: 'Prestador',
+    regime: '12x36',
+    teamGroup: 'turma_a',
     entryTime: '07h00',
     exitTime: '19h00',
     email: 'jose.frazao@escala.com',
     phone: '(11) 98733-4455',
     color: 'cyan',
     maxMonthlyHours: 180,
+    baseSalaryOrFee: 3500,
+    bonusAmount: 500,
+    bonusFrequencyMonths: 1, // Mensal
+    deductionPerMinuteLate: 0.50,
+    deductionPerAbsence: 150,
     status: 'active'
   },
   {
     id: 'prov-4',
     name: 'PATRICIA VIEIRA DA CONCEICAO',
     role: 'Prestador',
+    regime: '12x36',
+    teamGroup: 'turma_b',
     entryTime: '07h00',
     exitTime: '19h00',
     email: 'patricia.conceicao@escala.com',
     phone: '(11) 98744-5566',
     color: 'purple',
     maxMonthlyHours: 180,
+    baseSalaryOrFee: 3500,
+    bonusAmount: 600,
+    bonusFrequencyMonths: 3,
+    deductionPerMinuteLate: 0.50,
+    deductionPerAbsence: 150,
     status: 'active'
   },
   {
     id: 'prov-5',
     name: 'REGIANE JUCA DE CARVALHO',
     role: 'Prestador',
+    regime: '12x36',
+    teamGroup: 'turma_b',
     entryTime: '07h00',
     exitTime: '19h00',
     email: 'regiane.carvalho@escala.com',
     phone: '(11) 98755-6677',
     color: 'amber',
     maxMonthlyHours: 180,
+    baseSalaryOrFee: 3500,
+    bonusAmount: 600,
+    bonusFrequencyMonths: 3,
+    deductionPerMinuteLate: 0.50,
+    deductionPerAbsence: 150,
     status: 'active'
   },
   {
     id: 'prov-6',
     name: 'STEFANIE CRISTINA SANTOS SILVESTRE DA SILVA',
     role: 'Prestador',
+    regime: '12x36',
+    teamGroup: 'turma_a',
     entryTime: '07h00',
     exitTime: '19h00',
     email: 'stefanie.silva@escala.com',
     phone: '(11) 98766-7788',
     color: 'rose',
     maxMonthlyHours: 180,
+    baseSalaryOrFee: 3500,
+    bonusAmount: 800,
+    bonusFrequencyMonths: 6, // Semestral
+    deductionPerMinuteLate: 0.50,
+    deductionPerAbsence: 150,
     status: 'active'
   }
 ];
@@ -126,13 +168,10 @@ const PROVIDER_PATTERNS: { [id: string]: string[] } = {
 
 export function generateInitialAssignments(): ShiftAssignment[] {
   const assignments: ShiftAssignment[] = [];
-  const now = new Date();
-  const currentYear = now.getFullYear();
-  const currentMonth = now.getMonth();
-
-  // Seed for current month and adjacent
+  
+  // Seed specifically for October 2026 ONLY
   const monthsToSeed = [
-    { year: currentYear, month: currentMonth }
+    { year: 2026, month: 9 }  // October 2026
   ];
 
   let idCounter = 1;
@@ -150,8 +189,6 @@ export function generateInitialAssignments(): ShiftAssignment[] {
 
         if (shiftCode === 'D' || shiftCode === 'T') {
           const shiftTypeId = shiftCode === 'D' ? 'st-d' : 'st-t';
-          // Natasha days 10 to 14 have a note (red corner mark in reference)
-          const hasNote = prov.id === 'prov-2' && day >= 10 && day <= 14;
 
           assignments.push({
             id: `shift-${idCounter++}`,
@@ -160,7 +197,6 @@ export function generateInitialAssignments(): ShiftAssignment[] {
             departmentId: 'dept-1',
             providerId: prov.id,
             status: 'confirmed',
-            notes: hasNote ? 'Cobertura especial confirmada' : undefined,
             acknowledgedByProvider: true,
             createdAt: new Date().toISOString()
           });

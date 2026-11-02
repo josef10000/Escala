@@ -46,19 +46,19 @@ export const CollaboratorAuthModal: React.FC<CollaboratorAuthModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xs animate-in fade-in duration-100">
-      <div className="bg-slate-900 text-white rounded-3xl p-6 border border-slate-800 shadow-2xl max-w-sm w-full space-y-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-100">
+      <div className="bg-white text-slate-800 rounded-3xl p-6 border border-slate-200/90 shadow-2xl max-w-sm w-full space-y-4">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-950 text-indigo-400 border border-indigo-500/40 flex items-center justify-center font-bold">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center font-extrabold shadow-2xs">
               {targetProvider.name.substring(0, 2).toUpperCase()}
             </div>
             <div>
-              <div className="text-[11px] text-indigo-400 font-bold uppercase tracking-wider">
+              <div className="text-xs text-emerald-700 font-extrabold uppercase tracking-wider">
                 Área Individual
               </div>
-              <h3 className="text-base font-black text-white truncate max-w-[200px]">
+              <h3 className="text-sm font-extrabold text-slate-900">
                 {targetProvider.name}
               </h3>
             </div>
@@ -66,37 +66,36 @@ export const CollaboratorAuthModal: React.FC<CollaboratorAuthModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+            className="p-1.5 text-slate-400 hover:text-slate-700 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
-          <div className="bg-slate-950/60 p-3.5 rounded-2xl border border-slate-800/80 text-xs text-slate-300 leading-relaxed">
-            Olá, <span className="font-bold text-white">{targetProvider.name}</span>! Deseja acessar a sua área de calendário individual para visualizar seus plantões e enviar solicitações?
-          </div>
+          <p className="text-xs text-slate-600 font-medium">
+            Confirme que você é <strong>{targetProvider.name}</strong> para visualizar seu calendário mensal exclusivo e gerenciar pedidos de troca.
+          </p>
 
           {errorMsg && (
-            <div className="p-2.5 bg-rose-950/50 border border-rose-800/60 rounded-xl text-xs text-rose-300 text-center font-medium">
+            <p className="text-xs text-rose-600 bg-rose-50 p-2.5 rounded-xl border border-rose-200 font-medium">
               {errorMsg}
-            </div>
+            </p>
           )}
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 pt-1">
             <button
               type="button"
               onClick={onClose}
-              className="w-1/2 py-2.5 px-4 text-xs font-bold text-slate-400 hover:text-white bg-slate-800 rounded-2xl transition-all"
+              className="flex-1 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="w-1/2 py-2.5 px-4 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-2xl transition-all shadow-md flex items-center justify-center gap-1.5"
+              className="flex-1 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-xs transition-colors cursor-pointer"
             >
-              <UserCheck className="w-4 h-4" />
-              <span>Acessar</span>
+              Sou eu, Acessar
             </button>
           </div>
         </form>

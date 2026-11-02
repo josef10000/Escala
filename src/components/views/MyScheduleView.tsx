@@ -104,30 +104,30 @@ export const MyScheduleView: React.FC<MyScheduleViewProps> = ({
 
   if (!provider) {
     return (
-      <div className="bg-slate-900 p-8 rounded-2xl border border-slate-800 text-center">
-        <p className="text-slate-400">Selecione um prestador no topo para ver seus plantões.</p>
+      <div className="bg-[#1e293b] p-8 rounded-3xl border border-slate-700/80 text-center shadow-sm">
+        <p className="text-slate-400 font-medium">Selecione um prestador no topo para ver seus plantões.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 text-slate-100">
       {/* Top Banner: Provider Info & Month Summary */}
-      <div className="bg-slate-900 rounded-2xl border border-slate-800 p-5 sm:p-6 shadow-xl">
+      <div className="bg-[#1e293b] rounded-3xl border border-slate-700/80 p-5 sm:p-6 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
           {/* Provider Card */}
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-xl font-bold text-white shadow-md">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-600 flex items-center justify-center text-xl font-black text-white shadow-sm ring-2 ring-emerald-500/20">
               {provider.name.charAt(0)}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold text-white">{provider.name}</h2>
-                <span className="text-xs bg-slate-800 text-slate-300 px-2.5 py-0.5 rounded-full font-medium border border-slate-700">
+                <h2 className="text-xl font-extrabold text-white">{provider.name}</h2>
+                <span className="text-xs bg-emerald-950/70 text-emerald-400 px-2.5 py-0.5 rounded-full font-bold border border-emerald-800/80">
                   {provider.role}
                 </span>
               </div>
-              <div className="text-xs text-slate-400 mt-1 flex flex-wrap gap-2">
+              <div className="text-xs text-slate-400 mt-1 flex flex-wrap gap-2 font-medium">
                 <span>{provider.email}</span>
                 <span>·</span>
                 <span>{provider.phone}</span>
@@ -137,30 +137,30 @@ export const MyScheduleView: React.FC<MyScheduleViewProps> = ({
 
           {/* Quick Metrics */}
           <div className="flex flex-wrap items-center gap-3">
-            <div className="bg-slate-950 border border-slate-800 rounded-xl p-3 min-w-[130px]">
-              <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+            <div className="bg-slate-900/70 border border-slate-700/80 rounded-2xl p-3 min-w-[130px] shadow-sm">
+              <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                 Plantões no Mês
               </div>
-              <div className="text-2xl font-bold text-white font-mono-nums mt-0.5">
+              <div className="text-2xl font-black text-white mt-0.5">
                 {myMonthlyShifts.length}
               </div>
-              <div className="text-[11px] text-slate-500 font-mono-nums">
+              <div className="text-xs text-slate-400 font-medium">
                 {acknowledgedCount} confirmados
               </div>
             </div>
 
-            <div className="bg-slate-950 border border-slate-800 rounded-xl p-3 min-w-[160px]">
-              <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex justify-between">
+            <div className="bg-slate-900/70 border border-slate-700/80 rounded-2xl p-3 min-w-[160px] shadow-sm">
+              <div className="text-xs font-bold text-slate-400 uppercase tracking-wider flex justify-between">
                 <span>Horas Escaladas</span>
-                <span className="font-mono-nums text-indigo-400">{hoursPercentage}%</span>
+                <span className="font-extrabold text-emerald-400">{hoursPercentage}%</span>
               </div>
-              <div className="text-2xl font-bold text-indigo-400 font-mono-nums mt-0.5">
+              <div className="text-2xl font-black text-emerald-400 mt-0.5">
                 {totalHours}h{' '}
-                <span className="text-xs text-slate-500 font-normal">/ {maxHours}h</span>
+                <span className="text-xs text-slate-400 font-medium">/ {maxHours}h</span>
               </div>
-              <div className="w-full bg-slate-800 rounded-full h-1.5 mt-2">
+              <div className="w-full bg-slate-800 rounded-full h-1.5 mt-2 overflow-hidden">
                 <div
-                  className="h-1.5 rounded-full bg-indigo-500 transition-all"
+                  className="h-1.5 rounded-full bg-emerald-500 transition-all"
                   style={{ width: `${Math.min(100, hoursPercentage)}%` }}
                 />
               </div>
@@ -168,10 +168,10 @@ export const MyScheduleView: React.FC<MyScheduleViewProps> = ({
 
             <button
               onClick={exportToICS}
-              className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 bg-slate-950 border border-slate-800 hover:bg-slate-800 hover:text-white px-3 py-2.5 rounded-xl transition-colors shadow-2xs whitespace-nowrap self-stretch sm:self-auto justify-center"
+              className="flex items-center gap-1.5 text-xs font-bold text-slate-200 bg-slate-800/90 border border-slate-700 hover:bg-slate-800 hover:border-slate-600 px-3.5 py-2.5 rounded-2xl transition-colors shadow-sm whitespace-nowrap self-stretch sm:self-auto justify-center cursor-pointer"
               title="Salvar no Google Calendar ou celular"
             >
-              <FileDown className="w-4 h-4 text-indigo-400" />
+              <FileDown className="w-4 h-4 text-emerald-400" />
               <span>Exportar (.ics)</span>
             </button>
           </div>
@@ -180,22 +180,22 @@ export const MyScheduleView: React.FC<MyScheduleViewProps> = ({
 
       {/* Next Shift Spotlight Card */}
       {nextShift && nextShiftType && nextDept && (
-        <div className="bg-gradient-to-r from-indigo-950 via-slate-900 to-slate-950 border border-indigo-500/30 rounded-2xl p-5 sm:p-6 shadow-xl">
+        <div className="bg-gradient-to-r from-emerald-950/40 via-teal-950/30 to-slate-900/80 border border-emerald-800/70 rounded-3xl p-5 sm:p-6 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="text-xs uppercase tracking-wider text-indigo-400 font-bold mb-1 flex items-center gap-1.5">
-                <CalendarCheck className="w-4 h-4" />
+              <div className="text-xs uppercase tracking-wider text-emerald-400 font-extrabold mb-1 flex items-center gap-1.5">
+                <CalendarCheck className="w-4 h-4 text-emerald-400" />
                 <span>Seu Próximo Plantão</span>
               </div>
-              <div className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+              <div className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
                 {formatFriendlyDate(nextShift.date, true)}
               </div>
               <div className="text-xs sm:text-sm text-slate-300 mt-2 flex flex-wrap items-center gap-4">
-                <span className="flex items-center gap-1.5 font-mono-nums text-indigo-300">
-                  <Clock className="w-4 h-4 text-indigo-400" />
+                <span className="flex items-center gap-1.5 font-bold text-emerald-300">
+                  <Clock className="w-4 h-4 text-emerald-400" />
                   {nextShiftType.startTime} às {nextShiftType.endTime} ({nextShiftType.name})
                 </span>
-                <span className="flex items-center gap-1.5 text-slate-400">
+                <span className="flex items-center gap-1.5 text-slate-400 font-medium">
                   <MapPin className="w-4 h-4 text-slate-500" />
                   {nextDept.name}
                 </span>
@@ -205,10 +205,10 @@ export const MyScheduleView: React.FC<MyScheduleViewProps> = ({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => toggleAcknowledgeShift(nextShift.id)}
-                className={`px-4 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 shadow-sm ${
+                className={`px-4 py-2.5 text-xs font-bold rounded-2xl transition-all flex items-center gap-2 shadow-sm cursor-pointer ${
                   nextShift.acknowledgedByProvider
-                    ? 'bg-emerald-600 text-white'
-                    : 'bg-indigo-600 text-white hover:bg-indigo-500'
+                    ? 'bg-emerald-700/80 text-white border border-emerald-600'
+                    : 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-emerald-900/40'
                 }`}
               >
                 <CheckCircle2 className="w-4 h-4" />
@@ -220,23 +220,23 @@ export const MyScheduleView: React.FC<MyScheduleViewProps> = ({
       )}
 
       {/* Shifts Timeline */}
-      <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
-        <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
-          <h3 className="font-bold text-white text-sm">
+      <div className="bg-[#1e293b] rounded-3xl border border-slate-700/80 overflow-hidden shadow-sm">
+        <div className="p-4 border-b border-slate-700/80 flex items-center justify-between bg-slate-900/40">
+          <h3 className="font-extrabold text-white text-sm">
             Todos os seus plantões neste mês
           </h3>
-          <span className="text-xs text-slate-400 font-mono-nums">
+          <span className="text-xs text-slate-400 font-bold">
             {myMonthlyShifts.length} {myMonthlyShifts.length === 1 ? 'plantão' : 'plantões'}
           </span>
         </div>
 
         {myMonthlyShifts.length === 0 ? (
-          <div className="p-12 text-center text-slate-500">
-            <Calendar className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-            <p className="font-medium text-slate-400">Nenhum plantão agendado para você neste mês.</p>
+          <div className="p-12 text-center text-slate-400">
+            <Calendar className="w-8 h-8 text-slate-500 mx-auto mb-2" />
+            <p className="font-semibold text-slate-300">Nenhum plantão agendado para você neste mês.</p>
           </div>
         ) : (
-          <div className="divide-y divide-slate-800">
+          <div className="divide-y divide-slate-800/80">
             {myMonthlyShifts.map((shift, idx) => {
               const st = shiftTypes.find(s => s.id === shift.shiftTypeId);
               const dept = departments.find(d => d.id === shift.departmentId);
@@ -247,24 +247,28 @@ export const MyScheduleView: React.FC<MyScheduleViewProps> = ({
                 <div
                   key={shift.id}
                   className={`p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors ${
-                    isToday ? 'bg-indigo-950/20' : isPast ? 'bg-slate-950/30 opacity-70' : 'hover:bg-slate-800/40'
+                    isToday
+                      ? 'bg-emerald-950/25 border-l-4 border-l-emerald-500'
+                      : isPast
+                      ? 'bg-slate-900/30 opacity-75'
+                      : 'hover:bg-slate-800/40'
                   }`}
                 >
                   <div className="flex items-start sm:items-center gap-4">
-                    <div className="w-6 text-center font-mono-nums text-xs font-semibold text-slate-500">
+                    <div className="w-6 text-center text-xs font-bold text-slate-500">
                       #{idx + 1}
                     </div>
 
                     <div className="min-w-[140px]">
-                      <div className="font-bold text-white text-sm flex items-center gap-1.5">
+                      <div className="font-extrabold text-white text-sm flex items-center gap-1.5">
                         {formatFriendlyDate(shift.date)}
                         {isToday && (
-                          <span className="bg-indigo-600 text-white text-[9px] px-1.5 py-0.2 rounded-xs font-bold uppercase">
+                          <span className="bg-emerald-500 text-slate-950 text-xs px-2 py-0.5 rounded-md font-black uppercase">
                             Hoje
                           </span>
                         )}
                       </div>
-                      <div className="text-xs text-slate-500 font-mono-nums">
+                      <div className="text-xs text-slate-400 font-medium">
                         {formatShortDate(shift.date)}
                       </div>
                     </div>
@@ -272,24 +276,24 @@ export const MyScheduleView: React.FC<MyScheduleViewProps> = ({
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <span
-                          className={`font-mono-nums text-xs font-bold px-2 py-0.5 rounded-md border ${
+                          className={`text-xs font-bold px-2 py-0.5 rounded-lg border ${
                             st?.code.startsWith('N')
-                              ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
+                              ? 'bg-indigo-950/70 text-indigo-300 border-indigo-800/80'
                               : st?.code.startsWith('D')
-                              ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                              : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                              ? 'bg-amber-950/70 text-amber-300 border-amber-800/80'
+                              : 'bg-emerald-950/70 text-emerald-300 border-emerald-800/80'
                           }`}
                         >
                           {st?.code} · {st?.name}
                         </span>
-                        <span className="text-xs text-slate-400 font-mono-nums flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5 text-slate-500" />
+                        <span className="text-xs text-slate-300 font-medium flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5 text-slate-400" />
                           {st?.startTime} às {st?.endTime}
                         </span>
                       </div>
 
-                      <div className="text-xs text-slate-400 flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5 text-slate-500" />
+                      <div className="text-xs text-slate-400 flex items-center gap-1 font-medium">
+                        <MapPin className="w-3 h-3 text-slate-500" />
                         <span>{dept?.name}</span>
                       </div>
                     </div>
@@ -298,15 +302,15 @@ export const MyScheduleView: React.FC<MyScheduleViewProps> = ({
                   <div className="flex items-center gap-2 self-end sm:self-auto">
                     <button
                       onClick={() => toggleAcknowledgeShift(shift.id)}
-                      className={`text-xs px-3.5 py-1.5 rounded-lg border font-semibold flex items-center gap-1.5 transition-colors ${
+                      className={`text-xs px-3.5 py-1.5 rounded-xl border font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
                         shift.acknowledgedByProvider
                           ? 'bg-emerald-950/60 text-emerald-300 border-emerald-700/80'
-                          : 'bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-700'
+                          : 'bg-slate-800/90 text-slate-200 border-slate-700 hover:bg-slate-800 hover:border-slate-600'
                       }`}
                     >
                       <CheckCircle2
                         className={`w-3.5 h-3.5 ${
-                          shift.acknowledgedByProvider ? 'text-emerald-400' : 'text-slate-500'
+                          shift.acknowledgedByProvider ? 'text-emerald-400' : 'text-slate-400'
                         }`}
                       />
                       <span>{shift.acknowledgedByProvider ? 'Confirmado' : 'Confirmar Presença'}</span>

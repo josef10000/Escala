@@ -55,7 +55,7 @@ export const PrintScheduleView: React.FC<PrintScheduleViewProps> = ({ onClose })
         {/* Document Header */}
         <div className="border-b-2 border-slate-900 pb-4 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold uppercase tracking-wide">
+            <h1 className="text-[1.875rem] sm:text-3xl font-bold uppercase tracking-wide leading-tight">
               Escala Mensal de Plantões e Prestadores
             </h1>
             <p className="text-sm text-slate-600 mt-1">
@@ -87,7 +87,7 @@ export const PrintScheduleView: React.FC<PrintScheduleViewProps> = ({ onClose })
 
         {/* Printable Matrix Table */}
         <div className="overflow-x-auto border border-slate-300">
-          <table className="w-full text-left border-collapse text-[10px]">
+          <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-slate-100 border-b border-slate-300 font-bold">
                 <th className="p-1.5 border-r border-slate-300 min-w-[150px]">Colaborador</th>
@@ -121,7 +121,7 @@ export const PrintScheduleView: React.FC<PrintScheduleViewProps> = ({ onClose })
                   <tr key={p.id}>
                     <td className="p-1.5 border-r border-slate-300 font-medium">
                       <div className="font-bold">{p.name}</div>
-                      <div className="text-[9px] text-slate-500">{p.role}</div>
+                      <div className="text-xs text-slate-500">{p.role}</div>
                     </td>
                     {days.map(d => {
                       const shift = assignments.find(
@@ -158,13 +158,13 @@ export const PrintScheduleView: React.FC<PrintScheduleViewProps> = ({ onClose })
             <div className="border-t border-slate-800 w-3/4 mx-auto pt-2 font-bold">
               Supervisor / Coordenador da Escala
             </div>
-            <div className="text-slate-500 text-[11px] mt-0.5">Assinatura e Carimbo</div>
+            <div className="text-slate-500 text-xs mt-0.5">Assinatura e Carimbo</div>
           </div>
           <div>
             <div className="border-t border-slate-800 w-3/4 mx-auto pt-2 font-bold">
               Diretoria Técnica / Operações
             </div>
-            <div className="text-slate-500 text-[11px] mt-0.5">Homologação da Escala</div>
+            <div className="text-slate-500 text-xs mt-0.5">Homologação da Escala</div>
           </div>
         </div>
       </div>

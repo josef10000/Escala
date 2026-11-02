@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useSchedule } from '../../context/ScheduleContext';
 import { Provider, ScheduleRequestType } from '../../types';
-import { FileText, X, Calendar, PlusCircle, Check } from 'lucide-react';
-import { formatDateToISO } from '../../utils/dateUtils';
+import { FileText, X, CheckCircle2 } from 'lucide-react';
 
 interface ScheduleRequestModalProps {
   isOpen: boolean;
@@ -19,7 +18,7 @@ export const ScheduleRequestModal: React.FC<ScheduleRequestModalProps> = ({
 
   const [type, setType] = useState<ScheduleRequestType>('day_off');
   const [date, setDate] = useState<string>(() => {
-    // Default to 15th of next or current month
+    // Default to 15th of current month
     const m = String(currentMonthIndex + 1).padStart(2, '0');
     return `${currentYear}-${m}-15`;
   });
@@ -57,27 +56,27 @@ export const ScheduleRequestModal: React.FC<ScheduleRequestModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-100">
-      <div className="bg-slate-900 text-white rounded-3xl p-6 border border-slate-800 shadow-2xl max-w-md w-full space-y-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-100">
+      <div className="bg-[#141c28] text-slate-100 rounded-3xl p-6 border border-[#1e2a3a] shadow-2xl max-w-md w-full space-y-5">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="flex items-center justify-between border-b border-[#1e2a3a] pb-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-950 text-indigo-400 border border-indigo-500/40 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-2xl bg-cyan-950/60 text-cyan-300 border border-cyan-800/80 flex items-center justify-center font-bold shadow-sm">
               <FileText className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-black text-white">
-                Pedido para Escala
+              <h3 className="text-base font-extrabold text-white">
+                Pedido para a Escala
               </h3>
-              <p className="text-xs text-slate-400">
-                Colaborador: <strong className="text-indigo-300">{provider.name}</strong>
+              <p className="text-xs text-slate-400 font-medium">
+                Colaborador: <strong className="text-cyan-400">{provider.name}</strong>
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+            className="p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -85,10 +84,10 @@ export const ScheduleRequestModal: React.FC<ScheduleRequestModalProps> = ({
 
         {isSuccess ? (
           <div className="py-8 text-center space-y-3">
-            <div className="w-12 h-12 bg-emerald-950 text-emerald-400 rounded-full flex items-center justify-center mx-auto border border-emerald-500/40">
-              <Check className="w-6 h-6" />
+            <div className="w-12 h-12 bg-cyan-950/70 text-cyan-300 rounded-2xl flex items-center justify-center mx-auto border border-cyan-800 shadow-sm">
+              <CheckCircle2 className="w-6 h-6" />
             </div>
-            <h4 className="text-base font-black text-emerald-300">
+            <h4 className="text-base font-extrabold text-white">
               Pedido Enviado à Líder!
             </h4>
             <p className="text-xs text-slate-400">
@@ -96,39 +95,39 @@ export const ScheduleRequestModal: React.FC<ScheduleRequestModalProps> = ({
             </p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 text-xs">
             {/* Type selector */}
             <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1.5">
-                Tipo de Pedido:
+              <label className="block text-xs font-bold text-slate-300 mb-1">
+                Tipo de Solicitação:
               </label>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => setType('day_off')}
-                  className={`py-2 px-3 text-xs font-bold rounded-xl border text-center transition-all ${
+                  className={`py-2 px-3 rounded-xl font-bold border transition-all cursor-pointer ${
                     type === 'day_off'
-                      ? 'bg-blue-600/30 text-blue-200 border-blue-500 ring-1 ring-blue-500/50'
-                      : 'bg-slate-950 border-slate-700 text-slate-400 hover:text-slate-200'
+                      ? 'bg-cyan-500 text-slate-950 border-cyan-400 shadow-sm font-black'
+                      : 'bg-[#0c121c] text-slate-300 border-[#1e2a3a] hover:bg-slate-800'
                   }`}
                 >
-                  Solicitar Folga (D)
+                  Pedido de Folga (D)
                 </button>
                 <button
                   type="button"
                   onClick={() => setType('extra_shift')}
-                  className={`py-2 px-3 text-xs font-bold rounded-xl border text-center transition-all ${
+                  className={`py-2 px-3 rounded-xl font-bold border transition-all cursor-pointer ${
                     type === 'extra_shift'
-                      ? 'bg-emerald-600/30 text-emerald-200 border-emerald-500 ring-1 ring-emerald-500/50'
-                      : 'bg-slate-950 border-slate-700 text-slate-400 hover:text-slate-200'
+                      ? 'bg-cyan-500 text-slate-950 border-cyan-400 shadow-sm font-black'
+                      : 'bg-[#0c121c] text-slate-300 border-[#1e2a3a] hover:bg-slate-800'
                   }`}
                 >
-                  Disponibilidade Extra (T)
+                  Plantão Extra
                 </button>
               </div>
             </div>
 
-            {/* Date selection */}
+            {/* Date */}
             <div>
               <label className="block text-xs font-bold text-slate-300 mb-1">
                 Data Desejada:
@@ -138,7 +137,7 @@ export const ScheduleRequestModal: React.FC<ScheduleRequestModalProps> = ({
                 required
                 value={date}
                 onChange={e => setDate(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs font-mono focus:border-indigo-500 focus:outline-none"
+                className="w-full px-3 py-2 bg-[#0c121c] border border-[#1e2a3a] rounded-xl text-slate-200 text-xs font-bold focus:border-cyan-400 focus:outline-none transition-colors cursor-pointer"
               />
             </div>
 
@@ -152,31 +151,31 @@ export const ScheduleRequestModal: React.FC<ScheduleRequestModalProps> = ({
                 rows={3}
                 value={reason}
                 onChange={e => setReason(e.target.value)}
-                placeholder="Ex: Aniversário da minha filha / Exame marcado / Viagem programada..."
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs focus:border-indigo-500 focus:outline-none resize-none"
+                placeholder="Explique o motivo para a coordenação avaliar..."
+                className="w-full px-3 py-2 bg-[#0c121c] border border-[#1e2a3a] rounded-xl text-slate-200 text-xs focus:border-cyan-400 focus:outline-none resize-none transition-colors placeholder:text-slate-500"
               />
             </div>
 
             {errorMsg && (
-              <div className="p-2.5 bg-rose-950/50 border border-rose-800/60 rounded-xl text-xs text-rose-300">
+              <div className="p-3 bg-rose-950/70 border border-rose-800/80 rounded-xl text-xs text-rose-300 font-medium">
                 {errorMsg}
               </div>
             )}
 
-            <div className="flex gap-2 pt-2">
+            <div className="flex gap-2 pt-2 border-t border-[#1e2a3a]">
               <button
                 type="button"
                 onClick={onClose}
-                className="w-1/2 py-2 text-xs font-bold text-slate-400 hover:text-white"
+                className="w-1/2 py-2 text-xs font-bold text-slate-400 hover:text-white rounded-xl transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                className="w-1/2 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5"
+                className="w-1/2 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-md shadow-blue-950/40 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                <PlusCircle className="w-3.5 h-3.5" />
-                <span>Enviar Solicitação</span>
+                <FileText className="w-3.5 h-3.5 text-cyan-200" />
+                <span>Enviar Pedido</span>
               </button>
             </div>
           </form>

@@ -1,11 +1,17 @@
 export type ShiftStatus = 'confirmed' | 'pending' | 'swapped' | 'absent';
+export type WorkRegime = '12x36' | '5x2';
+export type WorkModality = 'presencial' | 'home_office';
+export type TeamGroup = 'turma_a' | 'turma_b' | 'none'; // Turma A = Ímpares, Turma B = Pares
+export type AbsenceType = 'vacation' | 'medical' | 'maternity' | 'compensation' | 'other';
 
 export interface Provider {
   id: string;
   name: string;
-  role: string; // e.g., "Prestador", "Enfermeiro", etc.
-  entryTime?: string; // e.g., "07h00"
-  exitTime?: string; // e.g., "19h00"
+  role: string; // e.g., "Prestador", "Técnico", "Administrativo", etc.
+  regime?: WorkRegime; // '12x36' (padrão) ou '5x2'
+  teamGroup?: TeamGroup; // 'turma_a' (Ímpares) ou 'turma_b' (Pares)
+  entryTime?: string; // e.g., "07h00" ou "08h00"
+  exitTime?: string; // e.g., "19h00" ou "17h00"
   email: string;
   phone: string;
   color: string;
@@ -16,6 +22,12 @@ export interface Provider {
     border: string;
   };
   maxMonthlyHours: number;
+  baseSalaryOrFee?: number; // Valor base (prestação de serviço ou honorários)
+  bonusAmount?: number; // Valor do bônus
+  bonusFrequencyMonths?: number; // 1 = mensal, 3 = trimestral, 6 = semestral, 12 = anual
+  deductionMode?: 'fixed_value' | 'percentage_of_bonus'; // Descontar em valor fixo ou % do bônus
+  deductionPerMinuteLate?: number; // Desconto por minuto de atraso (R$ ou %)
+  deductionPerAbsence?: number; // Desconto por falta injustificada (R$ ou %)
   status: 'active' | 'vacation' | 'inactive';
 }
 
@@ -45,6 +57,7 @@ export interface ShiftAssignment {
   departmentId: string;
   providerId: string | null; // null means open/unassigned spot
   status: ShiftStatus;
+  workModality?: WorkModality; // 'presencial' (default, don't show) or 'home_office' (shows HO)
   notes?: string;
   acknowledgedByProvider?: boolean;
   createdAt: string;
@@ -79,6 +92,21 @@ export interface ScheduleRequest {
   status: ScheduleRequestStatus;
   createdAt: string;
   reviewedAt?: string;
+}
+
+export type IncidentType = 'atraso' | 'falta_justificada' | 'falta_injustificada' | 'saida_antecipada' | 'hora_extra' | 'atestado_medico' | 'observacao';
+
+export interface AttendanceIncident {
+  id: string;
+  providerId: string;
+  date: string; // "YYYY-MM-DD"
+  type: IncidentType;
+  durationMinutes?: number; // e.g. 30 (minutos de atraso) or 120 (minutos de hora extra)
+  certificateNumber?: string; // CID ou Nº do atestado
+  reason: string;
+  registeredByRole: 'supervisor' | 'provider';
+  status: 'registrado' | 'abonado' | 'descontado';
+  createdAt: string;
 }
 
 export type ViewMode = 'escala' | 'personal-calendar' | 'calendar' | 'matrix' | 'week' | 'agenda' | 'my-schedule';

@@ -3,45 +3,56 @@
 @layer base {
   :root {
     color-scheme: dark;
+    font-size: 100%; /* Respeita o tamanho configurado pelo usuário no navegador (1rem = 16px) */
   }
   
-  body {
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    background-color: #0b0f19;
-    color: #f1f5f9;
-  }
-  
-  .font-mono-nums {
-    font-family: 'JetBrains Mono', monospace;
-    font-variant-numeric: tabular-nums;
+  html {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
-  /* Custom dark scrollbar */
+  body {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #0c121c;
+    color: #f8fafc;
+    -webkit-font-smoothing: antialiased;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  /* Custom refined dark SaaS scrollbar with cyan hover */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #0b0f19;
+    background: #0c121c;
   }
   ::-webkit-scrollbar-thumb {
     background: #1e293b;
-    border-radius: 3px;
+    border-radius: 4px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #334155;
+    background: #0ea5e9;
   }
 }
 
 @media print {
-  header, nav, .no-print, button, .action-bar {
+  @page {
+    size: landscape;
+    margin: 6mm 6mm;
+  }
+
+  header, nav, .no-print, button, select, input, .action-bar {
     display: none !important;
   }
   
   body {
-    background: white !important;
-    color: black !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
     padding: 0 !important;
+    font-size: 10px !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   
   .print-container {
@@ -51,5 +62,15 @@
     padding: 0 !important;
     box-shadow: none !important;
     border: none !important;
+  }
+
+  table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+  
+  th, td {
+    border: 1px solid #cbd5e1 !important;
+    color: #0f172a !important;
   }
 }

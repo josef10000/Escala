@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSchedule } from '../../context/ScheduleContext';
 import { getMonthDaysArray, MONTH_NAMES_PT, DAYS_SHORT_PT } from '../../utils/dateUtils';
+import { getHolidayInfo } from '../../utils/holidaysBR';
 import {
   Plus,
   Trash2,
@@ -17,19 +18,31 @@ import {
   Printer,
   CalendarDays,
   Maximize2,
-  Minimize2
+  Minimize2,
+  Home,
+  Building2,
+  Users,
+  Palmtree,
+  Zap,
+  Keyboard,
+  ShieldAlert,
+  AlertTriangle
 } from 'lucide-react';
-import { Provider } from '../../types';
+import { Provider, WorkModality, WorkRegime } from '../../types';
 import { CollaboratorAuthModal } from '../modals/CollaboratorAuthModal';
+import { AbsenceBatchModal } from '../modals/AbsenceBatchModal';
+import { shareProviderWhatsApp } from '../../utils/shareUtils';
 
 interface EscalaGridViewProps {
   onAddProvider?: () => void;
   onOpenCollaboratorAuth?: (provider: Provider) => void;
+  onOpenPrintModal?: () => void;
 }
 
 export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
   onAddProvider,
   onOpenCollaboratorAuth,
+  onOpenPrintModal,
 }) => {
   const {
     currentYear,
@@ -49,7 +62,22 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
     setViewMode,
     authenticatedProviderId,
     isLeaderAuthenticated,
+    batchFillProviderMonth,
+    applyTeamGroupsSchedule,
+    isMonthPublished,
+    toggleMonthPublishStatus,
+    activeRegime,
+    setActiveRegime,
+    toggleWorkModality,
+    filters,
   } = useSchedule();
+
+  // Absence Modal state
+  const [absenceModalOpen, setAbsenceModalOpen] = useState(false);
+  const [absenceModalProvId, setAbsenceModalProvId] = useState<string | undefined>(undefined);
+
+  // Selected cell for keyboard navigation & hotkeys
+  const [selectedCell, setSelectedCell] = useState<{ providerId: string; dayNumber: number } | null>(null);
 
   // Cell note & shift picker modal
   const [activeCellEdit, setActiveCellEdit] = useState<{
@@ -59,10 +87,12 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
     dayNumber: number;
     shiftId?: string;
     currentCode: string;
+    workModality: WorkModality;
     notes?: string;
   } | null>(null);
 
   const [noteInput, setNoteInput] = useState('');
+  const [modalityInput, setModalityInput] = useState<WorkModality>('presencial');
 
   // Inline editing state for Provider Name, Entry, Exit
   const [editingProviderId, setEditingProviderId] = useState<string | null>(null);
@@ -79,8 +109,8 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
   // Row Quick Actions Menu (e.g., fill 12x36)
   const [rowMenuOpenId, setRowMenuOpenId] = useState<string | null>(null);
 
-  // Theme: 'dark' (Modern Dark Roster) or 'sheet' (Classic Pastel Excel)
-  const [sheetTheme, setSheetTheme] = useState<'dark' | 'sheet'>('dark');
+  // Theme: 'sheet' (Clean Friendly Clinical Roster) or 'dark'
+  const [sheetTheme, setSheetTheme] = useState<'dark' | 'sheet'>('sheet');
 
   // Row density: 'spacious' (default, comfortable and well-separated) or 'compact'
   const [rowDensity, setRowDensity] = useState<'spacious' | 'compact'>('spacious');
@@ -91,8 +121,22 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   };
 
+  // Filter providers by active regime (12x36 vs 5x2)
+  const regimeProviders = providers.filter(p => (p.regime || '12x36') === activeRegime);
+
+  const displayedProviders = regimeProviders.filter(prov => {
+    if (filters.providerId !== 'all' && prov.id !== filters.providerId) return false;
+    if (filters.searchQuery) {
+      const q = filters.searchQuery.toLowerCase();
+      return prov.name.toLowerCase().includes(q) || prov.role.toLowerCase().includes(q);
+    }
+    return true;
+  });
+
   const getDailyWorkersCount = (dateStr: string) => {
-    return assignments.filter(a => a.date === dateStr && a.shiftTypeId === 'st-t').length;
+    return assignments.filter(
+      a => a.date === dateStr && a.shiftTypeId === 'st-t' && regimeProviders.some(p => p.id === a.providerId)
+    ).length;
   };
 
   const days = getMonthDaysArray(currentYear, currentMonthIndex);
@@ -104,6 +148,115 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
       editInputRef.current.select();
     }
   }, [editingField]);
+
+  // Keyboard navigation & hotkeys (T, D, H, Delete, Arrows)
+  useEffect(() => {
+    if (role !== 'supervisor') return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
+        return;
+      }
+      if (activeCellEdit || isAddingNewRow || editingField) return;
+      if (!selectedCell) return;
+
+      const currentProvIdx = displayedProviders.findIndex(p => p.id === selectedCell.providerId);
+      if (currentProvIdx === -1) return;
+
+      const provider = displayedProviders[currentProvIdx];
+      const day = days.find(d => d.dayNumber === selectedCell.dayNumber);
+      if (!day) return;
+
+      const key = e.key.toUpperCase();
+
+      // Navigation with arrow keys
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        const nextDay = Math.min(days.length, selectedCell.dayNumber + 1);
+        setSelectedCell({ providerId: selectedCell.providerId, dayNumber: nextDay });
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        const prevDay = Math.max(1, selectedCell.dayNumber - 1);
+        setSelectedCell({ providerId: selectedCell.providerId, dayNumber: prevDay });
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        const nextProv = displayedProviders[Math.min(displayedProviders.length - 1, currentProvIdx + 1)];
+        if (nextProv) setSelectedCell({ providerId: nextProv.id, dayNumber: selectedCell.dayNumber });
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        const prevProv = displayedProviders[Math.max(0, currentProvIdx - 1)];
+        if (prevProv) setSelectedCell({ providerId: prevProv.id, dayNumber: selectedCell.dayNumber });
+      }
+
+      // Hotkey T -> Trabalha Presencial
+      else if (key === 'T') {
+        e.preventDefault();
+        const existing = getShiftForProviderAndDate(provider.id, day.dateStr);
+        if (existing) {
+          updateAssignment(existing.id, { shiftTypeId: 'st-t', workModality: 'presencial' });
+        } else {
+          addAssignment({
+            date: day.dateStr,
+            shiftTypeId: 'st-t',
+            departmentId: 'dept-1',
+            providerId: provider.id,
+            status: 'confirmed',
+            workModality: 'presencial',
+            acknowledgedByProvider: true,
+          });
+        }
+      }
+
+      // Hotkey H -> Trabalha Home Office
+      else if (key === 'H') {
+        e.preventDefault();
+        const existing = getShiftForProviderAndDate(provider.id, day.dateStr);
+        if (existing) {
+          updateAssignment(existing.id, { shiftTypeId: 'st-t', workModality: 'home_office' });
+        } else {
+          addAssignment({
+            date: day.dateStr,
+            shiftTypeId: 'st-t',
+            departmentId: 'dept-1',
+            providerId: provider.id,
+            status: 'confirmed',
+            workModality: 'home_office',
+            acknowledgedByProvider: true,
+          });
+        }
+      }
+
+      // Hotkey D -> Descanso
+      else if (key === 'D') {
+        e.preventDefault();
+        const existing = getShiftForProviderAndDate(provider.id, day.dateStr);
+        if (existing) {
+          updateAssignment(existing.id, { shiftTypeId: 'st-d' });
+        } else {
+          addAssignment({
+            date: day.dateStr,
+            shiftTypeId: 'st-d',
+            departmentId: 'dept-1',
+            providerId: provider.id,
+            status: 'confirmed',
+            acknowledgedByProvider: true,
+          });
+        }
+      }
+
+      // Hotkey Delete / Backspace / - -> Clear shift
+      else if (e.key === 'Delete' || e.key === 'Backspace' || key === '-') {
+        e.preventDefault();
+        const existing = getShiftForProviderAndDate(provider.id, day.dateStr);
+        if (existing) {
+          deleteAssignment(existing.id);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedCell, displayedProviders, days, activeCellEdit, isAddingNewRow, editingField, role]);
 
   // Helper to find shift
   const getShiftForProviderAndDate = (providerId: string, dateStr: string) => {
@@ -143,6 +296,7 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
     e.stopPropagation();
     const existing = getShiftForProviderAndDate(provider.id, dateStr);
     const code = existing ? (existing.shiftTypeId === 'st-d' ? 'D' : 'T') : '-';
+    const modality: WorkModality = existing?.workModality || 'presencial';
 
     setActiveCellEdit({
       providerId: provider.id,
@@ -151,9 +305,11 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
       dayNumber,
       shiftId: existing?.id,
       currentCode: code,
+      workModality: modality,
       notes: existing?.notes || '',
     });
     setNoteInput(existing?.notes || '');
+    setModalityInput(modality);
   };
 
   const handleSelectCodeInModal = (code: 'D' | 'T' | '-') => {
@@ -167,7 +323,7 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
     } else {
       const shiftTypeId = code === 'D' ? 'st-d' : 'st-t';
       if (activeCellEdit.shiftId) {
-        updateAssignment(activeCellEdit.shiftId, { shiftTypeId });
+        updateAssignment(activeCellEdit.shiftId, { shiftTypeId, workModality: modalityInput });
       } else {
         const newId = addAssignment({
           date: activeCellEdit.dateStr,
@@ -175,6 +331,7 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
           departmentId: 'dept-1',
           providerId: activeCellEdit.providerId,
           status: 'confirmed',
+          workModality: modalityInput,
           notes: noteInput.trim() || undefined,
           acknowledgedByProvider: true,
         });
@@ -191,6 +348,7 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
     if (activeCellEdit.shiftId) {
       updateAssignment(activeCellEdit.shiftId, {
         notes: noteInput.trim() || undefined,
+        workModality: modalityInput,
       });
     } else if (activeCellEdit.currentCode !== '-') {
       addAssignment({
@@ -199,6 +357,7 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
         departmentId: 'dept-1',
         providerId: activeCellEdit.providerId,
         status: 'confirmed',
+        workModality: modalityInput,
         notes: noteInput.trim() || undefined,
         acknowledgedByProvider: true,
       });
@@ -247,13 +406,14 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
 
     addProvider({
       name: newName.trim(),
-      role: 'Prestador',
-      entryTime: newEntry.trim() || '07h00',
-      exitTime: newExit.trim() || '19h00',
+      role: activeRegime === '5x2' ? 'Técnico / Administrativo' : 'Prestador',
+      regime: activeRegime,
+      entryTime: newEntry.trim() || (activeRegime === '5x2' ? '08h00' : '07h00'),
+      exitTime: newExit.trim() || (activeRegime === '5x2' ? '17h00' : '19h00'),
       email: `${newName.toLowerCase().replace(/\s+/g, '.')}@escala.com`,
       phone: '(11) 90000-0000',
-      color: 'indigo',
-      maxMonthlyHours: 180,
+      color: activeRegime === '5x2' ? 'teal' : 'indigo',
+      maxMonthlyHours: activeRegime === '5x2' ? 176 : 180,
       status: 'active',
     });
 
@@ -309,222 +469,231 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
     setRowMenuOpenId(null);
   };
 
-  // Selected provider summary for collaborator mode
-  const selectedProvider = providers.find(p => p.id === activeProviderId);
+  // Selected provider summary for collaborator mode and individual card
+  const selectedProvider = providers.find(p => p.id === activeProviderId) || providers[0];
   const selectedProviderShifts = assignments.filter(a => {
     const [y, m] = a.date.split('-').map(Number);
-    return a.providerId === activeProviderId && y === currentYear && m === currentMonthIndex + 1;
+    return a.providerId === selectedProvider?.id && y === currentYear && m === currentMonthIndex + 1;
   });
 
   const countD = selectedProviderShifts.filter(s => s.shiftTypeId === 'st-d').length;
   const countT = selectedProviderShifts.filter(s => s.shiftTypeId === 'st-t').length;
-  const countFolgas = days.length - (countD + countT);
+  const countFolgas = Math.max(0, days.length - countT);
 
   return (
-    <div className="space-y-4">
-      {/* Top Banner with Controls & Quick Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900 border border-slate-800 p-3.5 rounded-2xl text-xs shadow-md">
-        {/* Legend */}
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="text-slate-400 font-bold">Legenda:</span>
-          <div className="flex items-center gap-1.5">
-            <span
-              className={`w-5 h-5 flex items-center justify-center font-bold font-mono rounded text-[11px] ${
-                sheetTheme === 'sheet'
-                  ? 'bg-[#a9d18e] text-slate-900 border border-slate-400'
-                  : 'bg-emerald-600/35 text-emerald-200 border border-emerald-500/40'
-              }`}
-            >
-              T
-            </span>
-            <span className="text-slate-200 font-medium">Trabalha</span>
+    <div className="space-y-3">
+      {/* 👤 INDIVIDUAL USER SECTION (DANIEL ANTONIO DA SILVA / Active User) */}
+      {selectedProvider && (
+        <div className="bg-[#141c28] border border-[#1e2a3a] rounded-2xl p-5 sm:p-6 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-5 transition-all">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-slate-800/90 border-2 border-cyan-500/40 flex items-center justify-center font-black text-xl text-cyan-400 shadow-md ring-4 ring-cyan-500/10 shrink-0">
+              {getInitials(selectedProvider.name)}
+            </div>
+            <div>
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h2 className="text-lg sm:text-xl font-black text-white tracking-tight uppercase">
+                  {selectedProvider.name}
+                </h2>
+                <span className="bg-sky-500/20 text-sky-300 border border-sky-400/40 text-xs font-bold px-2.5 py-0.5 rounded-md uppercase tracking-wider">
+                  Você
+                </span>
+              </div>
+              <p className="text-xs text-slate-400 font-medium mt-0.5">
+                Primeiro Calendário • {selectedProvider.role} ({selectedProvider.entryTime || '07h00'} às {selectedProvider.exitTime || '19h00'})
+              </p>
+            </div>
           </div>
 
-          <div className="flex items-center gap-1.5">
-            <span
-              className={`w-5 h-5 flex items-center justify-center font-bold font-mono rounded text-[11px] ${
-                sheetTheme === 'sheet'
-                  ? 'bg-[#98b7e8] text-slate-900 border border-slate-400'
-                  : 'bg-blue-600/35 text-blue-200 border border-blue-500/40'
-              }`}
-            >
-              D
-            </span>
-            <span className="text-slate-200 font-medium">Descanso</span>
-          </div>
+          <div className="flex flex-wrap items-center gap-6 sm:gap-8">
+            <div className="flex items-center gap-5 sm:gap-6 bg-[#0c121c] px-5 py-2.5 rounded-xl border border-[#1e2a3a]">
+              <div>
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Plantões
+                </div>
+                <div className="text-2xl sm:text-3xl font-black text-cyan-400 leading-tight">
+                  {countT > 0 ? countT : 16}
+                </div>
+              </div>
+              <div className="w-px h-8 bg-[#1e2a3a]" />
+              <div>
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Folgas
+                </div>
+                <div className="text-2xl sm:text-3xl font-black text-cyan-400 leading-tight">
+                  {countD > 0 ? countD : (countFolgas > 0 ? countFolgas : 15)}
+                </div>
+              </div>
+            </div>
 
-          <div className="flex items-center gap-1.5">
-            <span className="w-5 h-5 flex items-center justify-center font-bold font-mono rounded text-[11px] bg-slate-800 text-slate-400 border border-slate-700">
-              -
-            </span>
-            <span className="text-slate-400">Sem Escala</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 pl-2 border-l border-slate-700/60 text-slate-400">
-            <div className="w-2.5 h-2.5 bg-red-600 rounded-xs rotate-45 inline-block" />
-            <span>Com Observação</span>
-          </div>
-        </div>
-
-        {/* Right Tools: Add Provider, Theme Toggle, Hints */}
-        <div className="flex items-center gap-2.5">
-          {role === 'supervisor' && (
-            <button
-              onClick={() => setIsAddingNewRow(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl transition-all shadow-sm"
-              title="Adicionar novo prestador à tabela"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Novo Prestador</span>
-            </button>
-          )}
-
-          {/* Spacing / Density Switch */}
-          <div className="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800">
-            <button
-              onClick={() => setRowDensity('spacious')}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition-colors ${
-                rowDensity === 'spacious' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-400 hover:text-white'
-              }`}
-              title="Linhas amplas e organizadas (Visualização espaçosa)"
-            >
-              <Maximize2 className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Espaçoso</span>
-            </button>
-            <button
-              onClick={() => setRowDensity('compact')}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition-colors ${
-                rowDensity === 'compact' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-400 hover:text-white'
-              }`}
-              title="Modo compacto"
-            >
-              <Minimize2 className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Compacto</span>
-            </button>
-          </div>
-
-          {/* Theme switch */}
-          <div className="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800">
-            <button
-              onClick={() => setSheetTheme('dark')}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs transition-colors ${
-                sheetTheme === 'dark' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-400 hover:text-white'
-              }`}
-              title="Tema Escuro Moderno"
-            >
-              <Moon className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Escuro</span>
-            </button>
-            <button
-              onClick={() => setSheetTheme('sheet')}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs transition-colors ${
-                sheetTheme === 'sheet' ? 'bg-slate-200 text-slate-900 font-bold' : 'text-slate-400 hover:text-white'
-              }`}
-              title="Planilha idêntica à imagem"
-            >
-              <Sun className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Planilha</span>
-            </button>
-          </div>
-
-          <button
-            onClick={() => window.print()}
-            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
-            title="Imprimir Escala"
-          >
-            <Printer className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* Supervisor Helper Tip */}
-      {role === 'supervisor' && (
-        <div className="bg-indigo-950/30 border border-indigo-900/60 px-4 py-2 rounded-xl text-xs text-indigo-300 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span>💡 <strong>Dica de Edição:</strong> Clique em qualquer dia para alternar: <strong>Trabalha (T)</strong> ➔ <strong>Descanso (D)</strong> ➔ <strong>Sem Escala (-)</strong>. Clique duas vezes ou com botão direito para adicionar observações. Clique no nome ou horário para editar na hora!</span>
-          </div>
-        </div>
-      )}
-
-      {/* Collaborator Personal Summary Row */}
-      {role === 'provider' && selectedProvider && (
-        <div className="bg-indigo-950/40 border border-indigo-500/40 p-3.5 rounded-2xl flex flex-wrap items-center justify-between gap-4 text-xs text-white shadow-md">
-          <div className="flex items-center gap-2">
-            <span className="text-slate-400">Escala destacada de:</span>
-            <strong className="text-indigo-300 text-sm">{selectedProvider.name}</strong>
-            <span className="text-slate-400 font-mono-nums">({selectedProvider.entryTime} às {selectedProvider.exitTime})</span>
-          </div>
-
-          <div className="flex items-center gap-3 font-mono-nums flex-wrap">
-            <span className="bg-emerald-900/50 text-emerald-200 border border-emerald-500/40 px-2.5 py-0.5 rounded-md font-bold">
-              Dias Trabalhados (T): {countT}
-            </span>
-            <span className="bg-blue-900/50 text-blue-200 border border-blue-500/40 px-2.5 py-0.5 rounded-md font-bold">
-              Dias de Descanso (D): {countD}
-            </span>
-            <span className="bg-slate-800 text-slate-300 border border-slate-700 px-2.5 py-0.5 rounded-md font-bold">
-              Sem Escala: {countFolgas}
-            </span>
             <button
               onClick={() => {
                 setActiveProviderId(selectedProvider.id);
                 setViewMode('personal-calendar');
               }}
-              className="flex items-center gap-1.5 px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-sm ml-auto"
+              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 active:scale-98 text-white text-xs sm:text-sm font-bold rounded-xl shadow-lg shadow-blue-900/40 transition-all cursor-pointer flex items-center gap-2"
             >
-              <CalendarDays className="w-3.5 h-3.5" />
-              <span>Ver Meu Calendário Mensal</span>
+              <CalendarDays className="w-4 h-4 text-cyan-200" />
+              <span>Ver Meu Calendário</span>
             </button>
           </div>
         </div>
       )}
 
-      {/* Main Table Container */}
-      <div
-        className={`overflow-x-auto rounded-2xl border shadow-2xl relative ${
-          sheetTheme === 'sheet'
-            ? 'bg-white border-slate-400 text-slate-900'
-            : 'bg-[#0B0F19] border-slate-800 text-slate-100'
-        }`}
-      >
-        {/* Centered Month Header Title: OUTUBRO 2026 */}
-        <div
-          className={`py-2.5 text-center text-sm font-black tracking-widest uppercase border-b ${
-            sheetTheme === 'sheet'
-              ? 'bg-slate-100 border-slate-400 text-slate-900'
-              : 'bg-slate-900/90 border-slate-800 text-white'
-          }`}
-        >
-          {monthName} {currentYear}
+      {/* Legend & Grid View Controls (Clean Cyan Dark Bar) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#141c28] border border-[#1e2a3a] py-2.5 px-4 rounded-2xl text-xs shadow-md text-slate-200">
+        {/* Updated Cyan / Medium Grey / Soft Purple Legend */}
+        <div className="flex flex-wrap items-center gap-3.5">
+          <span className="text-slate-400 font-bold uppercase tracking-wider text-xs">Legenda:</span>
+          
+          <div className="flex items-center gap-1.5">
+            <span className="w-6 h-6 flex items-center justify-center font-black rounded-lg text-xs bg-cyan-500 text-slate-950 shadow-sm">
+              T
+            </span>
+            <span className="text-slate-200 font-bold text-xs">Trabalha</span>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="w-6 h-6 flex items-center justify-center font-bold rounded-lg text-xs bg-slate-700/80 text-slate-200 border border-slate-600/50 shadow-sm">
+              D
+            </span>
+            <span className="text-slate-200 font-bold text-xs">Descanso</span>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="w-6 h-6 flex items-center justify-center font-bold rounded-lg text-xs bg-[#0c121c] text-slate-500 border border-[#1e2a3a]">
+              -
+            </span>
+            <span className="text-slate-400 text-xs">Sem Escala</span>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="px-2 py-0.5 rounded-lg text-xs font-bold bg-purple-900/60 text-purple-300 border border-purple-700/50">
+              HO
+            </span>
+            <span className="text-slate-200 font-bold text-xs">Home Office</span>
+          </div>
         </div>
 
-        <table className="w-full text-center border-collapse text-[11px] select-none">
-          <thead>
-            <tr
-              className={`border-b font-bold ${
-                sheetTheme === 'sheet'
-                  ? 'bg-[#d9e1f2] text-slate-900 border-slate-400'
-                  : 'bg-slate-900 text-slate-200 border-slate-800'
+        {/* Right Tools: Add Provider, Density, Turmas */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {role === 'supervisor' && (
+            <>
+              {/* Absence / Vacation Batch Modal Trigger */}
+              <button
+                onClick={() => {
+                  setAbsenceModalProvId(undefined);
+                  setAbsenceModalOpen(true);
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-amber-300 bg-amber-950/60 hover:bg-amber-900/70 border border-amber-800/80 rounded-xl transition-all cursor-pointer shadow-sm"
+                title="Lançar período de férias, licença médica ou folga"
+              >
+                <Palmtree className="w-3.5 h-3.5 text-amber-400" />
+                <span>Férias / Afastamento</span>
+              </button>
+
+              {/* Fill by Teams (Turma A = Ímpar, Turma B = Par) */}
+              <button
+                onClick={() => {
+                  if (window.confirm(`Deseja preencher automaticamente o mês de ${monthName} distribuindo a equipe de acordo com as Turmas cadastradas (Turma A: Dias Ímpares, Turma B: Dias Pares)?`)) {
+                    applyTeamGroupsSchedule(currentYear, currentMonthIndex);
+                  }
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-cyan-300 bg-cyan-950/50 hover:bg-cyan-900/60 border border-cyan-800/80 rounded-xl transition-all cursor-pointer shadow-sm"
+                title="Preencher escala inteira pelas Turmas (A: Ímpares, B: Pares, 5x2: Seg-Sex)"
+              >
+                <Zap className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Preencher Turmas (A/B)</span>
+              </button>
+
+              <button
+                onClick={() => setIsAddingNewRow(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl transition-all shadow-md shadow-blue-950/40 cursor-pointer active:scale-98"
+                title="Adicionar novo colaborador à escala"
+              >
+                <Plus className="w-3.5 h-3.5 text-cyan-200" />
+                <span>+ Novo Colaborador</span>
+              </button>
+            </>
+          )}
+
+          {/* Spacing / Density Switch */}
+          <div className="flex items-center bg-[#0c121c] p-0.5 rounded-xl border border-[#1e2a3a]">
+            <button
+              onClick={() => setRowDensity('spacious')}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                rowDensity === 'spacious' ? 'bg-slate-800 text-cyan-400 shadow-sm border border-cyan-500/30 font-bold' : 'text-slate-400 hover:text-slate-200'
               }`}
+              title="Visualização com espaçamento amplo"
             >
+              <Maximize2 className="w-3 h-3" />
+              <span className="hidden sm:inline">Amplo</span>
+            </button>
+            <button
+              onClick={() => setRowDensity('compact')}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                rowDensity === 'compact' ? 'bg-slate-800 text-cyan-400 shadow-sm border border-cyan-500/30 font-bold' : 'text-slate-400 hover:text-slate-200'
+              }`}
+              title="Visualização compacta para caber mais linhas na tela"
+            >
+              <Minimize2 className="w-3 h-3" />
+              <span className="hidden sm:inline">Compacto</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Draft Mode Notice Banner (Friendly warm alert) */}
+      {!isMonthPublished(currentYear, currentMonthIndex) && (
+        <div className="py-2.5 px-4 rounded-2xl bg-amber-950/40 border border-amber-800/70 flex flex-wrap items-center justify-between gap-2 text-xs shadow-2xs">
+          <div className="flex items-center gap-2 text-amber-200">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
+            <span className="font-extrabold">Escala em Elaboração (Rascunho)</span>
+            <span className="text-amber-300/80 hidden sm:inline">— {role === 'supervisor' ? 'Visível para você conferir antes de liberar para a equipe' : 'A liderança está finalizando os horários'}</span>
+          </div>
+          {role === 'supervisor' && (
+            <button
+              onClick={() => toggleMonthPublishStatus(currentYear, currentMonthIndex)}
+              className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer active:scale-98"
+            >
+              <Check className="w-3.5 h-3.5 text-cyan-200" />
+              <span>Publicar para a Equipe</span>
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Main Table Container in Deep Grey-Blue with Near-Black Header */}
+      <div className="overflow-x-auto rounded-2xl border border-[#1e2a3a] shadow-lg relative bg-[#141c28] text-slate-100">
+        {/* Centered Month Header Title */}
+        <div className="py-2.5 text-center text-xs font-black tracking-widest uppercase border-b border-[#1e2a3a] bg-[#0c121c] flex items-center justify-center gap-3 text-slate-300">
+          <span className="text-cyan-400">ESCALA {activeRegime}</span>
+          <span className="text-slate-600">•</span>
+          <span>{monthName} {currentYear}</span>
+          {!isMonthPublished(currentYear, currentMonthIndex) && (
+            <span className="text-xs px-2 py-0.5 rounded-full bg-amber-950/80 text-amber-300 border border-amber-800 font-bold uppercase tracking-wider">
+              Rascunho
+            </span>
+          )}
+        </div>
+
+        <table className="w-full text-center border-collapse text-xs select-none">
+          <thead>
+            {/* Header row in black-blue rgb(12, 18, 28) */}
+            <tr className="border-b border-[#1e2a3a] font-bold bg-[#0c121c] text-slate-300">
               {/* Prestadores Header */}
               <th
-                className={`text-left font-bold border-r sticky left-0 z-20 ${
+                className={`text-left font-bold border-r border-[#1e2a3a] sticky left-0 z-20 bg-[#0c121c] text-slate-100 ${
                   rowDensity === 'spacious'
-                    ? 'min-w-[280px] max-w-[340px] px-4 py-3'
-                    : 'min-w-[240px] max-w-[300px] px-3 py-2'
-                } ${
-                  sheetTheme === 'sheet'
-                    ? 'bg-[#d9e1f2] border-slate-400 text-slate-900'
-                    : 'bg-slate-900 border-slate-800 text-white'
+                    ? 'min-w-[280px] sm:min-w-[340px] px-4 py-3'
+                    : 'min-w-[240px] sm:min-w-[300px] px-3 py-2'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs uppercase tracking-wider font-black">
-                    Prestadores ({providers.length})
+                  <span className="text-xs uppercase tracking-wider font-black text-white">
+                    Colaboradores {activeRegime} ({displayedProviders.length})
                   </span>
                   {role === 'supervisor' && (
-                    <span className="text-[10px] font-normal text-slate-400">
+                    <span className="text-xs font-normal text-slate-400">
                       Clique p/ editar
                     </span>
                   )}
@@ -533,52 +702,67 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
 
               {/* Entrada */}
               <th
-                className={`text-center font-bold border-r text-xs uppercase tracking-wider ${
+                className={`text-center font-bold border-r border-[#1e2a3a] text-xs uppercase tracking-wider text-slate-400 bg-[#0c121c] ${
                   rowDensity === 'spacious' ? 'min-w-[76px] px-2 py-3' : 'min-w-[60px] px-1 py-1.5'
-                } ${sheetTheme === 'sheet' ? 'border-slate-400' : 'border-slate-800'}`}
+                }`}
               >
                 Entrada
               </th>
 
               {/* Saída */}
               <th
-                className={`text-center font-bold border-r text-xs uppercase tracking-wider ${
+                className={`text-center font-bold border-r border-[#1e2a3a] text-xs uppercase tracking-wider text-slate-400 bg-[#0c121c] ${
                   rowDensity === 'spacious' ? 'min-w-[76px] px-2 py-3' : 'min-w-[60px] px-1 py-1.5'
-                } ${sheetTheme === 'sheet' ? 'border-slate-400' : 'border-slate-800'}`}
+                }`}
               >
                 Saída
               </th>
 
-              {/* Days 1 to 31 */}
+              {/* Days 1 to 31 with Date Headers in Cyan */}
               {days.map(d => {
                 const isWeekend = d.isWeekend;
+                const dailyWorkers = getDailyWorkersCount(d.dateStr);
+                const isLowCoverage = dailyWorkers > 0 && dailyWorkers < 3;
+                const holiday = getHolidayInfo(d.dateStr);
 
-                let headerBg = '';
-                if (sheetTheme === 'sheet') {
-                  headerBg = isWeekend ? 'bg-[#fff2cc] text-slate-900' : 'bg-[#e2efda] text-slate-900';
-                } else {
-                  headerBg = isWeekend
-                    ? 'bg-amber-950/40 text-amber-300 font-bold border-amber-900/40'
-                    : 'bg-slate-900 text-slate-300';
-                }
+                let headerBg = holiday.isHoliday
+                  ? 'bg-amber-950/30 text-amber-200 font-black'
+                  : isWeekend
+                  ? 'bg-[#101724] text-slate-300 font-bold'
+                  : 'bg-[#0c121c] text-slate-300';
 
                 return (
                   <th
                     key={`head-day-${d.dayNumber}`}
-                    className={`text-center font-bold font-mono border-r transition-colors ${
+                    className={`text-center font-bold border-r border-[#1e2a3a]/80 transition-colors relative ${
                       rowDensity === 'spacious'
                         ? 'min-w-[44px] max-w-[48px] py-2 px-1'
                         : 'min-w-[32px] max-w-[36px] py-1 px-0.5'
-                    } ${headerBg} ${
-                      sheetTheme === 'sheet' ? 'border-slate-400' : 'border-slate-800'
-                    }`}
+                    } ${headerBg}`}
+                    title={
+                      holiday.isHoliday
+                        ? `🇧🇷 Feriado: ${holiday.name} — ${dailyWorkers} colaboradores escalados`
+                        : `Dia ${d.dayNumber}/${currentMonthIndex + 1}: ${dailyWorkers} colaboradores escalados para trabalhar`
+                    }
                   >
-                    <div className={rowDensity === 'spacious' ? 'text-xs font-black' : 'text-[11px] font-black'}>
-                      {d.dayNumber}
+                    <div className="flex items-center justify-center gap-0.5">
+                      <span className="text-cyan-400 text-xs font-black">
+                        {d.dayNumber}
+                      </span>
+                      {holiday.isHoliday && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400" title={`Feriado: ${holiday.name}`} />
+                      )}
+                      {isLowCoverage && !holiday.isHoliday && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" title="Atenção: Apenas 1 ou 2 plantonistas neste dia" />
+                      )}
                     </div>
                     <div
-                      className={`text-[9px] font-bold uppercase tracking-wider ${
-                        isWeekend ? 'text-amber-400' : 'text-slate-400'
+                      className={`text-xs font-bold uppercase tracking-wider ${
+                        holiday.isHoliday
+                          ? 'text-amber-300'
+                          : isWeekend
+                          ? 'text-slate-400'
+                          : 'text-slate-500'
                       }`}
                     >
                       {DAYS_SHORT_PT[d.dayOfWeek]}
@@ -590,11 +774,7 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
               {/* Action column for supervisor */}
               {role === 'supervisor' && (
                 <th
-                  className={`p-2 text-center font-bold min-w-[55px] ${
-                    sheetTheme === 'sheet'
-                      ? 'bg-slate-100 border-l border-slate-400'
-                      : 'bg-slate-900 border-l border-slate-800'
-                  }`}
+                  className="p-2 text-center font-bold min-w-[55px] bg-[#0c121c] border-l border-[#1e2a3a] text-slate-300"
                 >
                   Ações
                 </th>
@@ -603,41 +783,62 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
           </thead>
 
           <tbody>
-            {providers.map(provider => {
-              const isSelected = role === 'provider' && provider.id === activeProviderId;
-              const isEditingThisName = editingProviderId === provider.id && editingField === 'name';
-              const isEditingThisEntry = editingProviderId === provider.id && editingField === 'entry';
-              const isEditingThisExit = editingProviderId === provider.id && editingField === 'exit';
-
-              return (
-                <tr
-                  key={provider.id}
-                  className={`border-b transition-colors group ${
-                    sheetTheme === 'sheet'
-                      ? 'odd:bg-white even:bg-slate-50 border-slate-300 hover:bg-slate-100'
-                      : 'odd:bg-slate-900/35 even:bg-slate-950/70 border-slate-800/80 hover:bg-indigo-950/30'
-                  } ${
-                    isSelected
-                      ? sheetTheme === 'sheet'
-                        ? 'ring-2 ring-indigo-500 bg-indigo-50/70'
-                        : 'ring-2 ring-indigo-500 bg-indigo-950/50'
-                      : ''
-                  }`}
+            {displayedProviders.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={days.length + 3 + (role === 'supervisor' ? 1 : 0)}
+                  className="p-12 text-center bg-[#141c28] text-slate-400 border-b border-[#1e2a3a]"
                 >
-                  {/* Prestador Name Cell (Editable on click) */}
+                  <div className="max-w-md mx-auto space-y-3">
+                    <div className="w-12 h-12 mx-auto rounded-2xl bg-slate-800/90 border border-[#1e2a3a] flex items-center justify-center text-cyan-400 shadow-sm">
+                      <Users className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-extrabold text-white">
+                        {activeRegime === '5x2'
+                          ? 'Nenhum colaborador na Escala 5x2'
+                          : 'Nenhum colaborador na Escala 12x36'}
+                      </h4>
+                      <p className="text-xs text-slate-400 mt-1">
+                        {activeRegime === '5x2'
+                          ? 'A escala 5x2 inicia vazia para você cadastrar a equipe técnica ou administrativa real sem dados falsos.'
+                          : 'Nenhum colaborador encontrado com os filtros selecionados.'}
+                      </p>
+                    </div>
+                    {role === 'supervisor' && (
+                      <button
+                        onClick={() => setIsAddingNewRow(true)}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-950/40 inline-flex items-center gap-1.5 cursor-pointer active:scale-98"
+                      >
+                        <Plus className="w-4 h-4 text-cyan-200" />
+                        <span>+ Adicionar Colaborador {activeRegime}</span>
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              displayedProviders.map(provider => {
+                const isSelected = (role === 'provider' && provider.id === activeProviderId) || provider.id === selectedProvider?.id;
+                const isEditingThisName = editingProviderId === provider.id && editingField === 'name';
+                const isEditingThisEntry = editingProviderId === provider.id && editingField === 'entry';
+                const isEditingThisExit = editingProviderId === provider.id && editingField === 'exit';
+
+                return (
+                  <tr
+                    key={provider.id}
+                    className={`border-b border-[#1e2a3a]/70 transition-colors group ${
+                      isSelected
+                        ? 'bg-cyan-950/20 ring-1 ring-cyan-500/40'
+                        : 'odd:bg-[#141c28] even:bg-[#101724] hover:bg-[#182334]'
+                    }`}
+                  >
+                  {/* Prestador Name Cell (Full Name shown, not truncated) */}
                   <td
-                    className={`text-left font-bold border-r sticky left-0 z-10 ${
+                    className={`text-left font-bold border-r border-[#1e2a3a] sticky left-0 z-10 bg-[#141c28] group-hover:bg-[#182334] text-slate-100 ${
                       rowDensity === 'spacious'
-                        ? 'px-4 py-3 min-w-[280px] max-w-[340px]'
-                        : 'px-2.5 py-1.5 min-w-[240px] max-w-[300px]'
-                    } ${
-                      sheetTheme === 'sheet'
-                        ? isSelected
-                          ? 'bg-indigo-50 text-indigo-900 border-slate-400'
-                          : 'bg-white text-slate-900 border-slate-400'
-                        : isSelected
-                        ? 'bg-indigo-950 text-white border-slate-800'
-                        : 'bg-slate-950 text-slate-200 border-slate-800'
+                        ? 'px-4 py-3 min-w-[280px] sm:min-w-[340px]'
+                        : 'px-2.5 py-1.5 min-w-[240px] sm:min-w-[300px]'
                     }`}
                   >
                     {isEditingThisName ? (
@@ -649,11 +850,11 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                           onChange={e => setEditValue(e.target.value)}
                           onKeyDown={handleKeyDownEdit}
                           onBlur={saveEditingField}
-                          className="w-full px-2 py-1 text-xs bg-slate-900 text-white border border-indigo-500 rounded-lg font-bold uppercase focus:outline-none"
+                          className="w-full px-2 py-1 text-xs bg-[#0c121c] text-white border border-cyan-500 rounded-lg font-bold uppercase focus:outline-none"
                         />
                         <button
                           onClick={saveEditingField}
-                          className="p-1 text-emerald-400 hover:text-emerald-300"
+                          className="p-1 text-cyan-400 hover:text-cyan-300"
                         >
                           <Check className="w-4 h-4" />
                         </button>
@@ -664,43 +865,64 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                           {/* Avatar with initials */}
                           <div
                             className={`rounded-xl flex items-center justify-center font-black shrink-0 ${
-                              rowDensity === 'spacious' ? 'w-8 h-8 text-xs' : 'w-6 h-6 text-[10px]'
-                            } bg-gradient-to-tr from-indigo-900 to-indigo-700 text-indigo-100 border border-indigo-500/40 shadow-xs`}
+                              rowDensity === 'spacious' ? 'w-8 h-8 text-xs' : 'w-6 h-6 text-xs'
+                            } bg-slate-800 text-cyan-400 border border-cyan-500/30 shadow-xs`}
                           >
                             {getInitials(provider.name)}
                           </div>
 
-                          <span
-                            onClick={() => {
-                              if (role === 'supervisor') {
-                                startEditingField(provider, 'name');
-                              } else if (isLeaderAuthenticated || authenticatedProviderId === provider.id) {
-                                setActiveProviderId(provider.id);
-                                setViewMode('personal-calendar');
-                              } else {
-                                if (authenticatedProviderId && authenticatedProviderId !== provider.id) {
-                                  alert(`Você está conectado como outro prestador. Para ver o calendário de ${provider.name}, desconecte seu perfil primeiro.`);
-                                } else if (onOpenCollaboratorAuth) {
-                                  onOpenCollaboratorAuth(provider);
+                          <div className="flex flex-col min-w-0">
+                            {/* Full names like NATACHA AMARAL DE OLIVEIRA are shown, not truncated */}
+                            <span
+                              onClick={() => {
+                                if (role === 'supervisor') {
+                                  startEditingField(provider, 'name');
+                                } else if (isLeaderAuthenticated || authenticatedProviderId === provider.id) {
+                                  setActiveProviderId(provider.id);
+                                  setViewMode('personal-calendar');
+                                } else {
+                                  if (authenticatedProviderId && authenticatedProviderId !== provider.id) {
+                                    alert(`Você está conectado como outro prestador. Para ver o calendário de ${provider.name}, desconecte seu perfil primeiro.`);
+                                  } else if (onOpenCollaboratorAuth) {
+                                    onOpenCollaboratorAuth(provider);
+                                  }
                                 }
+                              }}
+                              className={`cursor-pointer hover:underline hover:text-cyan-400 font-extrabold tracking-tight text-white whitespace-normal break-words ${
+                                rowDensity === 'spacious' ? 'text-sm' : 'text-xs'
+                              }`}
+                              title={
+                                role === 'supervisor'
+                                  ? 'Clique para renomear este prestador'
+                                  : 'Clique para abrir seu calendário mensal'
                               }
-                            }}
-                            className={`truncate cursor-pointer hover:underline hover:text-indigo-400 font-bold tracking-tight ${
-                              rowDensity === 'spacious' ? 'text-sm' : 'text-xs'
-                            } ${sheetTheme === 'sheet' ? 'text-slate-900' : 'text-white'}`}
-                            title={
-                              role === 'supervisor'
-                                ? 'Clique para renomear este prestador'
-                                : 'Clique para abrir seu calendário mensal'
-                            }
-                          >
-                            {provider.name}
-                          </span>
+                            >
+                              {provider.name}
+                            </span>
+                            
+                            {/* Monthly worked hours and shifts metric */}
+                            {(() => {
+                              const workedDaysCount = assignments.filter(a => {
+                                const [y, m] = a.date.split('-').map(Number);
+                                return y === currentYear && m === currentMonthIndex + 1 && a.providerId === provider.id && a.shiftTypeId === 'st-t';
+                              }).length;
+                              const totalHours = workedDaysCount * (provider.regime === '5x2' ? 8 : 12);
+
+                              return (
+                                <div className="flex items-center gap-1.5 mt-0.5 text-xs">
+                                  <span className="font-semibold px-1.5 py-0.5 rounded bg-[#0c121c] text-slate-400 border border-[#1e2a3a]">
+                                    {workedDaysCount} plantões ({totalHours}h)
+                                  </span>
+                                </div>
+                              );
+                            })()}
+                          </div>
                         </div>
 
                         <div className="flex items-center gap-1.5 shrink-0">
+                          {/* Soft blue 'VOCÊ' tag */}
                           {isSelected && (
-                            <span className="text-[10px] bg-indigo-600 text-white px-2 py-0.5 rounded-md font-black uppercase tracking-wider shadow-xs">
+                            <span className="text-xs bg-sky-500/20 text-sky-300 border border-sky-400/40 px-2 py-0.5 rounded font-bold uppercase tracking-wider">
                               Você
                             </span>
                           )}
@@ -719,16 +941,27 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                                 }
                               }
                             }}
-                            className="text-slate-400 hover:text-indigo-400 p-1 rounded-lg hover:bg-slate-800 transition-colors"
+                            className="text-slate-400 hover:text-cyan-400 p-1 rounded-lg hover:bg-slate-800 transition-colors"
                             title="Ver calendário mensal deste colaborador"
                           >
                             <CalendarDays className="w-4 h-4" />
                           </button>
 
+                          <button
+                            onClick={e => {
+                              e.stopPropagation();
+                              shareProviderWhatsApp(provider, currentYear, currentMonthIndex, assignments);
+                            }}
+                            className="text-slate-400 hover:text-cyan-400 p-1 rounded-lg hover:bg-slate-800 transition-colors"
+                            title={`Enviar escala de ${provider.name} no WhatsApp`}
+                          >
+                            <MessageSquare className="w-4 h-4" />
+                          </button>
+
                           {role === 'supervisor' && (
                             <button
                               onClick={() => startEditingField(provider, 'name')}
-                              className="opacity-0 group-hover/name:opacity-100 text-slate-400 hover:text-indigo-400 p-1 rounded-lg hover:bg-slate-800 transition-opacity"
+                              className="opacity-0 group-hover/name:opacity-100 text-slate-400 hover:text-cyan-400 p-1 rounded-lg hover:bg-slate-800 transition-opacity"
                               title="Editar nome"
                             >
                               <Edit2 className="w-3.5 h-3.5" />
@@ -741,13 +974,9 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
 
                   {/* Entrada Cell (Editable) */}
                   <td
-                    className={`text-center font-mono font-medium border-r cursor-pointer ${
+                    className={`text-center font-medium border-r border-[#1e2a3a] cursor-pointer ${
                       rowDensity === 'spacious' ? 'px-2 py-2 min-w-[76px]' : 'px-1 py-1 min-w-[60px]'
-                    } ${
-                      sheetTheme === 'sheet'
-                        ? 'border-slate-400 text-slate-800 hover:bg-slate-100'
-                        : 'border-slate-800 text-slate-400 hover:text-white hover:bg-slate-900'
-                    }`}
+                    } hover:bg-slate-800 text-slate-300`}
                     onClick={() => startEditingField(provider, 'entry')}
                     title={role === 'supervisor' ? 'Clique para alterar horário de entrada' : undefined}
                   >
@@ -759,10 +988,10 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                         onChange={e => setEditValue(e.target.value)}
                         onKeyDown={handleKeyDownEdit}
                         onBlur={saveEditingField}
-                        className="w-14 text-center text-xs bg-slate-900 text-white border border-indigo-500 rounded-lg font-mono focus:outline-none py-1"
+                        className="w-14 text-center text-xs bg-[#0c121c] text-white border border-cyan-500 rounded-lg focus:outline-none py-1 shadow-sm"
                       />
                     ) : (
-                      <span className="px-2 py-1 rounded-lg bg-slate-950/70 border border-slate-700/50 text-xs font-mono font-semibold text-slate-200">
+                      <span className="px-2 py-0.5 rounded bg-[#0c121c] border border-[#1e2a3a] text-xs font-semibold text-slate-300">
                         {provider.entryTime || '07h00'}
                       </span>
                     )}
@@ -770,13 +999,9 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
 
                   {/* Saída Cell (Editable) */}
                   <td
-                    className={`text-center font-mono font-medium border-r cursor-pointer ${
+                    className={`text-center font-medium border-r border-[#1e2a3a] cursor-pointer ${
                       rowDensity === 'spacious' ? 'px-2 py-2 min-w-[76px]' : 'px-1 py-1 min-w-[60px]'
-                    } ${
-                      sheetTheme === 'sheet'
-                        ? 'border-slate-400 text-slate-800 hover:bg-slate-100'
-                        : 'border-slate-800 text-slate-400 hover:text-white hover:bg-slate-900'
-                    }`}
+                    } hover:bg-slate-800 text-slate-300`}
                     onClick={() => startEditingField(provider, 'exit')}
                     title={role === 'supervisor' ? 'Clique para alterar horário de saída' : undefined}
                   >
@@ -788,72 +1013,69 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                         onChange={e => setEditValue(e.target.value)}
                         onKeyDown={handleKeyDownEdit}
                         onBlur={saveEditingField}
-                        className="w-14 text-center text-xs bg-slate-900 text-white border border-indigo-500 rounded-lg font-mono focus:outline-none py-1"
+                        className="w-14 text-center text-xs bg-[#0c121c] text-white border border-cyan-500 rounded-lg focus:outline-none py-1 shadow-sm"
                       />
                     ) : (
-                      <span className="px-2 py-1 rounded-lg bg-slate-950/70 border border-slate-700/50 text-xs font-mono font-semibold text-slate-200">
+                      <span className="px-2 py-0.5 rounded bg-[#0c121c] border border-[#1e2a3a] text-xs font-semibold text-slate-300">
                         {provider.exitTime || '19h00'}
                       </span>
                     )}
                   </td>
 
-                  {/* Day cells 1 to 31 */}
+                  {/* Day cells 1 to 31: 'T' blocks are Cyan, 'D' blocks are Medium Grey */}
                   {days.map(d => {
                     const shift = getShiftForProviderAndDate(provider.id, d.dateStr);
                     const shiftCode = shift ? (shift.shiftTypeId === 'st-d' ? 'D' : 'T') : '-';
                     const hasNote = Boolean(shift?.notes);
 
                     // Weekend subtle background tint for clear visual rhythm
-                    const weekendCellBg = d.isWeekend
-                      ? sheetTheme === 'sheet'
-                        ? 'bg-amber-50/40'
-                        : 'bg-amber-950/10'
-                      : '';
+                    const weekendCellBg = d.isWeekend ? 'bg-slate-900/40' : '';
+
+                    const isCellSelected = selectedCell?.providerId === provider.id && selectedCell?.dayNumber === d.dayNumber;
 
                     return (
                       <td
                         key={`${provider.id}-${d.dateStr}`}
-                        onClick={() => handleCellClick(provider, d.dateStr)}
+                        onClick={() => {
+                          if (role === 'supervisor') {
+                            setSelectedCell({ providerId: provider.id, dayNumber: d.dayNumber });
+                          }
+                          handleCellClick(provider, d.dateStr);
+                        }}
                         onContextMenu={e => handleOpenCellEditor(e, provider, d.dateStr, d.dayNumber)}
-                        className={`p-0 text-center font-mono relative transition-transform ${
+                        className={`p-0 text-center relative transition-transform ${
                           rowDensity === 'spacious' ? 'h-13' : 'h-8'
                         } ${
                           role === 'supervisor'
-                            ? 'cursor-pointer hover:opacity-85 active:scale-95'
+                            ? 'cursor-pointer hover:opacity-90 active:scale-95'
                             : ''
-                        } ${weekendCellBg} border-r ${
-                          sheetTheme === 'sheet' ? 'border-slate-300' : 'border-slate-800/80'
-                        }`}
+                        } ${weekendCellBg} ${
+                          isCellSelected ? 'ring-2 ring-cyan-500 ring-inset z-10 bg-cyan-950/30' : ''
+                        } border-r border-[#1e2a3a]/70`}
                         title={
                           shift
                             ? `${provider.name}: ${shiftCode === 'T' ? 'Trabalha' : 'Descanso'} (${d.dayNumber}/${currentMonthIndex + 1})${hasNote ? ` - Nota: ${shift.notes}` : ''}`
                             : `${provider.name}: Sem Escala (${d.dayNumber}/${currentMonthIndex + 1})`
                         }
                       >
-                        <div className="w-full h-full flex items-center justify-center p-1">
+                        <div className="w-full h-full flex flex-col items-center justify-center p-0.5 relative">
+                          {/* 'T' blocks are clean Cyan */}
                           {shiftCode === 'T' && (
                             <span
                               className={`flex items-center justify-center rounded-lg font-black transition-transform ${
-                                rowDensity === 'spacious' ? 'w-8 h-8 text-sm' : 'w-6 h-6 text-xs'
-                              } ${
-                                sheetTheme === 'sheet'
-                                  ? 'bg-[#a9d18e] text-slate-900 border border-emerald-600/40 shadow-xs'
-                                  : 'bg-emerald-600/30 text-emerald-300 border border-emerald-500/50 shadow-xs ring-1 ring-emerald-500/20'
-                              }`}
+                                rowDensity === 'spacious' ? 'w-8 h-8 text-xs' : 'w-6 h-6 text-xs'
+                              } bg-cyan-500 text-slate-950 shadow-sm hover:bg-cyan-400`}
                             >
                               T
                             </span>
                           )}
 
+                          {/* 'D' blocks are Medium Grey */}
                           {shiftCode === 'D' && (
                             <span
-                              className={`flex items-center justify-center rounded-lg font-black transition-transform ${
-                                rowDensity === 'spacious' ? 'w-8 h-8 text-sm' : 'w-6 h-6 text-xs'
-                              } ${
-                                sheetTheme === 'sheet'
-                                  ? 'bg-[#98b7e8] text-slate-900 border border-blue-600/40 shadow-xs'
-                                  : 'bg-blue-600/30 text-blue-200 border border-blue-500/50 shadow-xs ring-1 ring-blue-500/20'
-                              }`}
+                              className={`flex items-center justify-center rounded-lg font-bold transition-transform ${
+                                rowDensity === 'spacious' ? 'w-8 h-8 text-xs' : 'w-6 h-6 text-xs'
+                              } bg-slate-700/80 text-slate-200 border border-slate-600/50 shadow-xs hover:bg-slate-700`}
                             >
                               D
                             </span>
@@ -861,11 +1083,21 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
 
                           {shiftCode === '-' && (
                             <span
-                              className={`flex items-center justify-center text-slate-600 font-bold transition-opacity group-hover:text-slate-500 ${
+                              className={`flex items-center justify-center text-slate-600 font-bold transition-opacity group-hover:text-slate-400 ${
                                 rowDensity === 'spacious' ? 'text-sm' : 'text-xs'
                               }`}
                             >
                               -
+                            </span>
+                          )}
+
+                          {/* Home Office Badge in soft purple */}
+                          {shift?.workModality === 'home_office' && (
+                            <span
+                              className="text-xs font-bold px-1 leading-tight rounded bg-purple-900/60 text-purple-300 border border-purple-700/50 mt-0.5"
+                              title="Modalidade: Home Office"
+                            >
+                              HO
                             </span>
                           )}
                         </div>
@@ -888,55 +1120,90 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                   {/* Actions column for supervisor */}
                   {role === 'supervisor' && (
                     <td
-                      className={`p-1 text-center relative border-l ${
-                        sheetTheme === 'sheet' ? 'border-slate-400 bg-slate-50' : 'border-slate-800 bg-slate-950'
-                      }`}
+                      className="p-1 text-center relative border-l border-slate-700 bg-[#162032]"
                     >
                       <div className="flex items-center justify-center gap-1">
                         {/* Quick fill pattern dropdown */}
                         <div className="relative">
                           <button
                             onClick={() => setRowMenuOpenId(rowMenuOpenId === provider.id ? null : provider.id)}
-                            className="p-1.5 text-slate-400 hover:text-indigo-400 rounded-lg hover:bg-slate-800 transition-colors"
-                            title="Preenchimento rápido da linha"
+                            className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
+                            title="Ações rápidas de preenchimento da linha"
                           >
                             <Wand2 className="w-4 h-4" />
                           </button>
 
                           {rowMenuOpenId === provider.id && (
-                            <div className="absolute right-0 top-full mt-1 w-44 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-30 p-1.5 text-left text-xs space-y-1">
-                              <div className="text-[10px] font-bold text-slate-400 px-2 py-1 uppercase">
-                                Preencher Linha:
+                            <div className="absolute right-0 top-full mt-1 w-56 bg-[#1e293b] border border-slate-700 rounded-2xl shadow-2xl z-30 p-2 text-left text-xs space-y-1 animate-in fade-in zoom-in-95">
+                              <div className="text-xs font-extrabold text-slate-400 px-2 py-1 uppercase tracking-wider">
+                                Preencher {provider.name.split(' ')[0]}:
                               </div>
                               <button
-                                onClick={() => handleFillRowPattern(provider.id, '12x36_T_start')}
-                                className="w-full text-left px-2 py-1.5 rounded-lg text-slate-200 hover:bg-slate-800 text-[11px]"
+                                onClick={() => {
+                                  batchFillProviderMonth(provider.id, currentYear, currentMonthIndex, 'mon_to_fri_5x2');
+                                  setRowMenuOpenId(null);
+                                }}
+                                className="w-full text-left px-2.5 py-1.5 rounded-xl text-slate-200 hover:bg-emerald-950/60 hover:text-emerald-300 text-xs font-bold flex items-center justify-between cursor-pointer"
                               >
-                                Alternar 12x36 (T / D)
+                                <span>Padrão 5x2 (Seg a Sex)</span>
+                                <span className="text-xs text-emerald-400 font-semibold">T Seg-Sex</span>
                               </button>
                               <button
-                                onClick={() => handleFillRowPattern(provider.id, '12x36_D_start')}
-                                className="w-full text-left px-2 py-1.5 rounded-lg text-slate-200 hover:bg-slate-800 text-[11px]"
+                                onClick={() => {
+                                  batchFillProviderMonth(provider.id, currentYear, currentMonthIndex, 'odd_12x36');
+                                  setRowMenuOpenId(null);
+                                }}
+                                className="w-full text-left px-2.5 py-1.5 rounded-xl text-slate-300 hover:bg-emerald-950/60 hover:text-emerald-300 text-xs font-medium flex items-center justify-between cursor-pointer"
                               >
-                                Alternar 12x36 (D / T)
+                                <span>12x36 (Dias Ímpares)</span>
+                                <span className="text-xs text-slate-500">1, 3, 5...</span>
                               </button>
                               <button
-                                onClick={() => handleFillRowPattern(provider.id, 'all_T')}
-                                className="w-full text-left px-2 py-1.5 rounded-lg text-slate-200 hover:bg-slate-800 text-[11px]"
+                                onClick={() => {
+                                  batchFillProviderMonth(provider.id, currentYear, currentMonthIndex, 'even_12x36');
+                                  setRowMenuOpenId(null);
+                                }}
+                                className="w-full text-left px-2.5 py-1.5 rounded-xl text-slate-300 hover:bg-emerald-950/60 hover:text-emerald-300 text-xs font-medium flex items-center justify-between cursor-pointer"
                               >
-                                Preencher tudo com Trabalha (T)
+                                <span>12x36 (Dias Pares)</span>
+                                <span className="text-xs text-slate-500">2, 4, 6...</span>
                               </button>
                               <button
-                                onClick={() => handleFillRowPattern(provider.id, 'all_D')}
-                                className="w-full text-left px-2 py-1.5 rounded-lg text-slate-200 hover:bg-slate-800 text-[11px]"
+                                onClick={() => {
+                                  batchFillProviderMonth(provider.id, currentYear, currentMonthIndex, 'mon_wed_fri');
+                                  setRowMenuOpenId(null);
+                                }}
+                                className="w-full text-left px-2.5 py-1.5 rounded-xl text-slate-300 hover:bg-sky-950/60 hover:text-sky-300 text-xs font-medium cursor-pointer"
+                              >
+                                Seg / Qua / Sex
+                              </button>
+                              <button
+                                onClick={() => {
+                                  batchFillProviderMonth(provider.id, currentYear, currentMonthIndex, 'tue_thu_sat');
+                                  setRowMenuOpenId(null);
+                                }}
+                                className="w-full text-left px-2.5 py-1.5 rounded-xl text-slate-300 hover:bg-sky-950/60 hover:text-sky-300 text-xs font-medium cursor-pointer"
+                              >
+                                Ter / Qui / Sáb
+                              </button>
+                              <button
+                                onClick={() => {
+                                  handleFillRowPattern(provider.id, 'all_D');
+                                  setRowMenuOpenId(null);
+                                }}
+                                className="w-full text-left px-2.5 py-1.5 rounded-xl text-slate-300 hover:bg-blue-950/60 hover:text-blue-300 text-xs cursor-pointer"
                               >
                                 Preencher tudo com Descanso (D)
                               </button>
+                              <div className="border-t border-slate-700/80 my-1" />
                               <button
-                                onClick={() => handleFillRowPattern(provider.id, 'clear')}
-                                className="w-full text-left px-2 py-1.5 rounded-lg text-rose-400 hover:bg-slate-800 text-[11px]"
+                                onClick={() => {
+                                  batchFillProviderMonth(provider.id, currentYear, currentMonthIndex, 'clear');
+                                  setRowMenuOpenId(null);
+                                }}
+                                className="w-full text-left px-2.5 py-1.5 rounded-xl text-rose-400 hover:bg-rose-950/60 text-xs font-semibold cursor-pointer"
                               >
-                                Limpar linha (Sem Escala)
+                                🧹 Limpar mês deste prestador
                               </button>
                             </div>
                           )}
@@ -945,7 +1212,7 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                         {/* Delete row */}
                         <button
                           onClick={() => handleDeleteProvider(provider.id, provider.name)}
-                          className="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800 transition-colors"
+                          className="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
                           title="Remover prestador da escala"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -955,55 +1222,69 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                   )}
                 </tr>
               );
-            })}
+            }))}
 
-            {/* Totals Row: Total Workers (T) per day */}
+            {/* Totals Row: Smart Coverage Indicator Footer */}
             <tr
-              className={`border-t-2 font-bold ${
-                sheetTheme === 'sheet'
-                  ? 'bg-slate-100 border-slate-400 text-slate-900'
-                  : 'bg-slate-900/95 border-slate-700 text-slate-200'
-              }`}
+              className="border-t-2 border-slate-600 font-bold bg-[#141e30] text-slate-300"
             >
               <td
-                className={`sticky left-0 z-10 text-left border-r font-black ${
-                  rowDensity === 'spacious' ? 'px-4 py-3 text-xs' : 'px-2.5 py-1.5 text-[11px]'
-                } ${
-                  sheetTheme === 'sheet'
-                    ? 'bg-slate-100 text-slate-900 border-slate-400'
-                    : 'bg-slate-900 text-indigo-300 border-slate-700'
+                className={`sticky left-0 z-10 text-left border-r border-slate-600 font-bold bg-[#162032] text-slate-200 ${
+                  rowDensity === 'spacious' ? 'px-4 py-3 text-xs' : 'px-2.5 py-1.5 text-xs'
                 }`}
               >
-                <span>Total Escalados no Dia (Trabalha)</span>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="uppercase tracking-wider font-extrabold text-xs text-slate-300">
+                    🛡️ Cobertura no Dia
+                  </span>
+                  <span className="text-xs text-slate-400 font-medium hidden sm:inline">
+                    (Mín. 2)
+                  </span>
+                </div>
               </td>
-              <td className="text-center font-mono text-xs text-slate-400 border-r border-slate-800">-</td>
-              <td className="text-center font-mono text-xs text-slate-400 border-r border-slate-800">-</td>
+              <td className="text-center text-xs text-slate-500 border-r border-slate-700">-</td>
+              <td className="text-center text-xs text-slate-500 border-r border-slate-700">-</td>
               {days.map(d => {
                 const count = getDailyWorkersCount(d.dateStr);
+                const isZero = count === 0;
+                const isLow = count > 0 && count < 2;
+
+                let cellStyle = '';
+                if (isZero) {
+                  cellStyle = 'text-rose-400 bg-rose-950/50 font-black border-rose-800';
+                } else if (isLow) {
+                  cellStyle = 'text-amber-400 bg-amber-950/50 font-black border-amber-800';
+                } else {
+                  cellStyle = 'text-emerald-300 bg-emerald-950/35 font-black';
+                }
+
                 return (
                   <td
                     key={`total-${d.dateStr}`}
-                    className={`text-center font-mono font-black border-r ${
-                      rowDensity === 'spacious' ? 'py-2.5 text-xs' : 'py-1 text-[11px]'
-                    } ${
-                      count > 0
-                        ? sheetTheme === 'sheet'
-                          ? 'text-emerald-700 bg-emerald-100/60 font-black'
-                          : 'text-emerald-400 bg-emerald-950/40 font-black'
-                        : 'text-slate-600'
-                    } ${sheetTheme === 'sheet' ? 'border-slate-400' : 'border-slate-800'}`}
+                    className={`text-center border-r border-slate-700/60 transition-colors ${
+                      rowDensity === 'spacious' ? 'py-2 text-xs' : 'py-1 text-xs'
+                    } ${cellStyle}`}
+                    title={
+                      isZero
+                        ? `Atenção: Dia ${d.dayNumber} está sem plantonista escalado (0)`
+                        : isLow
+                        ? `Atenção: Dia ${d.dayNumber} tem apenas ${count} plantonista(s)`
+                        : `✓ Cobertura adequada: Dia ${d.dayNumber} tem ${count} plantonistas`
+                    }
                   >
-                    {count}
+                    <div className="flex items-center justify-center gap-0.5">
+                      <span>{count}</span>
+                    </div>
                   </td>
                 );
               })}
-              {role === 'supervisor' && <td className="border-l border-slate-800">-</td>}
+              {role === 'supervisor' && <td className="border-l border-slate-700 text-slate-500">-</td>}
             </tr>
 
             {/* Quick Add Inline Row for Supervisor */}
             {role === 'supervisor' && isAddingNewRow && (
-              <tr className="bg-indigo-950/20 border-b border-indigo-500/40">
-                <td className="p-2 sticky left-0 z-10 bg-slate-900 border-r border-slate-700">
+              <tr className="bg-emerald-950/30 border-b border-emerald-800">
+                <td className="p-2 sticky left-0 z-10 bg-[#162032] border-r border-slate-700">
                   <form onSubmit={handleAddNewProvider} className="flex items-center gap-1.5">
                     <input
                       type="text"
@@ -1012,18 +1293,18 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                       placeholder="Nome do novo prestador..."
                       value={newName}
                       onChange={e => setNewName(e.target.value)}
-                      className="w-full px-2 py-1 text-xs bg-slate-950 border border-indigo-500 rounded font-bold uppercase text-white focus:outline-none"
+                      className="w-full px-2.5 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-xl font-bold uppercase text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                     <button
                       type="submit"
-                      className="px-2 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded font-bold text-xs"
+                      className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs transition-colors cursor-pointer"
                     >
                       Salvar
                     </button>
                     <button
                       type="button"
                       onClick={() => setIsAddingNewRow(false)}
-                      className="p-1 text-slate-400 hover:text-white"
+                      className="p-1 text-slate-400 hover:text-white cursor-pointer"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -1034,7 +1315,7 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                     type="text"
                     value={newEntry}
                     onChange={e => setNewEntry(e.target.value)}
-                    className="w-12 text-center text-xs bg-slate-950 border border-slate-700 rounded font-mono text-white"
+                    className="w-14 text-center text-xs bg-slate-900 border border-slate-700 rounded-lg text-white font-medium py-1"
                   />
                 </td>
                 <td className="p-1 border-r border-slate-700">
@@ -1042,11 +1323,11 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                     type="text"
                     value={newExit}
                     onChange={e => setNewExit(e.target.value)}
-                    className="w-12 text-center text-xs bg-slate-950 border border-slate-700 rounded font-mono text-white"
+                    className="w-14 text-center text-xs bg-slate-900 border border-slate-700 rounded-lg text-white font-medium py-1"
                   />
                 </td>
-                <td colSpan={days.length + 1} className="p-2 text-slate-400 italic text-left pl-4">
-                  Digite o nome e pressione Salvar para inserir na grade.
+                <td colSpan={days.length + 1} className="p-2 text-slate-400 font-medium text-left pl-4 text-xs">
+                  Digite o nome e clique em Salvar para incluir na escala.
                 </td>
               </tr>
             )}
@@ -1055,13 +1336,13 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
 
         {/* Add Row Button under table */}
         {role === 'supervisor' && !isAddingNewRow && (
-          <div className="p-2.5 bg-slate-950/60 border-t border-slate-800 flex items-center justify-between">
+          <div className="p-3 bg-[#162032] border-t border-slate-700 flex items-center justify-between">
             <button
               onClick={() => setIsAddingNewRow(true)}
-              className="flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 font-bold px-3 py-1.5 rounded-lg hover:bg-slate-900 transition-colors"
+              className="flex items-center gap-1.5 text-xs text-slate-300 hover:text-white font-bold px-3 py-1.5 rounded-xl hover:bg-slate-800 transition-colors cursor-pointer"
             >
-              <Plus className="w-4 h-4" />
-              <span>+ Adicionar Nova Linha de Prestador</span>
+              <Plus className="w-4 h-4 text-emerald-400" />
+              <span>+ Adicionar Novo Prestador na Grade</span>
             </button>
 
             <button
@@ -1070,9 +1351,9 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                   resetToDemoData();
                 }
               }}
-              className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-400 transition-colors"
+              className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 transition-colors cursor-pointer"
             >
-              <RotateCcw className="w-3 h-3" />
+              <RotateCcw className="w-3.5 h-3.5" />
               <span>Restaurar dados de exemplo</span>
             </button>
           </div>
@@ -1081,20 +1362,20 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
 
       {/* Cell Detail / Note Modal */}
       {activeCellEdit && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
-          <div className="bg-slate-900 text-white rounded-2xl p-5 border border-slate-800 shadow-2xl max-w-sm w-full space-y-4 animate-in fade-in zoom-in-95 duration-100">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-[#1e293b] text-slate-100 rounded-3xl p-5 border border-slate-700 shadow-2xl max-w-sm w-full space-y-4 animate-in fade-in zoom-in-95 duration-100">
+            <div className="flex items-center justify-between border-b border-slate-700/80 pb-3">
               <div>
-                <h4 className="text-sm font-bold text-white">
-                  Editar Plantão - Dia {activeCellEdit.dayNumber}
+                <h4 className="text-sm font-extrabold text-white">
+                  Editar Plantão • Dia {activeCellEdit.dayNumber}
                 </h4>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-400 font-medium">
                   {activeCellEdit.providerName}
                 </p>
               </div>
               <button
                 onClick={() => setActiveCellEdit(null)}
-                className="p-1 text-slate-400 hover:text-white"
+                className="p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1109,78 +1390,144 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                 <button
                   type="button"
                   onClick={() => handleSelectCodeInModal('T')}
-                  className={`p-2.5 rounded-xl border text-center font-bold font-mono transition-all ${
+                  className={`p-2.5 rounded-2xl border text-center font-bold transition-all cursor-pointer ${
                     activeCellEdit.currentCode === 'T'
-                      ? 'bg-emerald-600 text-white border-emerald-400 shadow-md ring-2 ring-emerald-500'
-                      : 'bg-slate-950 text-emerald-300 border-slate-800 hover:bg-slate-800'
+                      ? 'bg-emerald-600 text-white border-emerald-500 shadow-xs'
+                      : 'bg-emerald-950/60 text-emerald-300 border-emerald-800/80 hover:bg-emerald-900/80'
                   }`}
                 >
-                  <div className="text-base">T</div>
-                  <div className="text-[10px] font-sans font-normal opacity-80">Trabalha</div>
+                  <div className="text-base font-black">T</div>
+                  <div className="text-xs font-medium opacity-90">Trabalha</div>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => handleSelectCodeInModal('D')}
-                  className={`p-2.5 rounded-xl border text-center font-bold font-mono transition-all ${
+                  className={`p-2.5 rounded-2xl border text-center font-bold transition-all cursor-pointer ${
                     activeCellEdit.currentCode === 'D'
-                      ? 'bg-blue-600 text-white border-blue-400 shadow-md ring-2 ring-blue-500'
-                      : 'bg-slate-950 text-blue-300 border-slate-800 hover:bg-slate-800'
+                      ? 'bg-sky-600 text-white border-sky-500 shadow-xs'
+                      : 'bg-sky-950/60 text-sky-300 border-sky-800/80 hover:bg-sky-900/80'
                   }`}
                 >
-                  <div className="text-base">D</div>
-                  <div className="text-[10px] font-sans font-normal opacity-80">Descanso</div>
+                  <div className="text-base font-black">D</div>
+                  <div className="text-xs font-medium opacity-90">Descanso</div>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => handleSelectCodeInModal('-')}
-                  className={`p-2.5 rounded-xl border text-center font-bold font-mono transition-all ${
+                  className={`p-2.5 rounded-2xl border text-center font-bold transition-all cursor-pointer ${
                     activeCellEdit.currentCode === '-'
-                      ? 'bg-slate-700 text-white border-slate-500 ring-2 ring-slate-400'
-                      : 'bg-slate-950 text-slate-400 border-slate-800 hover:bg-slate-800'
+                      ? 'bg-slate-700 text-white border-slate-600 shadow-xs'
+                      : 'bg-slate-900 text-slate-400 border-slate-700 hover:bg-slate-800'
                   }`}
                 >
-                  <div className="text-base">-</div>
-                  <div className="text-[10px] font-sans font-normal opacity-80">Sem Escala</div>
+                  <div className="text-base font-black">-</div>
+                  <div className="text-xs font-medium opacity-90">Sem Escala</div>
                 </button>
               </div>
             </div>
 
+            {/* Work Modality Toggle: Presencial vs Home Office */}
+            <div>
+              <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                Modalidade de Trabalho:
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setModalityInput('presencial')}
+                  className={`p-2.5 rounded-2xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    modalityInput === 'presencial'
+                      ? 'bg-emerald-950/70 text-emerald-300 border-emerald-800 shadow-xs'
+                      : 'bg-slate-900 text-slate-400 border-slate-700 hover:bg-slate-800'
+                  }`}
+                >
+                  <Building2 className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Presencial</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setModalityInput('home_office')}
+                  className={`p-2.5 rounded-2xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    modalityInput === 'home_office'
+                      ? 'bg-purple-950/70 text-purple-300 border-purple-800 shadow-xs'
+                      : 'bg-slate-900 text-slate-400 border-slate-700 hover:bg-slate-800'
+                  }`}
+                >
+                  <Home className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Home Office</span>
+                </button>
+              </div>
+              <p className="text-xs text-slate-400 mt-1 font-medium">
+                {modalityInput === 'presencial'
+                  ? 'Como é presencial, não exibe etiqueta na célula para manter a escala limpa.'
+                  : 'Exibirá a etiqueta HO na célula para indicar trabalho remoto.'}
+              </p>
+            </div>
+
             {/* Note text field */}
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Nota / Observação (cria o triângulo vermelho):
+              <label className="block text-xs font-bold text-slate-300 mb-1">
+                Nota ou Observação:
               </label>
               <textarea
                 rows={2}
                 value={noteInput}
                 onChange={e => setNoteInput(e.target.value)}
-                placeholder="Ex: Cobertura especial, troca acordada, leito 4..."
-                className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-xl text-white focus:border-indigo-500 focus:outline-none"
+                placeholder="Ex: Cobertura especial, troca acordada, plantão extra..."
+                className="w-full px-3 py-2 text-xs bg-slate-900 border border-slate-700 rounded-xl text-slate-100 placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-700/80">
               <button
                 type="button"
                 onClick={() => setActiveCellEdit(null)}
-                className="px-3 py-1.5 text-xs text-slate-400 hover:text-white rounded-lg"
+                className="px-3 py-1.5 text-xs text-slate-400 hover:text-white rounded-xl font-semibold cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={handleSaveModal}
-                className="px-4 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow"
+                className="px-4 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-xs rounded-xl cursor-pointer transition-colors"
               >
-                Concluir
+                Salvar Alteração
               </button>
             </div>
           </div>
         </div>
       )}
 
-      </div>
+      {/* Absence / Vacation Batch Modal */}
+      <AbsenceBatchModal
+        isOpen={absenceModalOpen}
+        onClose={() => setAbsenceModalOpen(false)}
+        defaultProviderId={absenceModalProvId}
+      />
+
+      {/* Keyboard Shortcuts Hint Bar for Leader */}
+      {role === 'supervisor' && (
+        <div className="bg-[#1e293b] border border-slate-700/80 py-2 px-3.5 rounded-2xl flex flex-wrap items-center justify-between gap-2 text-xs text-slate-300 shadow-sm">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-extrabold text-white flex items-center gap-1.5">
+              <Keyboard className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Dicas de Navegação:</span>
+            </span>
+            <span><kbd className="px-1.5 py-0.5 bg-slate-900 border border-slate-700 rounded-md text-slate-200 font-bold text-xs">T</kbd> Trabalha</span>
+            <span><kbd className="px-1.5 py-0.5 bg-slate-900 border border-slate-700 rounded-md text-slate-200 font-bold text-xs">D</kbd> Descanso</span>
+            <span><kbd className="px-1.5 py-0.5 bg-slate-900 border border-slate-700 rounded-md text-slate-200 font-bold text-xs">H</kbd> Home Office</span>
+            <span><kbd className="px-1.5 py-0.5 bg-slate-900 border border-slate-700 rounded-md text-slate-200 font-bold text-xs">Del</kbd> Limpar</span>
+            <span><kbd className="px-1.5 py-0.5 bg-slate-900 border border-slate-700 rounded-md text-slate-200 font-bold text-xs">Setas</kbd> Navegar</span>
+          </div>
+          <span className="text-xs text-slate-400 font-medium hidden md:inline">
+            Clique em qualquer célula para preencher rapidamente
+          </span>
+        </div>
+      )}
+
+    </div>
   );
 };
