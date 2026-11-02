@@ -275,10 +275,6 @@ export const CollaboratorProfileModal: React.FC<CollaboratorProfileModalProps> =
           {/* Additional details */}
           <div className="p-4 rounded-xl bg-[#141720]/60 border border-white/[0.04] text-xs text-neutral-400 space-y-1.5">
             <div className="flex items-center justify-between">
-              <span>E-mail:</span>
-              <span className="text-neutral-200 font-mono text-[11px]">{provider.email}</span>
-            </div>
-            <div className="flex items-center justify-between">
               <span>Telefone Cadastral:</span>
               <span className="text-neutral-200 font-mono text-[11px]">{provider.phone || 'Não informado'}</span>
             </div>

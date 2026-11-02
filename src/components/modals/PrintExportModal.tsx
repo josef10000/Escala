@@ -98,34 +98,39 @@ export const PrintExportModal: React.FC<PrintExportModalProps> = ({ isOpen, onCl
 
   // Download Excel CSV
   const handleDownloadExcel = () => {
-    exportEscalaToCSV({
-      providers,
-      assignments,
-      currentYear,
-      currentMonthIndex,
-      departmentName: deptName,
-      regime: activeRegime,
-    });
+    try {
+      exportEscalaToCSV({
+        providers,
+        assignments,
+        currentYear,
+        currentMonthIndex,
+        departmentName: deptName,
+        regime: activeRegime,
+      });
+    } catch (e) {
+      console.error('Error exporting CSV:', e);
+    }
   };
 
-  // Browser Print
+  // Browser Direct Print
   const handleBrowserPrint = () => {
     window.print();
   };
 
-  // Copy HTML Table for Excel
+  // Copy HTML Table to Clipboard for Excel / Word Paste
   const handleCopyExcel = () => {
     const tableEl = document.getElementById('preview-print-table');
     if (!tableEl) return;
 
     try {
-      const blob = new Blob([tableEl.outerHTML], { type: 'text/html' });
-      const textBlob = new Blob([tableEl.innerText], { type: 'text/plain' });
+      const html = tableEl.outerHTML;
+      const blobHtml = new Blob([html], { type: 'text/html' });
+      const blobText = new Blob([tableEl.innerText], { type: 'text/plain' });
 
       navigator.clipboard.write([
         new ClipboardItem({
-          'text/html': blob,
-          'text/plain': textBlob,
+          'text/html': blobHtml,
+          'text/plain': blobText,
         }),
       ]).then(() => {
         setCopiedExcel(true);
@@ -139,18 +144,20 @@ export const PrintExportModal: React.FC<PrintExportModalProps> = ({ isOpen, onCl
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/40 backdrop-blur-xs">
-      <div className="bg-white border border-slate-200/90 text-slate-800 rounded-3xl max-w-5xl w-full max-h-[94vh] flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="bg-[#0e1017] border border-white/[0.09] text-white rounded-2xl max-w-5xl w-full max-h-[94vh] flex flex-col shadow-2xl">
         
         {/* Modal Top Header */}
-        <div className="p-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 shrink-0">
+        <div className="p-5 border-b border-white/[0.08] flex flex-wrap items-center justify-between gap-3 shrink-0 bg-[#12141c]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-200/80 flex items-center justify-center text-indigo-700 shadow-2xs">
+            <div className="w-10 h-10 rounded-xl bg-[#00d2d3]/15 border border-[#00d2d3]/30 flex items-center justify-center text-[#00d2d3] font-bold">
               <Printer className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-extrabold text-slate-900">Central de Impressão & Exportação ({activeRegime})</h3>
-              <p className="text-xs text-slate-500 font-medium">
+              <h3 className="text-base font-semibold text-white tracking-tight">
+                Central de Impressão & Exportação ({activeRegime})
+              </h3>
+              <p className="text-xs text-neutral-400">
                 Gere o PDF oficial em A4 Paisagem, baixe para Excel ou imprima a escala {activeRegime}
               </p>
             </div>
@@ -161,48 +168,48 @@ export const PrintExportModal: React.FC<PrintExportModalProps> = ({ isOpen, onCl
             {/* Excel CSV button */}
             <button
               onClick={handleDownloadExcel}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-2xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#161922] hover:bg-white/[0.08] text-white border border-white/[0.08] rounded-xl text-xs font-semibold transition-colors cursor-pointer"
               title="Baixar planilha compatível com Microsoft Excel"
             >
-              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
               <span>Baixar Excel</span>
             </button>
 
             {/* Copy Table button */}
             <button
               onClick={handleCopyExcel}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-2xs"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[#161922] hover:bg-white/[0.08] text-white border border-white/[0.08] rounded-xl text-xs font-semibold transition-colors cursor-pointer"
               title="Copiar tabela para colar no Excel ou Word"
             >
-              {copiedExcel ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-slate-500" />}
+              {copiedExcel ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-neutral-400" />}
               <span>{copiedExcel ? 'Copiado!' : 'Copiar p/ Excel'}</span>
             </button>
 
             {/* Print button */}
             <button
               onClick={handleBrowserPrint}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-2xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#161922] hover:bg-white/[0.08] text-white border border-white/[0.08] rounded-xl text-xs font-semibold transition-colors cursor-pointer"
               title="Acionar diálogo de impressão da impressora"
             >
-              <Printer className="w-3.5 h-3.5 text-slate-500" />
+              <Printer className="w-3.5 h-3.5 text-neutral-400" />
               <span>Imprimir</span>
             </button>
 
-            {/* PRIMARY GREEN BUTTON: DOWNLOAD PDF */}
+            {/* PRIMARY BUTTON: DOWNLOAD PDF */}
             <button
               onClick={handleDownloadPDF}
               disabled={isGenerating}
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold rounded-xl text-xs transition-all shadow-xs cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 bg-[#00d2d3] hover:bg-[#57f1db] text-[#003731] font-bold rounded-xl text-xs transition-all shadow-md shadow-[#00d2d3]/20 cursor-pointer"
               title="Baixar arquivo PDF formatado para imprimir ou salvar"
             >
-              <FileDown className="w-4 h-4 text-white" />
+              <FileDown className="w-4 h-4" />
               <span>{isGenerating ? 'Gerando...' : `Baixar PDF ${activeRegime}`}</span>
             </button>
 
             {/* Close button */}
             <button
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-slate-700 rounded-xl hover:bg-slate-100 transition-colors ml-1 cursor-pointer"
+              className="p-1.5 text-neutral-400 hover:text-white rounded-lg hover:bg-white/[0.06] transition-colors ml-1 cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -211,9 +218,9 @@ export const PrintExportModal: React.FC<PrintExportModalProps> = ({ isOpen, onCl
 
         {/* Success Banner */}
         {downloadSuccess && blobPdfUrl && (
-          <div className="mx-4 mt-3 p-3 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between text-xs text-emerald-800 gap-3">
+          <div className="mx-6 mt-4 p-3.5 bg-emerald-500/15 border border-emerald-500/30 rounded-xl flex items-center justify-between text-xs text-emerald-300 gap-3">
             <div className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+              <Check className="w-4 h-4 text-emerald-400 shrink-0" />
               <span>
                 <strong>PDF {activeRegime} gerado com sucesso!</strong> Se o download não iniciou automaticamente:
               </span>
@@ -223,7 +230,7 @@ export const PrintExportModal: React.FC<PrintExportModalProps> = ({ isOpen, onCl
               target="_blank"
               rel="noreferrer"
               download={`escala-${activeRegime}-${monthName.toLowerCase()}-${currentYear}.pdf`}
-              className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-2xs transition-colors shrink-0"
+              className="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black rounded-lg font-bold text-xs flex items-center gap-1.5 transition-colors shrink-0"
             >
               <ExternalLink className="w-3.5 h-3.5" />
               <span>Abrir Arquivo</span>
@@ -232,45 +239,45 @@ export const PrintExportModal: React.FC<PrintExportModalProps> = ({ isOpen, onCl
         )}
 
         {/* Scrollable Printable Document Container */}
-        <div className="flex-1 overflow-auto p-4 bg-slate-100/70 flex justify-center">
+        <div className="flex-1 overflow-auto p-6 bg-[#090A0F] flex justify-center">
           <div
             id="preview-print-table"
-            className="w-full max-w-4xl bg-white text-slate-900 p-6 rounded-2xl shadow-sm space-y-4 border border-slate-200 font-sans"
+            className="w-full max-w-4xl bg-[#12141A] text-white p-6 rounded-2xl border border-white/[0.08] shadow-sm space-y-4 font-sans print:bg-white print:text-black print:p-0 print:border-none"
             style={{ minWidth: '850px' }}
           >
             {/* Document Header */}
-            <div className="border-b-2 border-slate-900 pb-3 flex items-start justify-between">
+            <div className="border-b border-white/[0.1] pb-3 flex items-start justify-between print:border-black">
               <div>
-                <h1 className="text-base font-black tracking-tight uppercase text-slate-900">
+                <h1 className="text-base font-bold tracking-tight uppercase text-white print:text-black">
                   ESCALA TÉCNICA OPERACIONAL {activeRegime.toUpperCase()}
                 </h1>
-                <div className="flex items-center gap-3 text-xs text-slate-700 font-medium mt-0.5">
-                  <span><strong>Setor:</strong> {deptName}</span>
+                <div className="flex items-center gap-3 text-xs text-neutral-400 font-medium mt-0.5 print:text-slate-700">
+                  <span><strong className="text-white print:text-black">Setor:</strong> {deptName}</span>
                   <span>•</span>
-                  <span><strong>Referência:</strong> {monthName.toUpperCase()} / {currentYear}</span>
+                  <span><strong className="text-white print:text-black">Referência:</strong> {monthName.toUpperCase()} / {currentYear}</span>
                   <span>•</span>
-                  <span><strong>Regime:</strong> {activeRegime === '5x2' ? '5x2 (Segunda a Sexta)' : '12x36 (Turno 12h)'}</span>
+                  <span><strong className="text-white print:text-black">Regime:</strong> {activeRegime === '5x2' ? '5x2 (Segunda a Sexta)' : '12x36 (Turno 12h)'}</span>
                 </div>
               </div>
 
-              <div className="text-right text-[11px] text-slate-600">
+              <div className="text-right text-[11px] text-neutral-400 print:text-slate-600">
                 <div>Documento Oficial de Escala</div>
-                <div className="font-semibold text-slate-800">Emissão: {new Date().toLocaleDateString('pt-BR')}</div>
+                <div className="font-semibold text-white print:text-black">Emissão: {new Date().toLocaleDateString('pt-BR')}</div>
               </div>
             </div>
 
             {/* Table */}
             <div className="overflow-x-auto">
-              <table className="w-full text-center border-collapse text-[10px] border border-slate-300">
+              <table className="w-full text-center border-collapse text-[10px] border border-white/[0.08] print:border-slate-300">
                 <thead>
-                  <tr className="bg-slate-50 font-bold border-b border-slate-300">
-                    <th className="text-left px-2 py-1.5 border-r border-slate-300 min-w-[170px] font-black uppercase text-slate-900">
+                  <tr className="bg-[#181B26] font-bold border-b border-white/[0.08] print:bg-slate-100 print:text-black">
+                    <th className="text-left px-2 py-2 border-r border-white/[0.08] min-w-[170px] font-bold uppercase text-white print:text-black">
                       Colaborador ({regimeProviders.length})
                     </th>
-                    <th className="px-1.5 py-1.5 border-r border-slate-300 min-w-[50px] uppercase font-bold text-[9px] text-slate-700">
+                    <th className="px-1.5 py-2 border-r border-white/[0.08] min-w-[50px] uppercase font-semibold text-[9px] text-neutral-300 print:text-black">
                       Entrada
                     </th>
-                    <th className="px-1.5 py-1.5 border-r border-slate-300 min-w-[50px] uppercase font-bold text-[9px] text-slate-700">
+                    <th className="px-1.5 py-2 border-r border-white/[0.08] min-w-[50px] uppercase font-semibold text-[9px] text-neutral-300 print:text-black">
                       Saída
                     </th>
 
@@ -278,26 +285,26 @@ export const PrintExportModal: React.FC<PrintExportModalProps> = ({ isOpen, onCl
                     {days.map(d => (
                       <th
                         key={`th-day-${d.dayNumber}`}
-                        className={`px-0.5 py-1 border-r border-slate-300 min-w-[22px] font-bold ${
-                          d.isWeekend ? 'bg-amber-50 text-amber-900' : 'bg-slate-50 text-slate-800'
-                        }`}
+                        className={`px-0.5 py-1.5 border-r border-white/[0.08] min-w-[22px] font-semibold ${
+                          d.isWeekend ? 'bg-amber-500/15 text-amber-300' : 'bg-[#181B26] text-neutral-300'
+                        } print:text-black`}
                       >
                         <div>{d.dayNumber}</div>
-                        <div className="text-[8px] font-bold uppercase text-slate-500">
+                        <div className="text-[8px] uppercase text-neutral-400 print:text-slate-600">
                           {DAYS_SHORT_PT[d.dayOfWeek]}
                         </div>
                       </th>
                     ))}
-                    <th className="px-1.5 py-1.5 border-l border-slate-300 min-w-[36px] font-bold text-slate-900">
+                    <th className="px-1.5 py-2 border-l border-white/[0.08] min-w-[36px] font-bold text-white print:text-black">
                       Total
                     </th>
                   </tr>
                 </thead>
 
-                <tbody>
+                <tbody className="divide-y divide-white/[0.04] print:divide-slate-200">
                   {regimeProviders.length === 0 ? (
                     <tr>
-                      <td colSpan={days.length + 4} className="py-6 text-center text-slate-500 font-medium">
+                      <td colSpan={days.length + 4} className="py-6 text-center text-neutral-400 font-medium">
                         Nenhum colaborador cadastrado na escala {activeRegime}.
                       </td>
                     </tr>
@@ -312,17 +319,17 @@ export const PrintExportModal: React.FC<PrintExportModalProps> = ({ isOpen, onCl
                       return (
                         <tr
                           key={`row-${p.id}`}
-                          className={`border-b border-slate-200 ${
-                            idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'
+                          className={`hover:bg-white/[0.02] ${
+                            idx % 2 === 0 ? 'bg-[#12141A]' : 'bg-[#151822]/60'
                           }`}
                         >
-                          <td className="text-left px-2 py-1 border-r border-slate-300 font-bold text-slate-900 truncate max-w-[180px]">
+                          <td className="text-left px-2 py-1.5 border-r border-white/[0.08] font-semibold text-white truncate max-w-[180px] print:text-black">
                             {p.name}
                           </td>
-                          <td className="px-1 py-1 border-r border-slate-300 text-[10px] text-slate-700">
+                          <td className="px-1 py-1.5 border-r border-white/[0.08] text-[10px] text-neutral-300 print:text-black">
                             {p.entryTime || (activeRegime === '5x2' ? '08h00' : '07h00')}
                           </td>
-                          <td className="px-1 py-1 border-r border-slate-300 text-[10px] text-slate-700">
+                          <td className="px-1 py-1.5 border-r border-white/[0.08] text-[10px] text-neutral-300 print:text-black">
                             {p.exitTime || (activeRegime === '5x2' ? '17h00' : '19h00')}
                           </td>
 
@@ -336,19 +343,19 @@ export const PrintExportModal: React.FC<PrintExportModalProps> = ({ isOpen, onCl
                             return (
                               <td
                                 key={`cell-${p.id}-${d.dateStr}`}
-                                className={`border-r border-slate-200 p-0 text-center font-bold text-[10px] ${
-                                  d.isWeekend ? 'bg-amber-50/20' : ''
+                                className={`border-r border-white/[0.06] p-0 text-center font-bold text-[10px] ${
+                                  d.isWeekend ? 'bg-amber-500/[0.03]' : ''
                                 }`}
                               >
                                 {code === 'T' && (
                                   <div className="flex flex-col items-center justify-center">
                                     <span
-                                      className="inline-block w-4 h-4 leading-4 rounded text-emerald-900 text-[9px] font-black bg-emerald-200"
+                                      className="inline-block w-4 h-4 leading-4 rounded text-[#003731] text-[9px] font-black bg-[#00d2d3]"
                                     >
                                       T
                                     </span>
                                     {isHomeOffice && (
-                                      <span className="text-[6.5px] font-black leading-none text-sky-800">
+                                      <span className="text-[6.5px] font-bold leading-none text-purple-300">
                                         HO
                                       </span>
                                     )}
@@ -356,19 +363,19 @@ export const PrintExportModal: React.FC<PrintExportModalProps> = ({ isOpen, onCl
                                 )}
                                 {code === 'D' && (
                                   <span
-                                    className="inline-block w-4 h-4 leading-4 rounded text-sky-900 text-[9px] font-black bg-sky-200"
+                                    className="inline-block w-4 h-4 leading-4 rounded text-neutral-400 text-[9px] font-bold bg-[#27272a]"
                                   >
                                     D
                                   </span>
                                 )}
-                                {code === '-' && <span className="text-slate-300">-</span>}
-                                {hasNote && <span className="text-[7px] text-rose-600 font-black block leading-none">*</span>}
+                                {code === '-' && <span className="text-neutral-600">-</span>}
+                                {hasNote && <span className="text-[7px] text-rose-400 font-black block leading-none">*</span>}
                               </td>
                             );
                           })}
 
                           {/* Total Count */}
-                          <td className="px-1 py-1 border-l border-slate-300 font-black text-slate-900 text-center bg-slate-50">
+                          <td className="px-1 py-1.5 border-l border-white/[0.08] font-bold text-[#00d2d3] text-center bg-[#181B26] print:text-black">
                             {countT}
                           </td>
                         </tr>
@@ -377,19 +384,19 @@ export const PrintExportModal: React.FC<PrintExportModalProps> = ({ isOpen, onCl
                   )}
 
                   {/* Totals row */}
-                  <tr className="bg-slate-100 font-bold border-t-2 border-slate-300">
-                    <td colSpan={3} className="text-left px-2 py-1.5 border-r border-slate-300 uppercase text-[9px] font-black text-slate-800">
+                  <tr className="bg-[#181B26] font-semibold border-t border-white/[0.1] print:bg-slate-100">
+                    <td colSpan={3} className="text-left px-2 py-1.5 border-r border-white/[0.08] uppercase text-[9px] font-bold text-neutral-300 print:text-black">
                       Total Trabalhadores no Dia
                     </td>
                     {days.map(d => {
                       const count = getDailyWorkersCount(d.dateStr);
                       return (
-                        <td key={`tot-${d.dateStr}`} className="border-r border-slate-300 font-black text-[9px] text-slate-800">
+                        <td key={`tot-${d.dateStr}`} className="border-r border-white/[0.08] font-bold text-[9px] text-[#00d2d3] print:text-black">
                           {count > 0 ? count : '-'}
                         </td>
                       );
                     })}
-                    <td className="border-l border-slate-300 font-black text-center bg-slate-200">
+                    <td className="border-l border-white/[0.08] font-bold text-center bg-[#181B26]">
                       -
                     </td>
                   </tr>
@@ -398,28 +405,28 @@ export const PrintExportModal: React.FC<PrintExportModalProps> = ({ isOpen, onCl
             </div>
 
             {/* Document Legend & Signatures */}
-            <div className="pt-2 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-700">
+            <div className="pt-3 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-400 print:text-slate-700">
               <div className="flex flex-wrap items-center gap-3 text-[10px]">
-                <div className="flex items-center gap-1">
-                  <span className="w-3.5 h-3.5 rounded text-emerald-900 font-bold flex items-center justify-center text-[9px] bg-emerald-200">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-3.5 h-3.5 rounded text-[#003731] font-bold flex items-center justify-center text-[9px] bg-[#00d2d3]">
                     T
                   </span>
                   <span>Trabalha</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <span className="w-3.5 h-3.5 rounded text-sky-900 font-bold flex items-center justify-center text-[9px] bg-sky-200">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-3.5 h-3.5 rounded text-neutral-300 font-bold flex items-center justify-center text-[9px] bg-[#27272a]">
                     D
                   </span>
                   <span>Descanso / Folga</span>
                 </div>
-                <div className="flex items-center gap-1 text-sky-800">
-                  <span className="font-bold border border-sky-300 bg-sky-50 px-1 py-0.2 rounded text-[8px]">
+                <div className="flex items-center gap-1.5 text-purple-300">
+                  <span className="font-bold border border-purple-500/30 bg-purple-500/20 px-1 py-0.2 rounded text-[8px]">
                     HO
                   </span>
                   <span>Home Office</span>
                 </div>
-                <div className="flex items-center gap-1 text-slate-500">
-                  <span className="font-bold text-rose-600">*</span>
+                <div className="flex items-center gap-1.5 text-neutral-400">
+                  <span className="font-bold text-rose-400">*</span>
                   <span>Com Observação/Troca</span>
                 </div>
               </div>
@@ -427,12 +434,12 @@ export const PrintExportModal: React.FC<PrintExportModalProps> = ({ isOpen, onCl
               {/* Signatures */}
               <div className="flex items-center gap-8 text-[10px] text-center pt-2">
                 <div>
-                  <div className="w-40 border-b border-slate-400" />
-                  <div className="mt-1 font-semibold text-slate-800">Líder / Responsável Técnico</div>
+                  <div className="w-36 border-b border-white/20 print:border-black" />
+                  <div className="mt-1 font-semibold text-neutral-300 print:text-black">Líder / Responsável Técnico</div>
                 </div>
                 <div>
-                  <div className="w-40 border-b border-slate-400" />
-                  <div className="mt-1 font-semibold text-slate-800">Coordenação Geral</div>
+                  <div className="w-36 border-b border-white/20 print:border-black" />
+                  <div className="mt-1 font-semibold text-neutral-300 print:text-black">Coordenação Geral</div>
                 </div>
               </div>
             </div>

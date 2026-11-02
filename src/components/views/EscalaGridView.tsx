@@ -792,14 +792,14 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                     className={`transition-colors hover:bg-white/[0.02] ${isSelected ? 'bg-white/[0.015]' : ''}`}
                   >
                     {/* Sticky Collaborator Name & Initials */}
-                    <td className="sticky left-0 z-10 bg-[#12141A] py-2.5 px-3 border-r border-white/[0.08]">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-xl bg-[#1A1D24] border border-white/[0.08] flex items-center justify-center font-bold text-white text-xs shrink-0">
+                    <td className={`sticky left-0 z-10 bg-[#12141A] border-r border-white/[0.08] ${rowDensity === 'compact' ? 'py-1 px-2' : 'py-2.5 px-3'}`}>
+                      <div className="flex items-center gap-2">
+                        <div className={`rounded-xl bg-[#1A1D24] border border-white/[0.08] flex items-center justify-center font-bold text-white shrink-0 ${rowDensity === 'compact' ? 'w-6 h-6 text-[10px]' : 'w-8 h-8 text-xs'}`}>
                           {getInitials(provider.name)}
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-white truncate text-xs">
+                            <span className={`font-bold text-white truncate ${rowDensity === 'compact' ? 'text-[11px]' : 'text-xs'}`}>
                               {provider.name}
                             </span>
                             {isSelected && (
@@ -808,31 +808,33 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center gap-1 text-[11px] text-zinc-400">
-                            <span>{plantõesCount} plantões ({hoursCount}h)</span>
-                            <span className="text-zinc-600">•</span>
-                            <button
-                              onClick={() => {
-                                setActiveProviderId(provider.id);
-                                setViewMode('personal-calendar');
-                              }}
-                              className="text-zinc-400 hover:text-[#00d2d3] transition-colors cursor-pointer"
-                              title="Ver calendário"
-                            >
-                              <MessageSquare className="w-3 h-3 inline" />
-                            </button>
-                          </div>
+                          {rowDensity !== 'compact' && (
+                            <div className="flex items-center gap-1 text-[11px] text-zinc-400">
+                              <span>{plantõesCount} plantões ({hoursCount}h)</span>
+                              <span className="text-zinc-600">•</span>
+                              <button
+                                onClick={() => {
+                                  setActiveProviderId(provider.id);
+                                  setViewMode('personal-calendar');
+                                }}
+                                className="text-zinc-400 hover:text-[#00d2d3] transition-colors cursor-pointer"
+                                title="Ver calendário"
+                              >
+                                <MessageSquare className="w-3 h-3 inline" />
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </td>
 
                     {/* Entrada */}
-                    <td className="py-2 px-2 text-center text-[11px] text-zinc-400 font-medium border-r border-white/[0.06]">
+                    <td className={`text-center font-medium border-r border-white/[0.06] text-zinc-400 ${rowDensity === 'compact' ? 'py-1 px-1 text-[10px]' : 'py-2 px-2 text-[11px]'}`}>
                       {provider.entryTime || '07h00'}
                     </td>
 
                     {/* Saída */}
-                    <td className="py-2 px-2 text-center text-[11px] text-zinc-400 font-medium border-r border-white/[0.08]">
+                    <td className={`text-center font-medium border-r border-white/[0.08] text-zinc-400 ${rowDensity === 'compact' ? 'py-1 px-1 text-[10px]' : 'py-2 px-2 text-[11px]'}`}>
                       {provider.exitTime || '19h00'}
                     </td>
 
@@ -877,7 +879,9 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                             }
                           }}
                           onContextMenu={e => handleOpenCellEditor(e, provider, d.dateStr, d.dayNumber)}
-                          className={`py-1.5 px-1 text-center border-r border-white/[0.04] cursor-pointer transition-all ${
+                          className={`text-center border-r border-white/[0.04] cursor-pointer transition-all ${
+                            rowDensity === 'compact' ? 'py-0.5 px-0.5' : 'py-1.5 px-1'
+                          } ${
                             isDayToday ? 'bg-[#00d2d3]/[0.05]' : ''
                           } ${isCellSelected ? 'ring-2 ring-[#00d2d3] ring-inset' : ''}`}
                           title={
@@ -888,12 +892,14 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                         >
                           <div className="flex items-center justify-center relative">
                             {code === '-' ? (
-                              <span className="text-zinc-600 text-xs font-medium w-7 h-7 flex items-center justify-center hover:text-zinc-400">
+                              <span className={`text-zinc-600 font-medium flex items-center justify-center hover:text-zinc-400 ${rowDensity === 'compact' ? 'w-5 h-5 text-[10px]' : 'w-7 h-7 text-xs'}`}>
                                 -
                               </span>
                             ) : (
                               <div
-                                className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-transform active:scale-95 relative ${chipStyle}`}
+                                className={`rounded-lg flex items-center justify-center transition-transform active:scale-95 relative ${chipStyle} ${
+                                  rowDensity === 'compact' ? 'w-5 h-5 text-[10px]' : 'w-7 h-7 text-xs'
+                                }`}
                               >
                                 {code}
                                 {saleOffer && (
