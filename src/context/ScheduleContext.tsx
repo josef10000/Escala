@@ -723,7 +723,7 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     const cleanPhone = whatsapp.trim();
     const updated = providers.map(p => {
       if (p.id === providerId) {
-        return { ...p, whatsapp: cleanPhone };
+        return { ...p, whatsapp: cleanPhone, phone: cleanPhone };
       }
       return p;
     });

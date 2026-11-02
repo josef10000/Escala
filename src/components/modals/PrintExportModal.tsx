@@ -144,8 +144,14 @@ export const PrintExportModal: React.FC<PrintExportModalProps> = ({ isOpen, onCl
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-[#0e1017] border border-white/[0.09] text-white rounded-2xl max-w-5xl w-full max-h-[94vh] flex flex-col shadow-2xl">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 cursor-pointer"
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        className="bg-[#0e1017] border border-white/[0.09] text-white rounded-2xl max-w-5xl w-full max-h-[94vh] flex flex-col shadow-2xl cursor-default"
+      >
         
         {/* Modal Top Header */}
         <div className="p-5 border-b border-white/[0.08] flex flex-wrap items-center justify-between gap-3 shrink-0 bg-[#12141c]">

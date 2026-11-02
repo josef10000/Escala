@@ -64,8 +64,14 @@ export const AutoScheduleModal: React.FC<AutoScheduleModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-[#0e1017] text-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden border border-white/[0.09]">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 cursor-pointer"
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        className="bg-[#0e1017] text-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden border border-white/[0.09] cursor-default"
+      >
         {/* Header */}
         <div className="p-5 border-b border-white/[0.08] bg-[#12141c] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">

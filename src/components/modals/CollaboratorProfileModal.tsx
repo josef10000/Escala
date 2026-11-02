@@ -43,7 +43,9 @@ export const CollaboratorProfileModal: React.FC<CollaboratorProfileModalProps> =
   const [whatsapp, setWhatsapp] = useState('');
   const [pin, setPin] = useState('');
   const [isSavingWhatsapp, setIsSavingWhatsapp] = useState(false);
+  const [whatsappSaved, setWhatsappSaved] = useState(false);
   const [isSavingPin, setIsSavingPin] = useState(false);
+  const [isChangingPin, setIsChangingPin] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -54,7 +56,9 @@ export const CollaboratorProfileModal: React.FC<CollaboratorProfileModalProps> =
       setSuccessMsg('');
       setErrorMsg('');
       setIsSavingWhatsapp(false);
+      setWhatsappSaved(false);
       setIsSavingPin(false);
+      setIsChangingPin(false);
     }
   }, [isOpen, provider]);
 
@@ -80,8 +84,12 @@ export const CollaboratorProfileModal: React.FC<CollaboratorProfileModalProps> =
     setIsSavingWhatsapp(true);
     try {
       await updateProviderWhatsapp(provider.id, cleanPhone);
-      setSuccessMsg('Número de WhatsApp atualizado com sucesso! Agora colegas podem contatar você para trocas e repasses.');
-      setTimeout(() => setSuccessMsg(''), 4000);
+      setWhatsappSaved(true);
+      setSuccessMsg('Número de WhatsApp atualizado e salvo com sucesso!');
+      setTimeout(() => {
+        setSuccessMsg('');
+        setWhatsappSaved(false);
+      }, 4000);
     } catch (err: any) {
       setErrorMsg(err.message || 'Erro ao salvar WhatsApp.');
     } finally {
@@ -102,8 +110,9 @@ export const CollaboratorProfileModal: React.FC<CollaboratorProfileModalProps> =
     try {
       const ok = await setupProviderPin(provider.id, cleanPin);
       if (ok) {
-        setSuccessMsg('PIN de segurança de 4 dígitos configurado com sucesso!');
+        setSuccessMsg('PIN de segurança de 4 dígitos configurado e salvo com sucesso!');
         setPin('');
+        setIsChangingPin(false);
         setTimeout(() => setSuccessMsg(''), 4000);
       } else {
         setErrorMsg('Erro ao configurar PIN.');
@@ -116,8 +125,14 @@ export const CollaboratorProfileModal: React.FC<CollaboratorProfileModalProps> =
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-[#0e1017] border border-white/[0.09] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 cursor-pointer"
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        className="relative w-full max-w-lg bg-[#0e1017] border border-white/[0.09] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] cursor-default"
+      >
         {/* Top Header */}
         <div className="px-6 py-5 border-b border-white/[0.08] flex items-center justify-between bg-[#12141c]">
           <div className="flex items-center gap-3">
@@ -149,13 +164,13 @@ export const CollaboratorProfileModal: React.FC<CollaboratorProfileModalProps> =
         {/* Feedback Alerts */}
         {successMsg && (
           <div className="mx-6 mt-4 p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center gap-3 text-emerald-300 text-xs">
-            <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+            <CheckCircle2 className="w-4 h-4 flex-shrink-0 text-emerald-400" />
             <span className="font-medium">{successMsg}</span>
           </div>
         )}
         {errorMsg && (
           <div className="mx-6 mt-4 p-3.5 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center gap-3 text-rose-300 text-xs">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-400" />
             <span className="font-medium">{errorMsg}</span>
           </div>
         )}
@@ -230,53 +245,84 @@ export const CollaboratorProfileModal: React.FC<CollaboratorProfileModalProps> =
               <button
                 type="submit"
                 disabled={isSavingWhatsapp}
-                className="px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-black transition-all disabled:opacity-50 flex items-center gap-1.5"
+                className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all disabled:opacity-50 flex items-center gap-1.5 ${
+                  whatsappSaved
+                    ? 'bg-emerald-400 text-black font-bold'
+                    : 'bg-emerald-500 hover:bg-emerald-400 text-black'
+                }`}
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                {isSavingWhatsapp ? 'Salvando...' : 'Salvar WhatsApp'}
+                {isSavingWhatsapp ? 'Salvando...' : whatsappSaved ? 'Salvo ✓' : 'Salvar WhatsApp'}
               </button>
             </div>
           </form>
 
           {/* Form: PIN Security */}
-          <form onSubmit={handleSavePin} className="p-4 rounded-xl bg-[#141720] border border-white/[0.06] space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-white flex items-center gap-2">
-                <KeyRound className="w-4 h-4 text-purple-400" />
-                PIN Pessoal de Acesso (4 dígitos)
-              </label>
-              <span className="text-[10px] text-neutral-400">
-                {provider.pin ? 'PIN configurado' : 'Sem PIN'}
-              </span>
-            </div>
-            <p className="text-xs text-neutral-400">
-              Proteja seu acesso individual à sua agenda e confirmação de permutas com uma senha de 4 dígitos.
-            </p>
-            <div className="flex items-center gap-2">
-              <input
-                type="password"
-                maxLength={4}
-                value={pin}
-                onChange={e => setPin(e.target.value.replace(/\D/g, ''))}
-                placeholder="Novo PIN de 4 dígitos..."
-                className="flex-1 bg-[#1b1f2b] border border-white/[0.08] rounded-xl px-3 py-2 text-white text-xs font-mono tracking-widest focus:outline-none focus:border-purple-500/50 text-center"
-              />
+          {provider.pin && !isChangingPin ? (
+            <div className="p-4 rounded-xl bg-[#141720] border border-white/[0.06] flex items-center justify-between text-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="font-semibold text-white">PIN de Segurança Configurado</div>
+                  <div className="text-[11px] text-neutral-400">Sua agenda e permutas estão protegidas por senha de 4 dígitos.</div>
+                </div>
+              </div>
               <button
-                type="submit"
-                disabled={isSavingPin || pin.length !== 4}
-                className="px-4 py-2 rounded-xl text-xs font-semibold bg-purple-600 hover:bg-purple-500 text-white transition-all disabled:opacity-50 flex items-center gap-1.5"
+                type="button"
+                onClick={() => setIsChangingPin(true)}
+                className="px-3.5 py-2 bg-[#1b1f2b] hover:bg-white/[0.08] text-purple-300 border border-purple-500/30 rounded-xl font-semibold transition-colors cursor-pointer shrink-0"
               >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                {isSavingPin ? 'Gravando...' : 'Definir PIN'}
+                Alterar PIN
               </button>
             </div>
-          </form>
+          ) : (
+            <form onSubmit={handleSavePin} className="p-4 rounded-xl bg-[#141720] border border-white/[0.06] space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-white flex items-center gap-2">
+                  <KeyRound className="w-4 h-4 text-purple-400" />
+                  {provider.pin ? 'Alterar PIN Pessoal de Acesso' : 'Definir PIN Pessoal de Acesso (4 dígitos)'}
+                </label>
+                {provider.pin && (
+                  <button
+                    type="button"
+                    onClick={() => setIsChangingPin(false)}
+                    className="text-[11px] text-neutral-400 hover:text-white cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                )}
+              </div>
+              <p className="text-xs text-neutral-400">
+                Proteja seu acesso individual à sua agenda e confirmação de permutas com uma senha de 4 dígitos.
+              </p>
+              <div className="flex items-center gap-2">
+                <input
+                  type="password"
+                  maxLength={4}
+                  value={pin}
+                  onChange={e => setPin(e.target.value.replace(/\D/g, ''))}
+                  placeholder="Novo PIN de 4 dígitos..."
+                  className="flex-1 bg-[#1b1f2b] border border-white/[0.08] rounded-xl px-3 py-2 text-white text-xs font-mono tracking-widest focus:outline-none focus:border-purple-500/50 text-center"
+                />
+                <button
+                  type="submit"
+                  disabled={isSavingPin || pin.length !== 4}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-purple-600 hover:bg-purple-500 text-white transition-all disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  {isSavingPin ? 'Gravando...' : 'Salvar PIN'}
+                </button>
+              </div>
+            </form>
+          )}
 
           {/* Additional details */}
           <div className="p-4 rounded-xl bg-[#141720]/60 border border-white/[0.04] text-xs text-neutral-400 space-y-1.5">
             <div className="flex items-center justify-between">
               <span>Telefone Cadastral:</span>
-              <span className="text-neutral-200 font-mono text-[11px]">{provider.phone || 'Não informado'}</span>
+              <span className="text-neutral-200 font-mono text-[11px]">{provider.whatsapp || provider.phone || 'Não informado'}</span>
             </div>
             <div className="flex items-center justify-between">
               <span>Regime Contratual:</span>

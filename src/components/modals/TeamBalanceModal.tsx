@@ -75,8 +75,14 @@ export const TeamBalanceModal: React.FC<TeamBalanceModalProps> = ({
   const overloadCount = stats.filter(s => s.isOverloaded).length;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-[#0e1017] text-white rounded-2xl p-6 border border-white/[0.09] shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden space-y-4">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 cursor-pointer"
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        className="bg-[#0e1017] text-white rounded-2xl p-6 border border-white/[0.09] shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden space-y-4 cursor-default"
+      >
         
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/[0.08] pb-4 shrink-0">

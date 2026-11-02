@@ -107,8 +107,14 @@ export const AbsenceBatchModal: React.FC<AbsenceBatchModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-[#0e1017] text-white rounded-2xl p-6 border border-white/[0.09] shadow-2xl max-w-lg w-full space-y-4 overflow-hidden">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 cursor-pointer"
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        className="bg-[#0e1017] text-white rounded-2xl p-6 border border-white/[0.09] shadow-2xl max-w-lg w-full space-y-4 overflow-hidden cursor-default"
+      >
         
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
