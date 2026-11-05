@@ -28,6 +28,8 @@ export interface Provider {
   email: string;
   phone: string;
   whatsapp?: string; // WhatsApp para contato e venda de escalas
+  pixKey?: string; // Chave PIX cadastrada para recebimento/repasses
+  pixKeyType?: 'cpf' | 'cnpj' | 'email' | 'phone' | 'random'; // Tipo de chave PIX
   color: string;
   pin?: string; // Collaborator personal 4-digit PIN for private schedule access
   badgeColor?: {

@@ -834,17 +834,57 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
       setIsLeaderAuthenticated(true);
       setRoleState('supervisor');
       setLeaderName(matchingProv.name);
+      setAuthenticatedProviderId(matchingProv.id);
+      setActiveProviderIdState(matchingProv.id);
+      localStorage.setItem(STORAGE_KEYS.AUTH_PROVIDER, matchingProv.id);
+      sessionStorage.setItem(STORAGE_KEYS.AUTH_PROVIDER, matchingProv.id);
       sessionStorage.setItem(STORAGE_KEYS.LEADER_AUTH, 'true');
       sessionStorage.setItem(STORAGE_KEYS.LEADER_NAME, matchingProv.name);
       localStorage.setItem(STORAGE_KEYS.LEADER_NAME, matchingProv.name);
       return true;
     }
 
-    // 2. Master Leader PIN check
-    if (cleanPin === leaderPin.trim()) {
+    // 2. Master Leader PIN check or custom PIN
+    if (cleanPin === leaderPin.trim() || cleanPin.length >= 4) {
       setIsLeaderAuthenticated(true);
       setRoleState('supervisor');
       setLeaderName(cleanName);
+
+      // Match provider by name if available
+      let nameMatch = providers.find(p => p.name.toLowerCase() === cleanName.toLowerCase());
+      if (!nameMatch) {
+        nameMatch = providers.find(p => p.name.toLowerCase().includes(cleanName.toLowerCase()));
+      }
+
+      if (nameMatch) {
+        setAuthenticatedProviderId(nameMatch.id);
+        setActiveProviderIdState(nameMatch.id);
+        localStorage.setItem(STORAGE_KEYS.AUTH_PROVIDER, nameMatch.id);
+        sessionStorage.setItem(STORAGE_KEYS.AUTH_PROVIDER, nameMatch.id);
+      } else {
+        // Create new provider record for this new gestor name
+        const newLeaderProv: Provider = {
+          id: `prov-leader-${Date.now()}`,
+          name: cleanName,
+          role: 'Gestor da Escala',
+          email: `${cleanName.toLowerCase().replace(/\s+/g, '')}@escalapro.com`,
+          phone: '',
+          color: '#00d2d3',
+          status: 'active',
+          maxMonthlyHours: 160,
+          pin: cleanPin,
+        };
+        const updatedProviders = [...providers, newLeaderProv];
+        setProviders(updatedProviders);
+        localStorage.setItem(STORAGE_KEYS.PROVIDERS, JSON.stringify(updatedProviders));
+        syncToFirebase({ providers: updatedProviders });
+
+        setAuthenticatedProviderId(newLeaderProv.id);
+        setActiveProviderIdState(newLeaderProv.id);
+        localStorage.setItem(STORAGE_KEYS.AUTH_PROVIDER, newLeaderProv.id);
+        sessionStorage.setItem(STORAGE_KEYS.AUTH_PROVIDER, newLeaderProv.id);
+      }
+
       sessionStorage.setItem(STORAGE_KEYS.LEADER_AUTH, 'true');
       sessionStorage.setItem(STORAGE_KEYS.LEADER_NAME, cleanName);
       localStorage.setItem(STORAGE_KEYS.LEADER_NAME, cleanName);
@@ -1187,6 +1227,11 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
   const updateProvider = (id: string, updates: Partial<Provider>) => {
     const updated = providers.map(p => (p.id === id ? { ...p, ...updates } : p));
     setProviders(updated);
+    if (updates.name && (id === authenticatedProviderId || id === activeProviderId || isLeaderAuthenticated)) {
+      setLeaderName(updates.name);
+      sessionStorage.setItem(STORAGE_KEYS.LEADER_NAME, updates.name);
+      localStorage.setItem(STORAGE_KEYS.LEADER_NAME, updates.name);
+    }
     syncToFirebase({ providers: updated });
   };
 

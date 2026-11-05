@@ -151,6 +151,7 @@ function ScheduleAppContent() {
           onOpenAnnouncements={() => setAnnouncementsOpen(true)}
           onOpenAuditLog={() => setAuditLogOpen(true)}
           onOpenKpiModal={() => setKpiModalOpen(true)}
+          onOpenExecutiveReportModal={() => setExecutiveReportModalOpen(true)}
         />
 
         {/* Main Container */}

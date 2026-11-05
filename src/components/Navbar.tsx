@@ -5,15 +5,8 @@ import {
   Inbox,
   LogOut,
   Share2,
-  CalendarDays,
-  Calendar,
-  LayoutGrid,
-  UserCheck,
-  Shield,
-  FileSpreadsheet,
   User as UserIcon,
   Coins,
-  Sparkles,
 } from 'lucide-react';
 import { useSchedule } from '../context/ScheduleContext';
 
@@ -37,23 +30,23 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({
   onOpenLeaderAuth,
   onOpenRequestsCenter,
+  onOpenProviderModal,
   onOpenShareModal,
   onOpenCollaboratorAuth,
   onOpenExecutiveReportModal,
   onOpenMarketplace,
   onOpenProfileModal,
-  onOpenImportModal,
-  onOpenAnnouncements,
   onOpenAuditLog,
   onOpenKpiModal,
 }) => {
   const {
     providers,
     isLeaderAuthenticated,
+    leaderName,
     authenticatedProviderId,
     activeProviderId,
     logoutProvider,
-    isSyncing,
+    logoutLeader,
     swapRequests,
     scheduleRequests,
     shiftSaleOffers,
@@ -66,41 +59,48 @@ export const Navbar: React.FC<NavbarProps> = ({
   const totalPending = pendingSwapsCount + pendingRequestsCount;
   const availableSalesCount = shiftSaleOffers.filter(s => s.status === 'available').length;
 
-  // Active or authenticated collaborator profile
+  // Active or authenticated collaborator / leader profile
   const authProviderObj = providers.find(p => p.id === authenticatedProviderId);
-  const activeProviderObj = providers.find(p => p.id === activeProviderId) || providers[0];
-  const displayUser = authProviderObj || (isLeaderAuthenticated ? { name: 'Daniel Antonio da Silva', role: 'PRESTADOR / GESTOR' } : activeProviderObj);
+  const activeProviderObj = providers.find(p => p.id === activeProviderId);
+  const leaderProviderObj = leaderName ? providers.find(p => p.name.toLowerCase() === leaderName.toLowerCase()) : null;
+
+  const displayUser =
+    authProviderObj ||
+    leaderProviderObj ||
+    (isLeaderAuthenticated && leaderName ? { id: 'leader-temp', name: leaderName, role: 'GESTOR DA ESCALA' } : null) ||
+    activeProviderObj ||
+    providers[0] ||
+    { id: 'guest', name: 'Gestor da Escala', role: 'GESTOR DA ESCALA' };
 
   return (
-    <header className="fixed top-0 inset-x-0 z-50 bg-[#0d0e13]/85 backdrop-blur-xl border-b border-white/[0.07] text-[#e3e2e7]">
-      <div className="h-16 w-full px-4 sm:px-8 flex items-center justify-between gap-4">
+    <header className="fixed top-0 inset-x-0 z-50 bg-[#0d0e13]/90 backdrop-blur-xl border-b border-white/[0.08] text-[#e3e2e7] h-16">
+      <div className="h-16 w-full px-3 sm:px-6 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
         
-        {/* Left: Brand + Nuvem Status + Desktop Navigation Pill */}
-        <div className="flex items-center gap-6 xl:gap-8">
+        {/* Left: Brand + Navigation Segmented Tabs */}
+        <div className="flex items-center gap-3 md:gap-5 shrink-0">
           
           {/* Brand Identity */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setViewMode('escala')}
-              className="flex items-center gap-2.5 cursor-pointer group text-left"
-            >
-              <img
-                src="/assets/aistudio/image_fb26a50f.png"
-                alt="EscalaPro Logo"
-                className="w-8 h-8 object-contain rounded-lg shadow-sm group-hover:scale-105 transition-transform"
-              />
-              <span className="font-semibold text-white tracking-tight text-base">
-                EscalaPro
-              </span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setViewMode('escala')}
+            className="flex items-center gap-2 cursor-pointer group shrink-0"
+          >
+            <img
+              src="/assets/aistudio/image_fb26a50f.png"
+              alt="EscalaPro Logo"
+              className="w-8 h-8 object-contain rounded-lg shadow-sm group-hover:scale-105 transition-transform"
+            />
+            <span className="font-bold text-white tracking-tight text-base hidden sm:inline">
+              EscalaPro
+            </span>
+          </button>
 
           {/* Center Navigation Tabs (Obsidian Segmented Menu) */}
-          <nav className="hidden xl:flex items-center gap-1 p-1 rounded-xl bg-[#1a1b20] border border-white/[0.04]">
+          <nav className="flex items-center gap-1 p-1 rounded-xl bg-[#1a1b20] border border-white/[0.05] shrink-0">
             <button
               type="button"
               onClick={() => setViewMode('escala')}
-              className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium ${
+              className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium whitespace-nowrap ${
                 viewMode === 'escala'
                   ? 'bg-[#343439] text-white font-semibold shadow-sm'
                   : 'text-[#bacac5] hover:text-white hover:bg-[#292a2e]'
@@ -112,7 +112,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => setViewMode('personal-calendar')}
-              className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium ${
+              className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium whitespace-nowrap ${
                 viewMode === 'personal-calendar'
                   ? 'bg-[#343439] text-white font-semibold shadow-sm'
                   : 'text-[#bacac5] hover:text-white hover:bg-[#292a2e]'
@@ -124,7 +124,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => setViewMode('agenda')}
-              className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium ${
+              className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium whitespace-nowrap hidden md:block ${
                 viewMode === 'agenda'
                   ? 'bg-[#343439] text-white font-semibold shadow-sm'
                   : 'text-[#bacac5] hover:text-white hover:bg-[#292a2e]'
@@ -136,29 +136,34 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => {
-                if (onOpenExecutiveReportModal) onOpenExecutiveReportModal();
-                else setViewMode('escala');
+                if (onOpenExecutiveReportModal) {
+                  onOpenExecutiveReportModal();
+                } else if (onOpenProviderModal) {
+                  onOpenProviderModal();
+                } else {
+                  setViewMode('escala');
+                }
               }}
-              className="px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer text-[#bacac5] hover:text-white hover:bg-[#292a2e] font-medium"
+              className="px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer text-[#bacac5] hover:text-white hover:bg-[#292a2e] font-medium whitespace-nowrap"
             >
               Relatórios & Equipe
             </button>
           </nav>
         </div>
 
-        {/* Right Actions & User Profile */}
-        <div className="flex items-center gap-3">
+        {/* Right Tools, Share, Leader Auth & User Profile */}
+        <div className="flex items-center gap-2 shrink-0">
           
           {/* Venda & Repasse de Plantões PJ */}
           {onOpenMarketplace && (
             <button
               type="button"
               onClick={onOpenMarketplace}
-              className="h-8 px-2.5 sm:px-3 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs font-medium border border-amber-500/25 flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="h-8 px-2.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs font-medium border border-amber-500/25 flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
               title="Mural de venda e compra de plantões remunerados PJ"
             >
               <Coins className="w-3.5 h-3.5 text-amber-400" />
-              <span className="hidden sm:inline">Venda de Plantões</span>
+              <span className="hidden lg:inline whitespace-nowrap">Venda Plantões</span>
               {availableSalesCount > 0 && (
                 <span className="px-1.5 py-0.2 bg-amber-400 text-black rounded-full text-[10px] font-black">
                   {availableSalesCount}
@@ -167,68 +172,40 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           )}
 
-          {/* Announcements / Bulletin Board (Everyone) */}
-          {onOpenAnnouncements && (
-            <button
-              type="button"
-              onClick={onOpenAnnouncements}
-              className="h-8 px-2.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white text-xs font-medium border border-white/[0.08] flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="Mural de Avisos e Comunicados da Liderança"
-            >
-              <span>📢 Avisos</span>
-            </button>
-          )}
-
-          {/* Gestor Only Section (Organized, clean, restricted) */}
+          {/* Gestor Only Additional Tools */}
           {isLeaderAuthenticated && (
-            <div className="flex items-center gap-1.5 pl-1 border-l border-white/[0.08]">
-              {/* Montar / Importar Escala */}
-              {onOpenImportModal && (
-                <button
-                  type="button"
-                  onClick={onOpenImportModal}
-                  className="h-8 px-3 rounded-lg bg-[#00d2d3] hover:bg-[#57f1db] text-[#003731] text-xs font-bold shadow-sm flex items-center gap-1.5 transition-all cursor-pointer"
-                  title="Importar escala por foto (IA), copiar texto do WhatsApp, gerar por turmas ou zerar escala"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-[#003731]" />
-                  <span className="hidden md:inline">Montar Escala</span>
-                </button>
-              )}
-
-              {/* KPIs (Gestor only) */}
+            <div className="hidden lg:flex items-center gap-1.5 pl-1 border-l border-white/[0.08]">
               {onOpenKpiModal && (
                 <button
                   type="button"
                   onClick={onOpenKpiModal}
-                  className="h-8 px-2.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white text-xs font-medium border border-white/[0.08] flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className="h-8 px-2.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white text-xs font-medium border border-white/[0.08] flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
                   title="Indicadores Operacionais e KPIs de Escala"
                 >
                   <span>📊 KPIs</span>
                 </button>
               )}
 
-              {/* Audit Log (Gestor only) */}
               {onOpenAuditLog && (
                 <button
                   type="button"
                   onClick={onOpenAuditLog}
-                  className="h-8 px-2.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white text-xs font-medium border border-white/[0.08] flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className="h-8 px-2.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white text-xs font-medium border border-white/[0.08] flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
                   title="Histórico de Auditoria e Log de Alterações"
                 >
                   <span>📋 Auditoria</span>
                 </button>
               )}
 
-              {/* Pending Requests Badge */}
               {onOpenRequestsCenter && (
                 <button
                   type="button"
                   onClick={onOpenRequestsCenter}
-                  className="relative flex items-center gap-1.5 h-8 px-2.5 text-xs font-medium text-zinc-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] rounded-lg transition-colors cursor-pointer"
+                  className="relative flex items-center gap-1.5 h-8 px-2.5 text-xs font-medium text-zinc-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] rounded-lg transition-colors cursor-pointer shrink-0"
                   title="Central de pedidos de folga e trocas pendentes"
                 >
                   <Inbox className="w-3.5 h-3.5 text-zinc-400" />
-                  <span className="hidden md:inline">Pedidos</span>
+                  <span className="hidden xl:inline whitespace-nowrap">Pedidos</span>
                   {totalPending > 0 && (
                     <span className="px-1.5 py-0.2 bg-[#00d2d3] text-[#003731] rounded-full text-[10px] font-black">
                       {totalPending}
@@ -239,16 +216,15 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           )}
 
-          {/* Share Schedule Action Button */}
+          {/* Share Schedule Action Button - SÓ O SÍMBOLO (Sem texto) */}
           {onOpenShareModal && (
             <button
               type="button"
               onClick={onOpenShareModal}
-              className="hidden sm:flex h-8 px-3 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white text-xs font-medium border border-white/[0.08] items-center gap-1.5 transition-colors cursor-pointer"
+              className="h-8 w-8 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white border border-white/[0.08] flex items-center justify-center transition-colors cursor-pointer shrink-0"
               title="Compartilhar Escala com a equipe"
             >
-              <Share2 className="w-3.5 h-3.5 text-zinc-400" />
-              <span>Compartilhar</span>
+              <Share2 className="w-4 h-4 text-zinc-300 group-hover:text-white" />
             </button>
           )}
 
@@ -257,89 +233,89 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={onOpenLeaderAuth}
-              className="h-8 px-2.5 sm:px-3 rounded-lg bg-white/[0.05] hover:bg-white/[0.09] text-zinc-200 hover:text-white text-xs font-medium border border-white/[0.12] flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="Líder autenticado. Clique para alterar PIN ou sair."
+              className="h-8 px-2.5 sm:px-3 rounded-lg bg-[#00d2d3]/15 hover:bg-[#00d2d3]/25 text-[#00d2d3] text-xs font-semibold border border-[#00d2d3]/30 flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+              title="Líder autenticado. Clique para gerenciar PIN ou desativar."
             >
               <Unlock className="w-3.5 h-3.5 text-[#00d2d3]" />
-              <span className="hidden sm:inline">Gestão Ativa</span>
+              <span className="hidden sm:inline whitespace-nowrap">Gestão Ativa</span>
             </button>
           ) : (
             <button
               type="button"
               onClick={onOpenLeaderAuth}
-              className="h-8 px-2.5 sm:px-3 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white text-xs font-medium border border-white/[0.08] flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="Apenas a líder pode fazer alterações na escala."
+              className="h-8 px-2.5 sm:px-3 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white text-xs font-medium border border-white/[0.08] flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+              title="Clique para acessar como Gestor/Líder da escala"
             >
               <Lock className="w-3.5 h-3.5 text-zinc-400" />
-              <span className="hidden sm:inline">Acesso Gestor</span>
+              <span className="hidden sm:inline whitespace-nowrap">Acesso Gestor</span>
             </button>
           )}
 
           {/* Hairline Divider */}
-          <div className="h-5 w-px bg-white/[0.08] hidden sm:block" />
+          <div className="h-5 w-px bg-white/[0.08] hidden sm:block shrink-0" />
 
-          {/* Collaborator Profile Information Block */}
-          <div className="flex items-center gap-2 pl-1">
-            {onOpenCollaboratorAuth && !authProviderObj && (
+          {/* User Profile Block */}
+          <div className="flex items-center gap-2 pl-1 shrink-0">
+            {onOpenCollaboratorAuth && !authProviderObj && !isLeaderAuthenticated && (
               <button
                 type="button"
                 onClick={onOpenCollaboratorAuth}
-                className="h-8 px-2.5 rounded-lg bg-[#00d2d3]/15 hover:bg-[#00d2d3]/25 text-[#00d2d3] border border-[#00d2d3]/30 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-98"
+                className="h-8 px-2.5 rounded-lg bg-[#00d2d3]/15 hover:bg-[#00d2d3]/25 text-[#00d2d3] border border-[#00d2d3]/30 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-98 shrink-0"
                 title="Clique para escolher seu nome na lista, criar seu PIN e entrar no seu perfil"
               >
                 <UserIcon className="w-3.5 h-3.5 text-[#00d2d3]" />
-                <span className="hidden sm:inline">Entrar no Meu Perfil</span>
+                <span className="hidden sm:inline whitespace-nowrap">Meu Perfil</span>
               </button>
             )}
 
+            {/* Profile Name Badge */}
             <button
               type="button"
               onClick={() => {
-                if (authProviderObj && onOpenProfileModal) {
+                if (onOpenProfileModal) {
                   onOpenProfileModal();
                 } else if (onOpenCollaboratorAuth) {
                   onOpenCollaboratorAuth();
-                } else if (onOpenProfileModal) {
-                  onOpenProfileModal();
                 }
               }}
-              className="hidden md:flex flex-col text-right cursor-pointer group text-left hover:opacity-90"
-              title="Clique para ver seu perfil, cadastrar WhatsApp, gerenciar PIN ou trocar de usuário"
+              className="hidden md:flex flex-col text-right cursor-pointer group hover:opacity-90 max-w-[130px] lg:max-w-[180px] shrink-0"
+              title="Clique para ver ou alterar seu perfil (Nome, WhatsApp, PIX, PIN ou Sair)"
             >
-              <span className="text-xs text-white font-medium leading-none group-hover:text-[#57f1db] transition-colors">
+              <span className="text-xs text-white font-semibold truncate leading-tight group-hover:text-[#00d2d3] transition-colors">
                 {displayUser.name}
               </span>
-              <span className="text-[10px] font-mono text-[#bacac5] tracking-wider uppercase pt-1">
-                {isLeaderAuthenticated ? 'GESTOR DA ESCALA' : authProviderObj ? 'PERFIL CONECTADO (VER)' : 'SELEÇÃO DE PERFIL'}
+              <span className="text-[10px] font-mono text-[#00d2d3] tracking-wider uppercase truncate">
+                {isLeaderAuthenticated ? 'GESTOR DA ESCALA' : authProviderObj ? 'PERFIL ATIVO' : 'SELEÇÃO DE PERFIL'}
               </span>
             </button>
 
-            {/* Profile Avatar / Trigger for Profile */}
-            <div className="relative group">
+            {/* Profile Avatar / Trigger */}
+            <div className="relative group shrink-0">
               <button
                 type="button"
                 onClick={() => {
-                  if (authProviderObj && onOpenProfileModal) {
+                  if (onOpenProfileModal) {
                     onOpenProfileModal();
                   } else if (onOpenCollaboratorAuth) {
                     onOpenCollaboratorAuth();
-                  } else if (onOpenProfileModal) {
-                    onOpenProfileModal();
                   }
                 }}
-                className="w-8 h-8 rounded-full bg-[#57f1db] hover:brightness-110 active:scale-95 transition-all flex items-center justify-center text-[#003731] font-bold shadow-md cursor-pointer"
-                title="Meu Perfil de Prestador (Escolher Nome, WhatsApp & PIN)"
+                className="w-8 h-8 rounded-full bg-[#00d2d3] hover:brightness-110 active:scale-95 transition-all flex items-center justify-center text-[#003731] font-bold shadow-md cursor-pointer shrink-0"
+                title="Meu Perfil (Editar Nome, WhatsApp, PIX, PIN ou Sair)"
               >
                 <UserIcon className="w-4 h-4 text-[#003731]" />
               </button>
 
-              {/* Logout button if collaborator is explicitly authenticated */}
-              {authProviderObj && (
+              {/* Quick logout badge if authenticated */}
+              {(authProviderObj || isLeaderAuthenticated) && (
                 <button
                   type="button"
-                  onClick={logoutProvider}
+                  onClick={() => {
+                    if (isLeaderAuthenticated) logoutLeader();
+                    if (authProviderObj) logoutProvider();
+                  }}
                   className="hidden group-hover:flex absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-rose-600 text-white items-center justify-center hover:bg-rose-500 cursor-pointer shadow-sm"
-                  title="Desconectar perfil deste aparelho"
+                  title="Sair do perfil"
                 >
                   <LogOut className="w-2.5 h-2.5" />
                 </button>
