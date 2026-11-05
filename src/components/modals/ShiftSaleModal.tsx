@@ -151,8 +151,14 @@ export const ShiftSaleModal: React.FC<ShiftSaleModalProps> = ({
   const quickPricePresets = [0, 50, 100, 150, 200, 250, 300];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl bg-[#0e1017] border border-white/[0.09] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 cursor-pointer"
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        className="relative w-full max-w-xl bg-[#0e1017] border border-white/[0.09] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] cursor-default"
+      >
         {/* Header */}
         <div className="px-6 py-5 border-b border-white/[0.08] flex items-center justify-between bg-[#12141c]">
           <div className="flex items-center gap-3">

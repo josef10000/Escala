@@ -40,7 +40,7 @@ export const LeaderAuthModal: React.FC<LeaderAuthModalProps> = ({ isOpen, onClos
       setInputPin('');
       onClose();
     } else {
-      setErrorMsg('Senha incorreta. A senha padrão inicial é 1234');
+      setErrorMsg('Senha ou PIN incorreto. Informe seu PIN individual cadastrado no perfil ou a senha Mestra de Liderança (1234).');
     }
   };
 
@@ -68,8 +68,14 @@ export const LeaderAuthModal: React.FC<LeaderAuthModalProps> = ({ isOpen, onClos
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-100">
-      <div className="bg-[#12141A] text-zinc-100 rounded-3xl p-6 border border-white/[0.08] shadow-2xl max-w-sm w-full space-y-5">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-100 cursor-pointer"
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        className="bg-[#12141A] text-zinc-100 rounded-3xl p-6 border border-white/[0.08] shadow-2xl max-w-sm w-full space-y-5 cursor-default"
+      >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
           <div className="flex items-center gap-3">
@@ -196,22 +202,25 @@ export const LeaderAuthModal: React.FC<LeaderAuthModalProps> = ({ isOpen, onClos
                 required
                 value={inputName}
                 onChange={e => setInputName(e.target.value)}
-                placeholder="Ex: Dra. Ana Souza"
+                placeholder="Ex: Dra. Ana Souza, Valéria..."
                 className="w-full px-3 py-2 text-xs bg-[#1A1D24] text-white border border-white/[0.08] rounded-xl focus:border-[#00d2d3] focus:outline-none font-medium"
               />
             </div>
 
             <div>
               <label className="block text-xs font-bold text-zinc-300 mb-1">
-                Senha / PIN de Acesso:
+                Senha ou PIN Individual de Acesso:
               </label>
               <input
                 type="password"
                 value={inputPin}
                 onChange={e => setInputPin(e.target.value)}
-                placeholder="Senha (padrão inicial: 1234)"
+                placeholder="PIN individual ou Mestre (1234)"
                 className="w-full px-3 py-2 text-xs bg-[#1A1D24] text-white border border-white/[0.08] rounded-xl focus:border-[#00d2d3] focus:outline-none font-medium"
               />
+              <p className="text-[10px] text-zinc-500 mt-1 font-medium">
+                Aceita seu PIN individual cadastrado no seu perfil ou a senha Mestra (1234).
+              </p>
             </div>
 
             {errorMsg && (

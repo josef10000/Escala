@@ -15,7 +15,8 @@ import {
   TeamGroup,
   AttendanceIncident,
   ShiftSaleOffer,
-  ShiftSaleStatus
+  ShiftSaleStatus,
+  WeekendColumn,
 } from '../types';
 import {
   INITIAL_DEPARTMENTS,
@@ -23,6 +24,10 @@ import {
   INITIAL_SHIFT_TYPES,
   generateInitialAssignments
 } from '../data/initialData';
+import {
+  INITIAL_WEEKEND_COLUMNS,
+  INITIAL_WEEKEND_ASSIGNMENTS,
+} from '../data/weekendData';
 import { formatDateToISO } from '../utils/dateUtils';
 import { db } from '../lib/firebase';
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
@@ -102,6 +107,18 @@ interface ScheduleContextType {
   isMonthPublished: (year: number, monthIndex: number) => boolean;
   toggleMonthPublishStatus: (year: number, monthIndex: number) => void;
 
+  // Announcements / Bulletin Board
+  announcements: Array<{
+    id: string;
+    title: string;
+    message: string;
+    priority: 'normal' | 'urgent';
+    authorName: string;
+    createdAt: string;
+  }>;
+  addAnnouncement: (data: { title: string; message: string; priority: 'normal' | 'urgent'; authorName: string }) => void;
+  deleteAnnouncement: (id: string) => void;
+
   // Venda & Compra de Escala (Marketplace de Plantões)
   createShiftSaleOffer: (data: {
     shiftAssignmentId: string;
@@ -114,6 +131,16 @@ interface ScheduleContextType {
   buyShiftSaleOffer: (offerId: string, buyerProviderId: string) => Promise<boolean>;
   cancelShiftSaleOffer: (offerId: string) => void;
   updateProviderWhatsapp: (providerId: string, whatsapp: string) => Promise<void>;
+
+  // Weekend Schedule View
+  weekendColumns: WeekendColumn[];
+  weekendAssignments: Record<string, Record<string, string>>;
+  addWeekendColumn: (name: string) => void;
+  renameWeekendColumn: (columnId: string, newName: string) => void;
+  deleteWeekendColumn: (columnId: string) => void;
+  updateWeekendCell: (dateStr: string, columnId: string, value: string) => void;
+  clearWeekendCell: (dateStr: string, columnId: string) => void;
+  clonePreviousMonthWeekendSchedule: (targetYear: number, targetMonthIndex: number) => number;
 
   // Actions
   addAssignment: (data: Omit<ShiftAssignment, 'id' | 'createdAt'>) => string;
@@ -199,6 +226,8 @@ const STORAGE_KEYS = {
   LAST_UPDATED_BY: 'escalapro_last_updated_by_oct2026_v1',
   REGIME: 'escalapro_regime_oct2026_v1',
   SHIFT_SALES: 'escalapro_shift_sales_oct2026_v1',
+  WEEKEND_COLUMNS: 'escalapro_weekend_columns_v1',
+  WEEKEND_ASSIGNMENTS: 'escalapro_weekend_assignments_v1',
 };
 
 export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -382,6 +411,180 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   });
 
+  const [announcements, setAnnouncements] = useState<Array<{
+    id: string;
+    title: string;
+    message: string;
+    priority: 'normal' | 'urgent';
+    authorName: string;
+    createdAt: string;
+  }>>(() => {
+    try {
+      const saved = localStorage.getItem('escalapro_announcements_v1');
+      if (saved) return JSON.parse(saved);
+      return [
+        {
+          id: 'ann-1',
+          title: 'Bem-vindo ao Sistema EscalaPro',
+          message: 'Novo painel unificado de plantões, trocas, repasses PJ e mural de avisos ativo para todos os prestadores.',
+          priority: 'normal',
+          authorName: 'Liderança',
+          createdAt: new Date().toISOString(),
+        }
+      ];
+    } catch {
+      return [];
+    }
+  });
+
+  const addAnnouncement = (data: { title: string; message: string; priority: 'normal' | 'urgent'; authorName: string }) => {
+    const newItem = {
+      id: `ann-${Date.now()}`,
+      ...data,
+      createdAt: new Date().toISOString(),
+    };
+    const updated = [newItem, ...announcements];
+    setAnnouncements(updated);
+    localStorage.setItem('escalapro_announcements_v1', JSON.stringify(updated));
+    syncToFirebase({ announcements: updated } as any);
+  };
+
+  const deleteAnnouncement = (id: string) => {
+    const updated = announcements.filter(a => a.id !== id);
+    setAnnouncements(updated);
+    localStorage.setItem('escalapro_announcements_v1', JSON.stringify(updated));
+    syncToFirebase({ announcements: updated } as any);
+  };
+
+  // Weekend Schedule View State & Actions
+  const [weekendColumns, setWeekendColumns] = useState<WeekendColumn[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.WEEKEND_COLUMNS);
+      return saved ? JSON.parse(saved) : INITIAL_WEEKEND_COLUMNS;
+    } catch {
+      return INITIAL_WEEKEND_COLUMNS;
+    }
+  });
+
+  const [weekendAssignments, setWeekendAssignments] = useState<Record<string, Record<string, string>>>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.WEEKEND_ASSIGNMENTS);
+      return saved ? JSON.parse(saved) : INITIAL_WEEKEND_ASSIGNMENTS;
+    } catch {
+      return INITIAL_WEEKEND_ASSIGNMENTS;
+    }
+  });
+
+  const addWeekendColumn = (name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    const newCol: WeekendColumn = {
+      id: `col-${Date.now()}`,
+      name: trimmed,
+    };
+    const updated = [...weekendColumns, newCol];
+    setWeekendColumns(updated);
+    try {
+      localStorage.setItem(STORAGE_KEYS.WEEKEND_COLUMNS, JSON.stringify(updated));
+    } catch (_) {}
+    syncToFirebase({ weekendColumns: updated } as any);
+  };
+
+  const renameWeekendColumn = (columnId: string, newName: string) => {
+    const trimmed = newName.trim();
+    if (!trimmed) return;
+    const updated = weekendColumns.map(col => col.id === columnId ? { ...col, name: trimmed } : col);
+    setWeekendColumns(updated);
+    try {
+      localStorage.setItem(STORAGE_KEYS.WEEKEND_COLUMNS, JSON.stringify(updated));
+    } catch (_) {}
+    syncToFirebase({ weekendColumns: updated } as any);
+  };
+
+  const deleteWeekendColumn = (columnId: string) => {
+    const updated = weekendColumns.filter(col => col.id !== columnId);
+    setWeekendColumns(updated);
+    try {
+      localStorage.setItem(STORAGE_KEYS.WEEKEND_COLUMNS, JSON.stringify(updated));
+    } catch (_) {}
+    syncToFirebase({ weekendColumns: updated } as any);
+  };
+
+  const updateWeekendCell = (dateStr: string, columnId: string, value: string) => {
+    setWeekendAssignments(prev => {
+      const daySlots = { ...(prev[dateStr] || {}) };
+      if (!value || value.trim() === '') {
+        delete daySlots[columnId];
+      } else {
+        daySlots[columnId] = value.trim();
+      }
+      const updated = { ...prev, [dateStr]: daySlots };
+      try {
+        localStorage.setItem(STORAGE_KEYS.WEEKEND_ASSIGNMENTS, JSON.stringify(updated));
+      } catch (_) {}
+      syncToFirebase({ weekendAssignments: updated } as any);
+      return updated;
+    });
+  };
+
+  const clearWeekendCell = (dateStr: string, columnId: string) => {
+    updateWeekendCell(dateStr, columnId, '');
+  };
+
+  const clonePreviousMonthWeekendSchedule = (targetYear: number, targetMonthIndex: number): number => {
+    let prevYear = targetYear;
+    let prevMonthIndex = targetMonthIndex - 1;
+    if (prevMonthIndex < 0) {
+      prevMonthIndex = 11;
+      prevYear--;
+    }
+
+    // Collect weekend dates for previous month
+    const prevDaysInMonth = new Date(prevYear, prevMonthIndex + 1, 0).getDate();
+    const prevWeekendDates: string[] = [];
+    for (let d = 1; d <= prevDaysInMonth; d++) {
+      const dayOfWeek = new Date(prevYear, prevMonthIndex, d).getDay();
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        prevWeekendDates.push(`${prevYear}-${String(prevMonthIndex + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
+      }
+    }
+
+    // Collect weekend dates for target month
+    const targetDaysInMonth = new Date(targetYear, targetMonthIndex + 1, 0).getDate();
+    const targetWeekendDates: string[] = [];
+    for (let d = 1; d <= targetDaysInMonth; d++) {
+      const dayOfWeek = new Date(targetYear, targetMonthIndex, d).getDay();
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        targetWeekendDates.push(`${targetYear}-${String(targetMonthIndex + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
+      }
+    }
+
+    if (targetWeekendDates.length === 0) return 0;
+
+    let appliedCount = 0;
+    const updatedAssignments = { ...weekendAssignments };
+
+    targetWeekendDates.forEach((targetDateStr, idx) => {
+      if (prevWeekendDates.length > 0) {
+        const sourceDateStr = prevWeekendDates[idx % prevWeekendDates.length];
+        const sourceDayAssignments = weekendAssignments[sourceDateStr];
+
+        if (sourceDayAssignments && Object.keys(sourceDayAssignments).length > 0) {
+          updatedAssignments[targetDateStr] = { ...sourceDayAssignments };
+          appliedCount += Object.keys(sourceDayAssignments).length;
+        }
+      }
+    });
+
+    setWeekendAssignments(updatedAssignments);
+    try {
+      localStorage.setItem(STORAGE_KEYS.WEEKEND_ASSIGNMENTS, JSON.stringify(updatedAssignments));
+    } catch (_) {}
+    syncToFirebase({ weekendAssignments: updatedAssignments });
+
+    return appliedCount;
+  };
+
   // Sync role with leader authentication
   useEffect(() => {
     if (isLeaderAuthenticated) {
@@ -480,6 +683,18 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             setLeaderPin(data.leaderPin);
             localStorage.setItem(STORAGE_KEYS.LEADER_PIN, data.leaderPin);
           }
+          if (data.weekendColumns && Array.isArray(data.weekendColumns)) {
+            setWeekendColumns(data.weekendColumns);
+            try {
+              localStorage.setItem(STORAGE_KEYS.WEEKEND_COLUMNS, JSON.stringify(data.weekendColumns));
+            } catch (_) {}
+          }
+          if (data.weekendAssignments && typeof data.weekendAssignments === 'object') {
+            setWeekendAssignments(data.weekendAssignments);
+            try {
+              localStorage.setItem(STORAGE_KEYS.WEEKEND_ASSIGNMENTS, JSON.stringify(data.weekendAssignments));
+            } catch (_) {}
+          }
           if (data.updatedAt) {
             setLastUpdatedAt(data.updatedAt);
             localStorage.setItem(STORAGE_KEYS.LAST_UPDATED, data.updatedAt);
@@ -558,6 +773,8 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     shiftSaleOffers?: ShiftSaleOffer[];
     leaderPin?: string;
     publishedMonths?: Record<string, boolean>;
+    weekendColumns?: WeekendColumn[];
+    weekendAssignments?: Record<string, Record<string, string>>;
   }): Promise<boolean> => {
     try {
       const scheduleDocRef = doc(db, 'schedule_store', 'main');
@@ -604,16 +821,36 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
 
   // Leader Authentication Methods
   const authenticateLeader = (name: string, pin: string): boolean => {
-    if (pin.trim() === leaderPin.trim() && name.trim()) {
+    const cleanPin = pin.trim();
+    const cleanName = name.trim();
+    if (!cleanPin || !cleanName) return false;
+
+    // 1. Check if any provider matches this name (case-insensitive) and has a personal PIN matching cleanPin
+    const matchingProv = providers.find(
+      p => p.name.toLowerCase() === cleanName.toLowerCase() && p.pin && p.pin.trim() === cleanPin
+    );
+
+    if (matchingProv) {
       setIsLeaderAuthenticated(true);
       setRoleState('supervisor');
-      const cleanName = name.trim();
+      setLeaderName(matchingProv.name);
+      sessionStorage.setItem(STORAGE_KEYS.LEADER_AUTH, 'true');
+      sessionStorage.setItem(STORAGE_KEYS.LEADER_NAME, matchingProv.name);
+      localStorage.setItem(STORAGE_KEYS.LEADER_NAME, matchingProv.name);
+      return true;
+    }
+
+    // 2. Master Leader PIN check
+    if (cleanPin === leaderPin.trim()) {
+      setIsLeaderAuthenticated(true);
+      setRoleState('supervisor');
       setLeaderName(cleanName);
       sessionStorage.setItem(STORAGE_KEYS.LEADER_AUTH, 'true');
       sessionStorage.setItem(STORAGE_KEYS.LEADER_NAME, cleanName);
       localStorage.setItem(STORAGE_KEYS.LEADER_NAME, cleanName);
       return true;
     }
+
     return false;
   };
 
@@ -1721,10 +1958,23 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
         isMonthPublished,
         toggleMonthPublishStatus,
 
+        announcements,
+        addAnnouncement,
+        deleteAnnouncement,
+
         createShiftSaleOffer,
         buyShiftSaleOffer,
         cancelShiftSaleOffer,
         updateProviderWhatsapp,
+
+        weekendColumns,
+        weekendAssignments,
+        addWeekendColumn,
+        renameWeekendColumn,
+        deleteWeekendColumn,
+        updateWeekendCell,
+        clearWeekendCell,
+        clonePreviousMonthWeekendSchedule,
 
         addAssignment,
         updateAssignment,

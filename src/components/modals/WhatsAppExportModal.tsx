@@ -164,8 +164,14 @@ export const WhatsAppExportModal: React.FC<WhatsAppExportModalProps> = ({ isOpen
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-100">
-      <div className="bg-[#141c28] text-slate-100 rounded-3xl border border-[#1e2a3a] shadow-2xl max-w-2xl w-full flex flex-col max-h-[90vh] overflow-hidden">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-100 cursor-pointer"
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        className="bg-[#141c28] text-slate-100 rounded-3xl border border-[#1e2a3a] shadow-2xl max-w-2xl w-full flex flex-col max-h-[90vh] overflow-hidden cursor-default"
+      >
         
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[#1e2a3a] p-5 shrink-0">

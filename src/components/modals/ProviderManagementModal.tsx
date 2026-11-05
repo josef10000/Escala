@@ -222,8 +222,14 @@ export const ProviderManagementModal: React.FC<ProviderManagementModalProps> = (
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-100">
-      <div className="bg-[#141c28] text-slate-100 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden border border-[#1e2a3a]">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-100 cursor-pointer"
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        className="bg-[#141c28] text-slate-100 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden border border-[#1e2a3a] cursor-default"
+      >
         
         {/* Header */}
         <div className="p-5 border-b border-[#1e2a3a] flex items-center justify-between shrink-0">

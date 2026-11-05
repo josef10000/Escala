@@ -152,6 +152,17 @@ export const ScheduleToolbar: React.FC<ScheduleToolbarProps> = ({
             >
               5x2
             </button>
+            <button
+              onClick={() => setActiveRegime('weekend')}
+              className={`px-3 py-1 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                activeRegime === 'weekend'
+                  ? 'bg-[#00d2d3] text-[#003731] shadow-xs font-black'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+              title="Escala de Fim de Semana (Sábados e Domingos)"
+            >
+              Fim de Semana
+            </button>
           </div>
 
           {/* Publication status badge */}

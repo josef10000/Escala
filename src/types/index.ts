@@ -1,8 +1,21 @@
 export type ShiftStatus = 'confirmed' | 'pending' | 'swapped' | 'absent';
-export type WorkRegime = '12x36' | '5x2';
+export type WorkRegime = '12x36' | '5x2' | 'weekend';
 export type WorkModality = 'presencial' | 'home_office';
 export type TeamGroup = 'turma_a' | 'turma_b' | 'none'; // Turma A = Ímpares, Turma B = Pares
 export type AbsenceType = 'vacation' | 'medical' | 'maternity' | 'compensation' | 'other';
+
+export interface WeekendColumn {
+  id: string;
+  name: string;
+}
+
+export interface WeekendDayRow {
+  dateStr: string; // "YYYY-MM-DD"
+  formattedDate: string; // "07/11/2026"
+  dayOfWeek: number; // 0 for Sunday, 6 for Saturday
+  dayOfWeekName: 'SÁBADO' | 'DOMINGO';
+  slots: Record<string, string>; // columnId -> assigned name
+}
 
 export interface Provider {
   id: string;

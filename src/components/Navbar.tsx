@@ -29,6 +29,9 @@ interface NavbarProps {
   onOpenMarketplace?: () => void;
   onOpenProfileModal?: () => void;
   onOpenImportModal?: () => void;
+  onOpenAnnouncements?: () => void;
+  onOpenAuditLog?: () => void;
+  onOpenKpiModal?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -40,6 +43,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenMarketplace,
   onOpenProfileModal,
   onOpenImportModal,
+  onOpenAnnouncements,
+  onOpenAuditLog,
+  onOpenKpiModal,
 }) => {
   const {
     providers,
@@ -143,35 +149,16 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Right Actions & User Profile */}
         <div className="flex items-center gap-3">
           
-          {/* Pending Requests Badge (Leader) */}
-          {isLeaderAuthenticated && onOpenRequestsCenter && (
-            <button
-              type="button"
-              onClick={onOpenRequestsCenter}
-              className="relative flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#e3e2e7] hover:text-[#57f1db] bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] rounded-lg transition-colors cursor-pointer"
-              title="Central de pedidos de folga e trocas pendentes"
-            >
-              <Inbox className="w-3.5 h-3.5 text-[#bacac5]" />
-              <span className="hidden md:inline">Pedidos</span>
-              {totalPending > 0 && (
-                <span className="px-1.5 py-0.2 bg-[#57f1db] text-[#003731] rounded-full text-xs font-black shadow-xs">
-                  {totalPending}
-                </span>
-              )}
-            </button>
-          )}
-
           {/* Venda & Repasse de Plantões PJ */}
           {onOpenMarketplace && (
             <button
               type="button"
               onClick={onOpenMarketplace}
-              className="h-8 px-2.5 sm:px-3 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 text-xs font-semibold border border-amber-500/30 flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="h-8 px-2.5 sm:px-3 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs font-medium border border-amber-500/25 flex items-center gap-1.5 transition-colors cursor-pointer"
               title="Mural de venda e compra de plantões remunerados PJ"
             >
               <Coins className="w-3.5 h-3.5 text-amber-400" />
               <span className="hidden sm:inline">Venda de Plantões</span>
-              <span className="sm:hidden">Repasses</span>
               {availableSalesCount > 0 && (
                 <span className="px-1.5 py-0.2 bg-amber-400 text-black rounded-full text-[10px] font-black">
                   {availableSalesCount}
@@ -180,18 +167,76 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           )}
 
-          {/* Import / Generate Schedule Action Button (Supervisor Only) */}
-          {isLeaderAuthenticated && onOpenImportModal && (
+          {/* Announcements / Bulletin Board (Everyone) */}
+          {onOpenAnnouncements && (
             <button
               type="button"
-              onClick={onOpenImportModal}
-              className="h-8 px-3 rounded-lg bg-[#00d2d3] hover:bg-[#57f1db] text-[#003731] text-xs font-bold shadow-md shadow-[#00d2d3]/20 flex items-center gap-1.5 transition-all cursor-pointer"
-              title="Importar escala por foto (IA), copiar texto do WhatsApp, gerar por turmas ou zerar escala"
+              onClick={onOpenAnnouncements}
+              className="h-8 px-2.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white text-xs font-medium border border-white/[0.08] flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Mural de Avisos e Comunicados da Liderança"
             >
-              <Sparkles className="w-3.5 h-3.5 text-[#003731]" />
-              <span className="hidden md:inline">Montar / Importar Escala</span>
-              <span className="md:hidden">Importar</span>
+              <span>📢 Avisos</span>
             </button>
+          )}
+
+          {/* Gestor Only Section (Organized, clean, restricted) */}
+          {isLeaderAuthenticated && (
+            <div className="flex items-center gap-1.5 pl-1 border-l border-white/[0.08]">
+              {/* Montar / Importar Escala */}
+              {onOpenImportModal && (
+                <button
+                  type="button"
+                  onClick={onOpenImportModal}
+                  className="h-8 px-3 rounded-lg bg-[#00d2d3] hover:bg-[#57f1db] text-[#003731] text-xs font-bold shadow-sm flex items-center gap-1.5 transition-all cursor-pointer"
+                  title="Importar escala por foto (IA), copiar texto do WhatsApp, gerar por turmas ou zerar escala"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-[#003731]" />
+                  <span className="hidden md:inline">Montar Escala</span>
+                </button>
+              )}
+
+              {/* KPIs (Gestor only) */}
+              {onOpenKpiModal && (
+                <button
+                  type="button"
+                  onClick={onOpenKpiModal}
+                  className="h-8 px-2.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white text-xs font-medium border border-white/[0.08] flex items-center gap-1.5 transition-colors cursor-pointer"
+                  title="Indicadores Operacionais e KPIs de Escala"
+                >
+                  <span>📊 KPIs</span>
+                </button>
+              )}
+
+              {/* Audit Log (Gestor only) */}
+              {onOpenAuditLog && (
+                <button
+                  type="button"
+                  onClick={onOpenAuditLog}
+                  className="h-8 px-2.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white text-xs font-medium border border-white/[0.08] flex items-center gap-1.5 transition-colors cursor-pointer"
+                  title="Histórico de Auditoria e Log de Alterações"
+                >
+                  <span>📋 Auditoria</span>
+                </button>
+              )}
+
+              {/* Pending Requests Badge */}
+              {onOpenRequestsCenter && (
+                <button
+                  type="button"
+                  onClick={onOpenRequestsCenter}
+                  className="relative flex items-center gap-1.5 h-8 px-2.5 text-xs font-medium text-zinc-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] rounded-lg transition-colors cursor-pointer"
+                  title="Central de pedidos de folga e trocas pendentes"
+                >
+                  <Inbox className="w-3.5 h-3.5 text-zinc-400" />
+                  <span className="hidden md:inline">Pedidos</span>
+                  {totalPending > 0 && (
+                    <span className="px-1.5 py-0.2 bg-[#00d2d3] text-[#003731] rounded-full text-[10px] font-black">
+                      {totalPending}
+                    </span>
+                  )}
+                </button>
+              )}
+            </div>
           )}
 
           {/* Share Schedule Action Button */}
@@ -199,11 +244,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={onOpenShareModal}
-              className="hidden sm:flex h-8 px-3 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-white text-xs font-medium border border-white/[0.08] items-center gap-1.5 transition-colors cursor-pointer"
+              className="hidden sm:flex h-8 px-3 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white text-xs font-medium border border-white/[0.08] items-center gap-1.5 transition-colors cursor-pointer"
               title="Compartilhar Escala com a equipe"
             >
-              <Share2 className="w-3.5 h-3.5 text-[#bacac5]" />
-              <span>Compartilhar Escala</span>
+              <Share2 className="w-3.5 h-3.5 text-zinc-400" />
+              <span>Compartilhar</span>
             </button>
           )}
 
@@ -212,22 +257,21 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={onOpenLeaderAuth}
-              className="h-8 px-3 rounded-lg bg-[#2dd4bf]/20 hover:bg-[#2dd4bf]/30 text-[#57f1db] text-xs font-semibold border border-[#57f1db]/30 flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="h-8 px-2.5 sm:px-3 rounded-lg bg-white/[0.05] hover:bg-white/[0.09] text-zinc-200 hover:text-white text-xs font-medium border border-white/[0.12] flex items-center gap-1.5 transition-colors cursor-pointer"
               title="Líder autenticado. Clique para alterar PIN ou sair."
             >
-              <Unlock className="w-3.5 h-3.5 text-[#57f1db]" />
-              <span>Acesso da Liderança</span>
+              <Unlock className="w-3.5 h-3.5 text-[#00d2d3]" />
+              <span className="hidden sm:inline">Gestão Ativa</span>
             </button>
           ) : (
             <button
               type="button"
               onClick={onOpenLeaderAuth}
-              className="h-8 px-3 rounded-lg bg-[#2dd4bf]/20 hover:bg-[#2dd4bf]/30 text-[#57f1db] text-xs font-semibold border border-[#57f1db]/30 flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="h-8 px-2.5 sm:px-3 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white text-xs font-medium border border-white/[0.08] flex items-center gap-1.5 transition-colors cursor-pointer"
               title="Apenas a líder pode fazer alterações na escala."
             >
-              <Lock className="w-3.5 h-3.5 text-[#57f1db]" />
-              <span className="hidden sm:inline">Acesso da Liderança</span>
-              <span className="sm:hidden">Líder</span>
+              <Lock className="w-3.5 h-3.5 text-zinc-400" />
+              <span className="hidden sm:inline">Acesso Gestor</span>
             </button>
           )}
 

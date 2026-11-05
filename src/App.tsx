@@ -25,6 +25,9 @@ import { ShiftSaleModal } from './components/modals/ShiftSaleModal';
 import { ShiftMarketplaceModal } from './components/modals/ShiftMarketplaceModal';
 import { CollaboratorProfileModal } from './components/modals/CollaboratorProfileModal';
 import { ImportScheduleModal } from './components/modals/ImportScheduleModal';
+import { AnnouncementsModal } from './components/modals/AnnouncementsModal';
+import { AuditLogModal } from './components/modals/AuditLogModal';
+import { OperationalKpiModal } from './components/modals/OperationalKpiModal';
 import { MobileScheduleView } from './components/views/MobileScheduleView';
 import { Provider, ShiftAssignment } from './types';
 import { Calendar, Clock, CheckCircle2, AlertCircle, Plus, CalendarDays } from 'lucide-react';
@@ -71,6 +74,9 @@ function ScheduleAppContent() {
   const [shiftSaleModalOpen, setShiftSaleModalOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [importScheduleModalOpen, setImportScheduleModalOpen] = useState(false);
+  const [announcementsOpen, setAnnouncementsOpen] = useState(false);
+  const [auditLogOpen, setAuditLogOpen] = useState(false);
+  const [kpiModalOpen, setKpiModalOpen] = useState(false);
   const [saleModalDefaultDate, setSaleModalDefaultDate] = useState<string>('');
   const [saleModalDefaultProviderId, setSaleModalDefaultProviderId] = useState<string>('');
 
@@ -142,6 +148,9 @@ function ScheduleAppContent() {
           onOpenMarketplace={() => setMarketplaceModalOpen(true)}
           onOpenProfileModal={() => setProfileModalOpen(true)}
           onOpenImportModal={() => setImportScheduleModalOpen(true)}
+          onOpenAnnouncements={() => setAnnouncementsOpen(true)}
+          onOpenAuditLog={() => setAuditLogOpen(true)}
+          onOpenKpiModal={() => setKpiModalOpen(true)}
         />
 
         {/* Main Container */}
@@ -170,6 +179,7 @@ function ScheduleAppContent() {
               onOpenPrintModal={() => setPrintModalOpen(true)}
               onOpenMarketplace={() => setMarketplaceModalOpen(true)}
               onOpenSellModal={handleOpenSellModal}
+              onOpenLeaderAuth={() => setLeaderAuthModalOpen(true)}
             />
           )}
 
@@ -341,6 +351,24 @@ function ScheduleAppContent() {
       <ImportScheduleModal
         isOpen={importScheduleModalOpen}
         onClose={() => setImportScheduleModalOpen(false)}
+      />
+
+      {/* Mural de Avisos & Comunicados */}
+      <AnnouncementsModal
+        isOpen={announcementsOpen}
+        onClose={() => setAnnouncementsOpen(false)}
+      />
+
+      {/* Histórico de Auditoria */}
+      <AuditLogModal
+        isOpen={auditLogOpen}
+        onClose={() => setAuditLogOpen(false)}
+      />
+
+      {/* Indicadores Operacionais & KPIs */}
+      <OperationalKpiModal
+        isOpen={kpiModalOpen}
+        onClose={() => setKpiModalOpen(false)}
       />
     </div>
   );

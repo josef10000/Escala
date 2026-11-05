@@ -146,8 +146,14 @@ export const CollaboratorAuthModal: React.FC<CollaboratorAuthModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-100">
-      <div className="bg-[#12141A] text-zinc-100 rounded-3xl p-5 sm:p-6 border border-white/[0.08] shadow-2xl max-w-md w-full space-y-4">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-100 cursor-pointer"
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        className="bg-[#12141A] text-zinc-100 rounded-3xl p-5 sm:p-6 border border-white/[0.08] shadow-2xl max-w-md w-full space-y-4 cursor-default"
+      >
         
         {/* Top Header */}
         <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">

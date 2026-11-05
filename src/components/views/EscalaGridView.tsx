@@ -31,10 +31,13 @@ import {
   ShieldCheck,
   MessageSquare,
   Coins,
+  Sparkles,
 } from 'lucide-react';
 import { Provider, WorkModality, WorkRegime } from '../../types';
 import { AbsenceBatchModal } from '../modals/AbsenceBatchModal';
 import { QuickSwapModal } from '../modals/QuickSwapModal';
+import { MonthTurnComparisonModal } from '../modals/MonthTurnComparisonModal';
+import { WeekendScheduleView } from './WeekendScheduleView';
 
 interface EscalaGridViewProps {
   onAddProvider?: () => void;
@@ -42,6 +45,7 @@ interface EscalaGridViewProps {
   onOpenPrintModal?: () => void;
   onOpenMarketplace?: () => void;
   onOpenSellModal?: (date?: string, providerId?: string) => void;
+  onOpenLeaderAuth?: () => void;
 }
 
 export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
@@ -50,6 +54,7 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
   onOpenPrintModal,
   onOpenMarketplace,
   onOpenSellModal,
+  onOpenLeaderAuth,
 }) => {
   const {
     currentYear,
@@ -72,6 +77,8 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
     addProvider,
     setViewMode,
     authenticatedProviderId,
+    isLeaderAuthenticated,
+    clonePreviousMonthSchedule,
     applyTeamGroupsSchedule,
     activeRegime,
     setActiveRegime,
@@ -83,6 +90,8 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
   const [absenceModalOpen, setAbsenceModalOpen] = useState(false);
   const [absenceModalProvId, setAbsenceModalProvId] = useState<string | undefined>(undefined);
   const [quickSwapOpen, setQuickSwapOpen] = useState(false);
+  const [isComparisonModalOpen, setIsComparisonModalOpen] = useState(false);
+  const [toastNotification, setToastNotification] = useState<string | null>(null);
 
   // Quinzena filter: 'all' | 'q1' (1-15) | 'q2' (16-31)
   const [quinzenaView, setQuinzenaView] = useState<'all' | 'q1' | 'q2'>('all');
@@ -182,51 +191,26 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
   const avgShifts = regimeProviders.length > 0 ? (totalTAssignments / regimeProviders.length).toFixed(1) : '0.0';
   const avgHours = (parseFloat(avgShifts) * (activeRegime === '5x2' ? 8 : 12)).toFixed(0);
 
-  // REAL BENTO 1: AUDITORIA DE INTERVALO PJ (Detect consecutive duty days)
-  let consecutiveDutyConflicts = 0;
-  regimeProviders.forEach(prov => {
-    for (let i = 0; i < allDays.length - 1; i++) {
-      const d1 = allDays[i];
-      const d2 = allDays[i + 1];
-      const s1 = assignments.find(a => a.providerId === prov.id && a.date === d1.dateStr && a.shiftTypeId === 'st-t');
-      const s2 = assignments.find(a => a.providerId === prov.id && a.date === d2.dateStr && a.shiftTypeId === 'st-t');
-      if (s1 && s2 && prov.regime !== '5x2') {
-        consecutiveDutyConflicts++;
-      }
-    }
+  // Check if current month is populated for this regime
+  const currentMonthAssignments = assignments.filter(a => {
+    const [y, m] = a.date.split('-').map(Number);
+    return y === currentYear && m === currentMonthIndex + 1;
   });
-
-  // REAL BENTO 2: COBERTURA DIÁRIA EM PLANTÃO (Calculated for every day of month)
-  const dailyDutyCounts = allDays.map(d => {
-    return assignments.filter(
-      a => a.date === d.dateStr && a.shiftTypeId === 'st-t' && regimeProviders.some(p => p.id === a.providerId)
-    ).length;
+  const currentRegimeAssignments = currentMonthAssignments.filter(a => {
+    const prov = providers.find(p => p.id === a.providerId);
+    return (prov?.regime || '12x36') === activeRegime;
   });
-  const maxDailyDuty = Math.max(...dailyDutyCounts, 1);
-  const minDailyDuty = Math.min(...dailyDutyCounts);
-  const avgDailyDuty = (dailyDutyCounts.reduce((a, b) => a + b, 0) / (dailyDutyCounts.length || 1)).toFixed(1);
+  const isCurrentMonthEmpty = currentRegimeAssignments.length === 0;
 
-  // Generate dynamic SVG sparkline coordinates
-  const sparklineCoords = dailyDutyCounts.map((val, idx) => {
-    const x = allDays.length > 1 ? (idx / (allDays.length - 1)) * 300 : 150;
-    const y = 52 - (val / (maxDailyDuty + 1)) * 42;
-    return { x, y, val };
-  });
+  let prevMonthIdx = currentMonthIndex - 1;
+  let prevYr = currentYear;
+  if (prevMonthIdx < 0) {
+    prevMonthIdx = 11;
+    prevYr--;
+  }
+  const prevMonthName = MONTH_NAMES_PT[prevMonthIdx];
 
-  const sparklinePathD = sparklineCoords.reduce((acc, pt, idx, arr) => {
-    if (idx === 0) return `M ${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`;
-    const prev = arr[idx - 1];
-    const cx = ((prev.x + pt.x) / 2).toFixed(1);
-    return `${acc} C ${cx} ${prev.y.toFixed(1)}, ${cx} ${pt.y.toFixed(1)}, ${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`;
-  }, '');
-  const sparklineAreaD = `${sparklinePathD} L 300 60 L 0 60 Z`;
 
-  const todayIndex = Math.max(0, Math.min(allDays.length - 1, todayDayNumber - 1));
-  const todayPoint = sparklineCoords[todayIndex] || { x: 150, y: 30, val: todayWorkersCount };
-
-  // REAL BENTO 3: TROCAS & PERMUTAS PJ
-  const pendingSwapsCount = swapRequests.filter(s => s.status === 'pending_supervisor').length;
-  const approvedSwapsCount = swapRequests.filter(s => s.status === 'approved').length;
 
   useEffect(() => {
     if (editingField && editInputRef.current) {
@@ -446,34 +430,42 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
   return (
     <div className="space-y-4 max-w-7xl mx-auto animate-in fade-in duration-200">
       
-      {/* 1. TOP AURORAL ATMOSPHERE BANNER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
-        <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-2xl bg-[#00d2d3]/10 border border-[#00d2d3]/25 flex items-center justify-center text-[#00d2d3] shadow-[0_0_20px_rgba(0,210,211,0.15)] shrink-0">
-            <CalendarDays className="w-5 h-5" />
+      {/* 1. TOP HEADER & STATUS */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-[#00d2d3] shrink-0">
+            <CalendarDays className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-[11px] font-bold text-zinc-400 tracking-wider uppercase flex items-center gap-1.5">
-              <span>ESCALA UNIFICADA</span>
+            <div className="text-[11px] font-semibold text-zinc-400 tracking-wider uppercase flex items-center gap-1.5">
+              <span>ESCALA OPERACIONAL</span>
               <span className="text-zinc-600">•</span>
-              <span className="text-zinc-300 font-semibold">{monthName} de {currentYear}</span>
+              <span className="text-zinc-300">{monthName} de {currentYear}</span>
             </div>
-            <h1 className="text-2xl sm:text-[28px] font-black text-white tracking-tight leading-tight">
+            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
               Quadro Geral de Escalas
             </h1>
           </div>
         </div>
 
         {/* Live Status Pill */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#12141A] border border-white/[0.08] text-xs text-zinc-300 shadow-sm self-start sm:self-auto">
-          <span className="w-2 h-2 rounded-full bg-[#00d2d3] shadow-[0_0_8px_#00d2d3]" />
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#12141A] border border-white/[0.08] text-xs text-zinc-300 self-start sm:self-auto">
+          <span className="w-2 h-2 rounded-full bg-[#00d2d3]" />
           <span>
-            {isCurrentViewingMonth
-              ? `Hoje (${DAYS_SHORT_PT[today.getDay()] || 'Seg'}, ${todayDayNumber}/${monthName.slice(0, 3)})`
-              : `Início do Mês (${todayDayNumber}/${monthName.slice(0, 3)})`}:{' '}
-            <strong className="text-[#00d2d3] font-bold">{todayWorkersCount} em Turno</strong>
-            <span className="text-zinc-500 mx-1">•</span>
-            <span className="text-zinc-400">{todayOffCount} de Folga</span>
+            {isCurrentViewingMonth ? (
+              <>
+                Hoje ({DAYS_SHORT_PT[today.getDay()] || 'Hoje'}, {today.getDate()}/{monthName.slice(0, 3)}):{' '}
+                <strong className="text-[#00d2d3] font-semibold">{todayWorkersCount} em Turno</strong>
+                <span className="text-zinc-500 mx-1.5">•</span>
+                <span className="text-zinc-400">{todayOffCount} de Folga</span>
+              </>
+            ) : (
+              <>
+                Referência: <strong className="text-zinc-200">{monthName} {currentYear}</strong>
+                <span className="text-zinc-500 mx-1.5">•</span>
+                <span className="text-zinc-400">{todayWorkersCount} escalados no 1º dia</span>
+              </>
+            )}
           </span>
         </div>
       </div>
@@ -511,7 +503,7 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
             Hoje
           </button>
 
-          {/* Regime Switch 12x36 / 5x2 */}
+          {/* Regime Switch 12x36 / 5x2 / Fim de Semana */}
           <div className="flex items-center bg-[#1A1D24] border border-white/[0.08] rounded-xl p-0.5 text-xs font-bold">
             <button
               onClick={() => setActiveRegime('12x36')}
@@ -533,168 +525,125 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
             >
               5×2
             </button>
+            <button
+              onClick={() => setActiveRegime('weekend')}
+              className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                activeRegime === 'weekend'
+                  ? 'bg-[#00d2d3] text-[#003731] font-black shadow-sm'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              Fim de Semana
+            </button>
           </div>
 
           {/* Status badge */}
           <div className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/[0.03] border border-white/[0.06] text-[11px] font-medium text-zinc-400">
             <span className="w-1.5 h-1.5 rounded-full bg-[#00d2d3]" />
-            <span>Escala Oficial Vigente</span>
+            <span>{activeRegime === 'weekend' ? 'Escala de Fins de Semana' : 'Escala Vigente'}</span>
           </div>
         </div>
 
         {/* Right Side: Search, Density, Print */}
         <div className="flex items-center gap-2 flex-1 justify-end flex-wrap sm:flex-nowrap">
-          {/* Search box */}
-          <div className="relative min-w-[200px] max-w-[280px] w-full">
-            <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            <input
-              type="text"
-              value={filters.searchQuery}
-              onChange={e => setFilters(f => ({ ...f, searchQuery: e.target.value }))}
-              placeholder="Buscar colaborador ou função..."
-              className="w-full bg-[#1A1D24] border border-white/[0.08] rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#00d2d3]/60 transition-colors"
-            />
-            {filters.searchQuery && (
+          {activeRegime !== 'weekend' ? (
+            <>
+              {/* Search box */}
+              <div className="relative min-w-[200px] max-w-[280px] w-full">
+                <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  value={filters.searchQuery}
+                  onChange={e => setFilters(f => ({ ...f, searchQuery: e.target.value }))}
+                  placeholder="Buscar colaborador ou função..."
+                  className="w-full bg-[#1A1D24] border border-white/[0.08] rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#00d2d3]/60 transition-colors"
+                />
+                {filters.searchQuery && (
+                  <button
+                    onClick={() => setFilters(f => ({ ...f, searchQuery: '' }))}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white text-xs cursor-pointer"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+
+              {/* Density toggle */}
+              <div className="flex items-center bg-[#1A1D24] border border-white/[0.08] rounded-xl p-0.5 text-xs">
+                <button
+                  onClick={() => setRowDensity('spacious')}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
+                    rowDensity === 'spacious' ? 'bg-[#292A2F] text-white font-bold' : 'text-zinc-400 hover:text-white'
+                  }`}
+                  title="Modo Amplo"
+                >
+                  <Maximize2 className="w-3 h-3 text-[#00d2d3]" />
+                  <span className="hidden sm:inline">Amplo</span>
+                </button>
+                <button
+                  onClick={() => setRowDensity('compact')}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
+                    rowDensity === 'compact' ? 'bg-[#292A2F] text-white font-bold' : 'text-zinc-400 hover:text-white'
+                  }`}
+                  title="Modo Compacto"
+                >
+                  <Minimize2 className="w-3 h-3 text-zinc-400" />
+                  <span className="hidden sm:inline">Compacto</span>
+                </button>
+              </div>
+
+              {/* Print button */}
               <button
-                onClick={() => setFilters(f => ({ ...f, searchQuery: '' }))}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white text-xs cursor-pointer"
+                onClick={() => onOpenPrintModal ? onOpenPrintModal() : window.print()}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1A1D24] hover:bg-[#252830] text-zinc-200 border border-white/[0.08] rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0"
               >
-                ×
+                <Printer className="w-3.5 h-3.5 text-zinc-400" />
+                <span>Imprimir / PDF</span>
               </button>
-            )}
-          </div>
-
-          {/* Density toggle */}
-          <div className="flex items-center bg-[#1A1D24] border border-white/[0.08] rounded-xl p-0.5 text-xs">
-            <button
-              onClick={() => setRowDensity('spacious')}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
-                rowDensity === 'spacious' ? 'bg-[#292A2F] text-white font-bold' : 'text-zinc-400 hover:text-white'
-              }`}
-              title="Modo Amplo"
-            >
-              <Maximize2 className="w-3 h-3 text-[#00d2d3]" />
-              <span className="hidden sm:inline">Amplo</span>
-            </button>
-            <button
-              onClick={() => setRowDensity('compact')}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
-                rowDensity === 'compact' ? 'bg-[#292A2F] text-white font-bold' : 'text-zinc-400 hover:text-white'
-              }`}
-              title="Modo Compacto"
-            >
-              <Minimize2 className="w-3 h-3 text-zinc-400" />
-              <span className="hidden sm:inline">Compacto</span>
-            </button>
-          </div>
-
-          {/* Print button */}
-          <button
-            onClick={() => onOpenPrintModal ? onOpenPrintModal() : window.print()}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1A1D24] hover:bg-[#252830] text-zinc-200 border border-white/[0.08] rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0"
-          >
-            <Printer className="w-3.5 h-3.5 text-zinc-400" />
-            <span>Imprimir / PDF</span>
-          </button>
+            </>
+          ) : (
+            <div className="text-xs text-zinc-400 font-medium">
+              Visualizando Sábados e Domingos
+            </div>
+          )}
         </div>
       </div>
 
-      {/* 3. ACTIVE USER SPOTLIGHT CARD */}
-      {spotlightProvider && (
-        <div className="bg-[#12141A] border border-white/[0.08] rounded-2xl p-4 sm:p-5 shadow-sm relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            {/* Avatar Squircle with Initials & Checkmark Badge */}
-            <div className="relative">
-              <div className="w-12 h-12 rounded-2xl bg-[#1A1D24] border border-white/[0.12] flex items-center justify-center font-black text-white text-base shadow-sm">
-                {getInitials(spotlightProvider.name)}
-              </div>
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-[#00d2d3] flex items-center justify-center shadow-xs">
-                <Check className="w-2.5 h-2.5 text-[#003731] stroke-[3]" />
-              </div>
-            </div>
-
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">
-                  {spotlightProvider.name}
-                </h2>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-[#00d2d3] text-[#003731]">
-                  VOCÊ
-                </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold text-zinc-400 bg-[#1A1D24] border border-white/[0.06]">
-                  Prestador {spotlightProvider.regime || '12×36'}
-                </span>
-              </div>
-              <p className="text-xs text-zinc-400">
-                1º Calendário • Horário regular das {spotlightProvider.entryTime || '07h00'} às {spotlightProvider.exitTime || '19h00'} • Posto CTI Geral A
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4 sm:gap-6 flex-wrap md:flex-nowrap justify-between md:justify-end">
-            <div className="flex items-center gap-5 bg-[#090A0F] px-4 py-2 rounded-xl border border-white/[0.06]">
-              <div>
-                <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">PLANTÕES</div>
-                <div className="text-xl sm:text-2xl font-black text-[#00d2d3] leading-tight">
-                  {spotlightPlantõesCount > 0 ? spotlightPlantõesCount : 16}{' '}
-                  <span className="text-xs font-normal text-zinc-400">({spotlightHours > 0 ? spotlightHours : 192}h)</span>
-                </div>
-              </div>
-              <div className="w-px h-8 bg-white/[0.08]" />
-              <div>
-                <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">FOLGAS</div>
-                <div className="text-xl sm:text-2xl font-black text-white leading-tight">
-                  {spotlightFolgasCount > 0 ? spotlightFolgasCount : 15}{' '}
-                  <span className="text-xs font-normal text-zinc-400">dias</span>
-                </div>
-              </div>
-            </div>
-
-            <button
-              onClick={() => {
-                setActiveProviderId(spotlightProvider.id);
-                setViewMode('personal-calendar');
-              }}
-              className="px-4 py-2.5 bg-[#00d2d3] hover:bg-[#57f1db] text-[#003731] font-black text-xs sm:text-sm rounded-xl shadow-lg shadow-[#00d2d3]/20 transition-all cursor-pointer flex items-center gap-2 active:scale-98 shrink-0"
-            >
-              <CalendarDays className="w-4 h-4 text-[#003731]" />
-              <span>Ver Meu Calendário</span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* 4. MICRO-LEGEND STRIP */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#12141A] border border-white/[0.08] py-2 px-3.5 rounded-xl text-xs text-zinc-300">
+      {activeRegime === 'weekend' ? (
+        <WeekendScheduleView onOpenLeaderAuth={onOpenLeaderAuth} />
+      ) : (
+        <>
+          {/* 3. CLEAN INLINE LEGEND */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 py-1.5 px-1 text-xs text-zinc-400">
         <div className="flex flex-wrap items-center gap-3">
-          <span className="text-zinc-500 font-bold uppercase tracking-wider text-[11px]">LEGENDA:</span>
+          <span className="text-zinc-500 font-bold uppercase tracking-wider text-[10px]">LEGENDA:</span>
           
           <div className="flex items-center gap-1.5">
-            <span className="w-5 h-5 flex items-center justify-center font-black rounded-md text-[11px] bg-[#00d2d3] text-[#003731]">
+            <span className="w-4 h-4 flex items-center justify-center font-bold rounded text-[10px] bg-[#00d2d3] text-[#003731]">
               T
             </span>
             <span className="text-zinc-300 text-[11px]">Trabalha (07h-19h)</span>
           </div>
 
           <div className="flex items-center gap-1.5">
-            <span className="w-5 h-5 flex items-center justify-center font-bold rounded-md text-[11px] bg-[#27272a] text-[#a1a1aa]">
+            <span className="w-4 h-4 flex items-center justify-center font-bold rounded text-[10px] bg-[#27272a] text-[#a1a1aa]">
               D
             </span>
-            <span className="text-zinc-300 text-[11px]">Descanso / Folga</span>
+            <span className="text-zinc-300 text-[11px]">Folga / Descanso</span>
           </div>
 
           <div className="flex items-center gap-1.5">
-            <span className="w-5 h-5 flex items-center justify-center font-bold rounded-md text-[11px] bg-[#1A1D24] text-zinc-500 border border-white/[0.06]">
+            <span className="w-4 h-4 flex items-center justify-center font-bold rounded text-[10px] bg-[#1A1D24] text-zinc-500 border border-white/[0.06]">
               -
             </span>
-            <span className="text-zinc-400 text-[11px]">Sem Escala Definida</span>
+            <span className="text-zinc-400 text-[11px]">Sem Escala</span>
           </div>
 
           <div className="flex items-center gap-1.5">
-            <span className="px-1.5 py-0.5 rounded-md text-[11px] font-bold bg-[#571bc1] text-[#f3e8ff]">
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#571bc1] text-[#f3e8ff]">
               HO
             </span>
-            <span className="text-zinc-300 text-[11px]">Home Office / Remoto</span>
+            <span className="text-zinc-300 text-[11px]">Home Office</span>
           </div>
 
           <button
@@ -703,22 +652,92 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
             className="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity"
             title="Ver plantões anunciados à venda"
           >
-            <span className="px-1.5 py-0.5 rounded-md text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
               💰 Venda
             </span>
-            <span className="text-zinc-300 text-[11px]">À Venda (Repasse PJ)</span>
+            <span className="text-zinc-300 text-[11px]">À Venda</span>
           </button>
         </div>
 
-        <div className="flex items-center gap-3 text-[11px] text-zinc-400">
-          <span className="flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#00d2d3]" />
-            <span>Coluna 12 (Hoje) em destaque</span>
-          </span>
-          <span className="text-zinc-600">•</span>
-          <span>Escala 100% Homologada</span>
+        <div className="flex items-center gap-2 text-[11px] text-zinc-500">
+          {isCurrentViewingMonth && (
+            <span className="flex items-center gap-1 text-[#00d2d3]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00d2d3]" />
+              <span>Dia de hoje ({today.getDate()}) em destaque</span>
+            </span>
+          )}
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toastNotification && (
+        <div className="p-3 bg-[#00d2d3]/15 border border-[#00d2d3]/30 text-[#00d2d3] rounded-xl text-xs flex items-center justify-between animate-in fade-in">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-[#00d2d3]" />
+            <span>{toastNotification}</span>
+          </div>
+          <button onClick={() => setToastNotification(null)} className="text-zinc-400 hover:text-white">×</button>
+        </div>
+      )}
+
+      {/* Proactive Smart Continuity Banner (Shown when month is unpopulated) */}
+      {isCurrentMonthEmpty && (
+        <div className="bg-gradient-to-r from-[#12141A] via-[#161a22] to-[#12141A] border border-[#00d2d3]/30 rounded-2xl p-4 sm:p-5 shadow-lg relative overflow-hidden">
+          <div className="absolute -top-12 -right-12 w-36 h-36 bg-[#00d2d3]/10 rounded-full blur-2xl pointer-events-none" />
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+            <div className="flex items-start sm:items-center gap-3.5">
+              <div className="w-10 h-10 rounded-2xl bg-[#00d2d3]/20 border border-[#00d2d3]/40 text-[#00d2d3] flex items-center justify-center shrink-0 shadow-sm">
+                <Sparkles className="w-5 h-5 text-[#00d2d3]" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-sm sm:text-base font-bold text-white tracking-tight">
+                    Escala de {monthName} de {currentYear} ainda não preenchida
+                  </h3>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#00d2d3]/15 text-[#00d2d3] border border-[#00d2d3]/30">
+                    Continuidade Inteligente
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-400 mt-1 max-w-2xl leading-relaxed">
+                  Deseja projetar a escala a partir do fechamento de <strong className="text-white">{prevMonthName} {prevYr}</strong>? O sistema calcula o descanso de 36h da virada para garantir que quem plantonou no último dia folgue no dia 1º, evitando plantões consecutivos.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 self-start md:self-center shrink-0 flex-wrap">
+              <button
+                onClick={() => setIsComparisonModalOpen(true)}
+                className="px-3.5 py-2 bg-[#1A1D24] hover:bg-[#252830] text-zinc-200 border border-white/[0.08] rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <Activity className="w-3.5 h-3.5 text-[#00d2d3]" />
+                <span>Comparar Virada (Auditoria 36h)</span>
+              </button>
+
+              {isLeaderAuthenticated ? (
+                <button
+                  onClick={() => {
+                    const count = clonePreviousMonthSchedule(currentYear, currentMonthIndex, 'continue_12x36');
+                    setToastNotification(`${count} plantões e folgas projetados com descanso de 36h respeitado!`);
+                    setTimeout(() => setToastNotification(null), 4000);
+                  }}
+                  className="px-4 py-2 bg-[#00d2d3] hover:bg-[#57f1db] text-[#003731] font-black rounded-xl text-xs transition-all shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-98"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-[#003731]" />
+                  <span>Projetar em 1 Clique</span>
+                </button>
+              ) : (
+                <button
+                  onClick={onOpenLeaderAuth}
+                  className="px-4 py-2 bg-[#1A1D24] hover:bg-[#252830] text-amber-300 border border-amber-500/30 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5 cursor-pointer"
+                  title="Desbloquear como Líder"
+                >
+                  <span>🔒 Desbloquear Líder</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 5. ROSTER TABLE */}
       <div className="bg-[#12141A] border border-white/[0.08] rounded-2xl shadow-sm overflow-hidden">
@@ -727,8 +746,18 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
           <div className="text-[11px] font-bold tracking-wider uppercase text-zinc-400">
             ESCALA {activeRegime} • {monthNameUpper} {currentYear} (QUINZENA {quinzenaView === 'q1' ? '1' : quinzenaView === 'q2' ? '2' : '1 & 2'})
           </div>
-          <div className="text-xs text-zinc-400 font-medium">
-            {displayedProviders.length} Colaboradores no Regime
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsComparisonModalOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/[0.04] hover:bg-[#00d2d3]/15 text-[#00d2d3] border border-[#00d2d3]/30 text-xs font-bold transition-all cursor-pointer"
+              title="Comparar virada de mês com o mês anterior e auditar descanso de 36h"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#00d2d3]" />
+              <span>Virada de Mês (36h)</span>
+            </button>
+            <div className="text-xs text-zinc-400 font-medium">
+              {displayedProviders.length} Colaboradores
+            </div>
           </div>
         </div>
 
@@ -963,138 +992,19 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
           </div>
         </div>
       </div>
-
-      {/* 6. THREE BENTO CARDS (Auditoria de Turnos PJ, Cobertura em Plantão Real, Trocas & Permutas) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
-        
-        {/* Card 1: Auditoria de Turnos PJ (Real consecutive duty check) */}
-        <div className="bg-[#12141A] border border-white/[0.08] rounded-2xl p-5 flex flex-col justify-between shadow-sm relative overflow-hidden group">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="text-[11px] font-bold text-[#00d2d3] uppercase tracking-wider">
-                AUDITORIA DE TURNOS PJ
-              </div>
-              <ShieldCheck className="w-4 h-4 text-[#00d2d3]" />
-            </div>
-            <h3 className="text-base font-bold text-white tracking-tight">
-              Conformidade e Intervalo Interjornada
-            </h3>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              {consecutiveDutyConflicts === 0
-                ? `Nenhum conflito de jornada consecutiva identificado em ${monthName} ${currentYear}. Todos os prestadores PJ cumprem o descanso mínimo acordado.`
-                : `${consecutiveDutyConflicts} sobreposição(ões) de turno consecutivo identificada(s) em ${monthName} ${currentYear}. Necessário ajuste no intervalo de 36h contratual.`}
-            </p>
-          </div>
-
-          <div className="flex items-center justify-between pt-4 mt-2 border-t border-white/[0.06] text-xs">
-            <div className="flex items-center gap-2 text-zinc-300 font-semibold">
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  consecutiveDutyConflicts === 0 ? 'bg-[#00d2d3] shadow-[0_0_8px_#00d2d3]' : 'bg-amber-400'
-                }`}
-              />
-              <span>{consecutiveDutyConflicts === 0 ? '100% Regularizado' : `${consecutiveDutyConflicts} Conflitos Pendentes`}</span>
-            </div>
-            <span className="text-zinc-500 font-mono text-[11px]">Contrato de Prestação PJ</span>
-          </div>
-        </div>
-
-        {/* Card 2: Cobertura em Plantão (with real calculated SVG area sparkline) */}
-        <div className="bg-[#12141A] border border-white/[0.08] rounded-2xl p-5 flex flex-col justify-between shadow-sm relative overflow-hidden group">
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
-                COBERTURA EM PLANTÃO
-              </div>
-              <Activity className="w-4 h-4 text-purple-400" />
-            </div>
-            <h3 className="text-base font-bold text-white tracking-tight">
-              Lotação Diária em Tempo Real
-            </h3>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              Média real de <strong className="text-zinc-200">{avgDailyDuty}</strong> plantonistas PJ/dia. Hoje: <strong className="text-[#00d2d3]">{todayWorkersCount} ativos</strong> ({todayOffCount} de folga). Pico do mês: <strong className="text-zinc-200">{maxDailyDuty}</strong> profissionais.
-            </p>
-          </div>
-
-          {/* SVG Sparkline Curve with Real Dynamic Pinpoint */}
-          <div className="py-2">
-            <div className="relative h-14 w-full">
-              <svg className="w-full h-full overflow-visible" viewBox="0 0 300 60" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="coverageGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#00d2d3" stopOpacity="0.3" />
-                    <stop offset="100%" stopColor="#00d2d3" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                {/* Area fill */}
-                <path
-                  d={sparklineAreaD}
-                  fill="url(#coverageGradient)"
-                />
-                {/* Smooth curve stroke */}
-                <path
-                  d={sparklinePathD}
-                  fill="none"
-                  stroke="#00d2d3"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
-                {/* Pinpoint for Today with Real Coordinates */}
-                <circle cx={todayPoint.x.toFixed(1)} cy={todayPoint.y.toFixed(1)} r="4" fill="#00d2d3" className="shadow-[0_0_10px_#00d2d3]" />
-                <circle cx={todayPoint.x.toFixed(1)} cy={todayPoint.y.toFixed(1)} r="7" fill="#00d2d3" opacity="0.3" />
-              </svg>
-            </div>
-            <div className="flex items-center justify-between text-[11px] text-zinc-500 font-mono pt-1">
-              <span>01/{monthName.slice(0, 3)}</span>
-              <span className="text-[#00d2d3] font-bold font-sans">Hoje (Dia {todayDayNumber}: {todayWorkersCount} PJ)</span>
-              <span>{allDays.length}/{monthName.slice(0, 3)}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Card 3: Trocas & Permutas PJ */}
-        <div className="bg-[#12141A] border border-white/[0.08] rounded-2xl p-5 flex flex-col justify-between shadow-sm relative overflow-hidden group">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
-                TROCAS & PERMUTAS PJ
-              </div>
-              <ArrowLeftRight className="w-4 h-4 text-zinc-400" />
-            </div>
-            <h3 className="text-base font-bold text-white tracking-tight">
-              Gestão de Permutas entre Prestadores
-            </h3>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              {pendingSwapsCount > 0
-                ? `${pendingSwapsCount} solicitação(ões) de troca aguardando validação da liderança. ${approvedSwapsCount} troca(s) já confirmada(s).`
-                : `${approvedSwapsCount > 0 ? `${approvedSwapsCount} troca(s) confirmada(s) neste ciclo.` : 'Nenhuma troca pendente no momento.'} Notificação e repasses automáticos entre prestadores de serviço.`}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 pt-4 mt-2">
-            <button
-              onClick={() => setQuickSwapOpen(true)}
-              className="flex-1 py-2 px-3 bg-[#1A1D24] hover:bg-[#252830] text-white border border-white/[0.08] rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-98"
-            >
-              <ArrowLeftRight className="w-3.5 h-3.5 text-zinc-300" />
-              <span>Nova Permuta</span>
-            </button>
-            <button
-              onClick={() => alert('As permutas entre prestadores PJ respeitam o intervalo mínimo contratual acordado de 36 horas entre turnos.')}
-              className="p-2 bg-[#1A1D24] hover:bg-[#252830] text-zinc-400 hover:text-white border border-white/[0.08] rounded-xl transition-colors cursor-pointer"
-              title="Regras contratuais de permuta PJ"
-            >
-              <HelpCircle className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-      </div>
+    </>
+  )}
 
       {/* Cell Editor Modal (Right-click or note edit) */}
       {activeCellEdit && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-100">
-          <div className="bg-[#12141A] text-zinc-100 rounded-3xl p-5 border border-white/[0.1] shadow-2xl max-w-sm w-full space-y-4">
+        <div
+          onClick={() => setActiveCellEdit(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-100 cursor-pointer"
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            className="bg-[#12141A] text-zinc-100 rounded-3xl p-5 border border-white/[0.1] shadow-2xl max-w-sm w-full space-y-4 cursor-default"
+          >
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
               <div>
                 <h3 className="text-sm font-black text-white">Editar Plantão</h3>
@@ -1236,6 +1146,18 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
         isOpen={absenceModalOpen}
         onClose={() => setAbsenceModalOpen(false)}
         defaultProviderId={absenceModalProvId}
+      />
+
+      {/* Month Turn Continuity & 36h Rest Comparison Modal */}
+      <MonthTurnComparisonModal
+        isOpen={isComparisonModalOpen}
+        onClose={() => setIsComparisonModalOpen(false)}
+        targetYear={currentYear}
+        targetMonthIndex={currentMonthIndex}
+        onApplySuccess={(count) => {
+          setToastNotification(`${count} plantões projetados com sucesso para ${monthName}!`);
+          setTimeout(() => setToastNotification(null), 4000);
+        }}
       />
     </div>
   );

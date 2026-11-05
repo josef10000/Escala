@@ -101,8 +101,14 @@ export const AttendanceIncidentModal: React.FC<AttendanceIncidentModalProps> = (
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-100">
-      <div className="bg-[#141c28] text-slate-100 rounded-3xl p-6 border border-[#1e2a3a] shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden space-y-4">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-100 cursor-pointer"
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        className="bg-[#141c28] text-slate-100 rounded-3xl p-6 border border-[#1e2a3a] shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden space-y-4 cursor-default"
+      >
         
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[#1e2a3a] pb-3 shrink-0">
