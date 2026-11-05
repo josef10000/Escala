@@ -33,6 +33,8 @@ export const CollaboratorAuthModal: React.FC<CollaboratorAuthModalProps> = ({
     authenticateProvider,
     setupProviderPin,
     isLeaderAuthenticated,
+    setActiveProviderId,
+    setViewMode,
   } = useSchedule();
 
   // Internal selected provider (starts with targetProvider if provided, else null for list view)
@@ -117,6 +119,8 @@ export const CollaboratorAuthModal: React.FC<CollaboratorAuthModalProps> = ({
 
         const ok = await setupProviderPin(selectedProvider.id, pin);
         if (ok) {
+          setActiveProviderId(selectedProvider.id);
+          setViewMode('personal-calendar');
           if (onSuccess) onSuccess(selectedProvider);
           onClose();
         } else {
@@ -132,6 +136,8 @@ export const CollaboratorAuthModal: React.FC<CollaboratorAuthModalProps> = ({
 
         const ok = authenticateProvider(selectedProvider.id, pin);
         if (ok) {
+          setActiveProviderId(selectedProvider.id);
+          setViewMode('personal-calendar');
           if (onSuccess) onSuccess(selectedProvider);
           onClose();
         } else {

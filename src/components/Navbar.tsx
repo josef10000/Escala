@@ -279,21 +279,38 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="h-5 w-px bg-white/[0.08] hidden sm:block" />
 
           {/* Collaborator Profile Information Block */}
-          <div className="flex items-center gap-2.5 pl-1">
+          <div className="flex items-center gap-2 pl-1">
+            {onOpenCollaboratorAuth && !authProviderObj && (
+              <button
+                type="button"
+                onClick={onOpenCollaboratorAuth}
+                className="h-8 px-2.5 rounded-lg bg-[#00d2d3]/15 hover:bg-[#00d2d3]/25 text-[#00d2d3] border border-[#00d2d3]/30 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-98"
+                title="Clique para escolher seu nome na lista, criar seu PIN e entrar no seu perfil"
+              >
+                <UserIcon className="w-3.5 h-3.5 text-[#00d2d3]" />
+                <span className="hidden sm:inline">Entrar no Meu Perfil</span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={() => {
-                if (onOpenProfileModal) onOpenProfileModal();
-                else if (onOpenCollaboratorAuth) onOpenCollaboratorAuth();
+                if (authProviderObj && onOpenProfileModal) {
+                  onOpenProfileModal();
+                } else if (onOpenCollaboratorAuth) {
+                  onOpenCollaboratorAuth();
+                } else if (onOpenProfileModal) {
+                  onOpenProfileModal();
+                }
               }}
               className="hidden md:flex flex-col text-right cursor-pointer group text-left hover:opacity-90"
-              title="Ver meu perfil, cadastrar WhatsApp e gerenciar PIN"
+              title="Clique para ver seu perfil, cadastrar WhatsApp, gerenciar PIN ou trocar de usuário"
             >
               <span className="text-xs text-white font-medium leading-none group-hover:text-[#57f1db] transition-colors">
                 {displayUser.name}
               </span>
-              <span className="text-[11px] font-mono text-[#bacac5] tracking-wider uppercase pt-1">
-                {isLeaderAuthenticated ? 'GESTOR DA ESCALA' : authProviderObj ? 'PRESTADOR (VER PERFIL)' : 'PRESTADOR PJ'}
+              <span className="text-[10px] font-mono text-[#bacac5] tracking-wider uppercase pt-1">
+                {isLeaderAuthenticated ? 'GESTOR DA ESCALA' : authProviderObj ? 'PERFIL CONECTADO (VER)' : 'SELEÇÃO DE PERFIL'}
               </span>
             </button>
 
@@ -302,11 +319,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 type="button"
                 onClick={() => {
-                  if (onOpenProfileModal) onOpenProfileModal();
-                  else if (onOpenCollaboratorAuth) onOpenCollaboratorAuth();
+                  if (authProviderObj && onOpenProfileModal) {
+                    onOpenProfileModal();
+                  } else if (onOpenCollaboratorAuth) {
+                    onOpenCollaboratorAuth();
+                  } else if (onOpenProfileModal) {
+                    onOpenProfileModal();
+                  }
                 }}
                 className="w-8 h-8 rounded-full bg-[#57f1db] hover:brightness-110 active:scale-95 transition-all flex items-center justify-center text-[#003731] font-bold shadow-md cursor-pointer"
-                title="Meu Perfil de Prestador (WhatsApp & PIN)"
+                title="Meu Perfil de Prestador (Escolher Nome, WhatsApp & PIN)"
               >
                 <UserIcon className="w-4 h-4 text-[#003731]" />
               </button>

@@ -20,12 +20,14 @@ interface CollaboratorProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   providerId?: string;
+  onOpenCollaboratorAuth?: () => void;
 }
 
 export const CollaboratorProfileModal: React.FC<CollaboratorProfileModalProps> = ({
   isOpen,
   onClose,
   providerId,
+  onOpenCollaboratorAuth,
 }) => {
   const {
     providers,
@@ -33,6 +35,7 @@ export const CollaboratorProfileModal: React.FC<CollaboratorProfileModalProps> =
     activeProviderId,
     updateProviderWhatsapp,
     setupProviderPin,
+    logoutProvider,
     assignments,
     shiftSaleOffers,
   } = useSchedule();
@@ -332,10 +335,24 @@ export const CollaboratorProfileModal: React.FC<CollaboratorProfileModalProps> =
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-white/[0.06] bg-[#12141c] flex items-center justify-end">
+        <div className="px-6 py-4 border-t border-white/[0.06] bg-[#12141c] flex items-center justify-between gap-3">
+          {onOpenCollaboratorAuth && (
+            <button
+              type="button"
+              onClick={() => {
+                logoutProvider();
+                onClose();
+                onOpenCollaboratorAuth();
+              }}
+              className="px-3.5 py-2 rounded-xl text-xs font-bold text-rose-300 hover:bg-rose-950/40 border border-rose-800/40 transition-colors flex items-center gap-1.5 cursor-pointer"
+            >
+              <User className="w-3.5 h-3.5 text-rose-400" />
+              <span>Trocar de Usuário / Outro Nome</span>
+            </button>
+          )}
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-300 hover:text-white hover:bg-white/[0.06] transition-colors"
+            className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-300 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
           >
             Fechar
           </button>

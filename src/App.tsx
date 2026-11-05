@@ -345,6 +345,7 @@ function ScheduleAppContent() {
       <CollaboratorProfileModal
         isOpen={profileModalOpen}
         onClose={() => setProfileModalOpen(false)}
+        onOpenCollaboratorAuth={() => setCollaboratorAuthOpen(true)}
       />
 
       {/* Montador e Importador de Escala Inteligente (IA / Foto / WhatsApp / Zerar) */}
