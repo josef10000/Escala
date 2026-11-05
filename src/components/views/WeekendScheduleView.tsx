@@ -16,6 +16,16 @@ import {
   Sparkles,
   ArrowUpDown,
   Lock,
+  ShieldCheck,
+  Clock,
+  Sun,
+  Crown,
+  TrendingUp,
+  CheckCircle2,
+  Users,
+  Award,
+  Shield,
+  Calendar,
 } from 'lucide-react';
 import { WeekendColumn } from '../../types';
 
@@ -132,27 +142,137 @@ export const WeekendScheduleView: React.FC<WeekendScheduleViewProps> = ({ onOpen
     setEditingCell(null);
   };
 
-  // Filtered weekend rows based on search
+  const [dayFilter, setDayFilter] = useState<'all' | 'sat' | 'sun'>('all');
+
+  const getInitials = (name: string) => {
+    if (!name || name.trim() === '-' || name.trim() === '') return '';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
+  const getColumnIcon = (colName: string) => {
+    const upper = colName.toUpperCase();
+    if (upper.includes('RESPONSÁVEL') || upper.includes('LÍDER') || upper.includes('COORDENAÇÃO')) {
+      return <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0" />;
+    }
+    if (upper.includes('SUPORTE') || upper.includes('APOIO') || upper.includes('FOLGA')) {
+      return <ShieldCheck className="w-3.5 h-3.5 text-sky-400 shrink-0" />;
+    }
+    if (upper.includes('12') || upper.includes('36')) {
+      return <Clock className="w-3.5 h-3.5 text-[#00d2d3] shrink-0" />;
+    }
+    if (upper.includes('08H') || upper.includes('09H') || upper.includes('TURNO')) {
+      return <Sun className="w-3.5 h-3.5 text-amber-300 shrink-0" />;
+    }
+    return <Users className="w-3.5 h-3.5 text-purple-400 shrink-0" />;
+  };
+
+  // Filtered weekend rows based on search & day filter
   const filteredWeekendDays = weekendDays.filter(day => {
+    if (dayFilter === 'sat' && day.dayOfWeek !== 6) return false;
+    if (dayFilter === 'sun' && day.dayOfWeek !== 0) return false;
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
     if (day.formattedDate.toLowerCase().includes(q) || day.dayOfWeekName.toLowerCase().includes(q)) {
       return true;
     }
-    // Check if any slot has this query
     const slots = weekendAssignments[day.dateStr] || {};
     return Object.values(slots).some(val => val && val.toLowerCase().includes(q));
   });
 
-  // Calculate quick stats
+  // Calculate quick stats & top collaborator
   const totalAssignedSlots = weekendDays.reduce((acc, day) => {
     const slots = weekendAssignments[day.dateStr] || {};
     return acc + Object.values(slots).filter(v => v && v.trim() !== '' && v.trim() !== '-').length;
   }, 0);
   const totalPossibleSlots = weekendDays.length * weekendColumns.length;
+  const coveragePercent = totalPossibleSlots > 0 ? Math.round((totalAssignedSlots / totalPossibleSlots) * 100) : 0;
+
+  const collaboratorCounts: Record<string, number> = {};
+  weekendDays.forEach(day => {
+    const slots = weekendAssignments[day.dateStr] || {};
+    Object.values(slots).forEach(val => {
+      if (val && val.trim() && val.trim() !== '-') {
+        const cleanName = val.trim();
+        collaboratorCounts[cleanName] = (collaboratorCounts[cleanName] || 0) + 1;
+      }
+    });
+  });
+
+  let topCollaboratorName = '-';
+  let topCollaboratorCount = 0;
+  Object.entries(collaboratorCounts).forEach(([name, count]) => {
+    if (count > topCollaboratorCount) {
+      topCollaboratorCount = count;
+      topCollaboratorName = name;
+    }
+  });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 animate-in fade-in duration-200">
+      
+      {/* Executive Key Metrics Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* Card 1: Cobertura */}
+        <div className="bg-[#12141A] border border-white/[0.08] p-3.5 rounded-2xl flex items-center gap-3.5 shadow-sm">
+          <div className="w-10 h-10 rounded-xl bg-[#00d2d3]/15 border border-[#00d2d3]/30 text-[#00d2d3] flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-5 h-5" />
+          </div>
+          <div className="space-y-1 flex-1 min-w-0">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+              Cobertura do Mês
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-black text-white">{coveragePercent}% Preenchido</span>
+              <span className="text-xs text-zinc-400 font-mono">{totalAssignedSlots}/{totalPossibleSlots}</span>
+            </div>
+            <div className="w-full h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-[#00d2d3] to-purple-500 rounded-full transition-all duration-500"
+                style={{ width: `${coveragePercent}%` }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Card 2: Destaque Plantonista */}
+        <div className="bg-[#12141A] border border-white/[0.08] p-3.5 rounded-2xl flex items-center gap-3.5 shadow-sm">
+          <div className="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-400 flex items-center justify-center shrink-0">
+            <Award className="w-5 h-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+              Maior Presença no Mês
+            </div>
+            <div className="text-sm font-bold text-white truncate">
+              {topCollaboratorName}
+            </div>
+            <div className="text-xs text-purple-300 font-medium">
+              {topCollaboratorCount > 0 ? `${topCollaboratorCount} plantões de fim de semana` : 'Sem plantões ainda'}
+            </div>
+          </div>
+        </div>
+
+        {/* Card 3: Total de Vagas */}
+        <div className="bg-[#12141A] border border-white/[0.08] p-3.5 rounded-2xl flex items-center gap-3.5 shadow-sm">
+          <div className="w-10 h-10 rounded-xl bg-sky-500/15 border border-sky-500/30 text-sky-400 flex items-center justify-center shrink-0">
+            <Calendar className="w-5 h-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+              Dias de Fim de Semana
+            </div>
+            <div className="text-sm font-bold text-white">
+              {weekendDays.length} Dias ({weekendColumns.length} Colunas de Grupo)
+            </div>
+            <div className="text-xs text-sky-300 font-medium">
+              Sábados e Domingos de {monthName}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* 1. Header Toolbar for Weekend Schedule */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#12141A] border border-white/[0.08] p-3 rounded-2xl">
         <div className="flex items-center gap-3">
@@ -171,16 +291,50 @@ export const WeekendScheduleView: React.FC<WeekendScheduleViewProps> = ({ onOpen
           </div>
         </div>
 
-        {/* Action Controls */}
+        {/* Action Controls & Day Filter */}
         <div className="flex items-center gap-2 flex-wrap">
+          {/* Day Segmented Filter */}
+          <div className="flex items-center bg-[#1A1D24] border border-white/[0.08] rounded-xl p-0.5 text-xs font-bold">
+            <button
+              onClick={() => setDayFilter('all')}
+              className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                dayFilter === 'all'
+                  ? 'bg-purple-500 text-white shadow-xs'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              Todos ({weekendDays.length})
+            </button>
+            <button
+              onClick={() => setDayFilter('sat')}
+              className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                dayFilter === 'sat'
+                  ? 'bg-sky-500 text-white shadow-xs'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              Sábados
+            </button>
+            <button
+              onClick={() => setDayFilter('sun')}
+              className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                dayFilter === 'sun'
+                  ? 'bg-purple-600 text-white shadow-xs'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              Domingos
+            </button>
+          </div>
+
           {/* Search box */}
-          <div className="relative min-w-[180px] max-w-[240px]">
+          <div className="relative min-w-[160px] max-w-[220px]">
             <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Filtrar por nome ou data..."
+              placeholder="Buscar colaborador..."
               className="w-full bg-[#1A1D24] border border-white/[0.08] rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#00d2d3]/60 transition-colors"
             />
             {searchQuery && (
@@ -308,7 +462,7 @@ export const WeekendScheduleView: React.FC<WeekendScheduleViewProps> = ({ onOpen
             <thead>
               <tr className="bg-[#161820] text-white border-b border-white/[0.08]">
                 {/* Column 1: DATA */}
-                <th className="py-3 px-3 min-w-[110px] font-bold text-white tracking-wider border-r border-white/[0.08] bg-[#161820]">
+                <th className="py-3 px-3.5 min-w-[110px] font-bold text-white tracking-wider border-r border-white/[0.08] bg-[#161820]">
                   <div className="flex items-center justify-between gap-1.5">
                     <span>DATA</span>
                     <Filter className="w-3 h-3 text-zinc-500 opacity-60" />
@@ -316,7 +470,7 @@ export const WeekendScheduleView: React.FC<WeekendScheduleViewProps> = ({ onOpen
                 </th>
 
                 {/* Column 2: DIA SEMANA */}
-                <th className="py-3 px-3 min-w-[120px] font-bold text-white tracking-wider border-r border-white/[0.08] bg-[#161820]">
+                <th className="py-3 px-3.5 min-w-[120px] font-bold text-white tracking-wider border-r border-white/[0.08] bg-[#161820]">
                   <div className="flex items-center justify-between gap-1.5">
                     <span>DIA SEMANA</span>
                     <Filter className="w-3 h-3 text-zinc-500 opacity-60" />
@@ -327,7 +481,7 @@ export const WeekendScheduleView: React.FC<WeekendScheduleViewProps> = ({ onOpen
                 {weekendColumns.map((col, idx) => (
                   <th
                     key={col.id}
-                    className="py-3 px-3 min-w-[150px] font-bold text-white tracking-wider border-r border-white/[0.08] bg-[#161820] group relative"
+                    className="py-3 px-3.5 min-w-[170px] font-bold text-white tracking-wider border-r border-white/[0.08] bg-[#161820] group relative"
                   >
                     {editingColumnId === col.id ? (
                       <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
@@ -340,7 +494,7 @@ export const WeekendScheduleView: React.FC<WeekendScheduleViewProps> = ({ onOpen
                             if (e.key === 'Escape') setEditingColumnId(null);
                           }}
                           autoFocus
-                          className="w-full bg-[#12141A] border border-[#00d2d3] rounded px-2 py-0.5 text-xs text-white focus:outline-none"
+                          className="w-full bg-[#12141A] border border-[#00d2d3] rounded px-2 py-0.5 text-xs text-white focus:outline-none font-bold"
                         />
                         <button
                           onClick={() => handleSaveColumnRename(col.id)}
@@ -356,10 +510,13 @@ export const WeekendScheduleView: React.FC<WeekendScheduleViewProps> = ({ onOpen
                         </button>
                       </div>
                     ) : (
-                      <div className="flex items-center justify-between gap-1.5">
-                        <span className="truncate uppercase font-bold text-zinc-100">{col.name}</span>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          {getColumnIcon(col.name)}
+                          <span className="truncate uppercase font-bold text-zinc-100 text-xs tracking-tight">{col.name}</span>
+                        </div>
                         
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 shrink-0">
                           <Filter className="w-3 h-3 text-zinc-500 opacity-60" />
                           
                           {/* Supervisor edit/delete column icons */}
@@ -417,14 +574,14 @@ export const WeekendScheduleView: React.FC<WeekendScheduleViewProps> = ({ onOpen
                   return (
                     <tr key={row.dateStr} className={`${rowBg} hover:bg-[#1a1d28] transition-colors`}>
                       {/* Column 1: DATA */}
-                      <td className="py-2.5 px-3 font-mono font-medium text-zinc-300 border-r border-white/[0.06] whitespace-nowrap">
+                      <td className="py-3 px-3.5 font-mono font-bold text-zinc-200 border-r border-white/[0.06] whitespace-nowrap">
                         {row.formattedDate}
                       </td>
 
                       {/* Column 2: DIA SEMANA */}
-                      <td className="py-2.5 px-3 border-r border-white/[0.06] whitespace-nowrap">
+                      <td className="py-3 px-3.5 border-r border-white/[0.06] whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                          className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
                             isSaturday
                               ? 'bg-sky-500/15 text-sky-300 border border-sky-500/30'
                               : 'bg-purple-500/15 text-purple-300 border border-purple-500/30'
@@ -452,16 +609,31 @@ export const WeekendScheduleView: React.FC<WeekendScheduleViewProps> = ({ onOpen
                                 cellVal
                               )
                             }
-                            className={`py-2 px-3 border-r border-white/[0.04] transition-all cursor-pointer relative group ${
-                              hasVal && !isDash
-                                ? 'text-zinc-100 font-semibold'
-                                : 'text-zinc-500 font-normal italic'
-                            } hover:bg-white/[0.04]`}
+                            className="py-2.5 px-3 border-r border-white/[0.04] transition-all cursor-pointer relative group hover:bg-white/[0.04]"
                           >
-                            <div className="flex items-center justify-between min-h-[22px]">
-                              <span>{hasVal ? cellVal : <span className="opacity-40">-</span>}</span>
-                              {isLeaderAuthenticated && (
-                                <span className="opacity-0 group-hover:opacity-100 text-[10px] text-zinc-500 ml-1">
+                            <div className="flex items-center justify-between min-h-[28px]">
+                              {hasVal && !isDash ? (
+                                <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-xl bg-[#1A1D24] border border-white/[0.08] text-white shadow-2xs group-hover:border-[#00d2d3]/50 transition-all max-w-full">
+                                  <span className="w-5 h-5 rounded-lg bg-[#00d2d3]/20 text-[#00d2d3] border border-[#00d2d3]/30 font-black text-[10px] flex items-center justify-center shrink-0 font-mono">
+                                    {getInitials(cellVal)}
+                                  </span>
+                                  <span className="font-bold text-xs text-white truncate max-w-[130px]">
+                                    {cellVal}
+                                  </span>
+                                </div>
+                              ) : (
+                                <div className="inline-flex items-center gap-1.5 text-zinc-600 font-medium text-xs py-1">
+                                  <span className="opacity-40 font-mono">-</span>
+                                  {isLeaderAuthenticated && (
+                                    <span className="opacity-0 group-hover:opacity-100 text-[10px] font-bold text-[#00d2d3] transition-opacity flex items-center gap-0.5">
+                                      + Atribuir
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+
+                              {isLeaderAuthenticated && hasVal && !isDash && (
+                                <span className="opacity-0 group-hover:opacity-100 text-[10px] text-zinc-400 ml-1 transition-opacity">
                                   ✎
                                 </span>
                               )}
