@@ -355,17 +355,6 @@ export const MobileScheduleView: React.FC<MobileScheduleViewProps> = ({
         >
           📍 Postos
         </button>
-        <button
-          type="button"
-          onClick={() => setActiveModule('templates_whatsapp')}
-          className={`py-1.5 px-1 rounded-lg text-[11px] font-semibold text-center transition-all cursor-pointer ${
-            activeModule === 'templates_whatsapp'
-              ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-xs'
-              : 'bg-slate-800/60 text-slate-300 hover:bg-slate-700 border border-transparent'
-          }`}
-        >
-          💬 WhatsApp
-        </button>
       </div>
 
       {/* 🔔 TOMORROW SHIFT REMINDER BANNER */}

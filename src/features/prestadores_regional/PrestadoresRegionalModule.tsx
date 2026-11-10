@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import { Search, X, Plus } from 'lucide-react';
 import {
   Prestador,
   ViewMode,
@@ -33,8 +34,6 @@ import {
 } from './utils/storage';
 import { filterPrestadores, searchUniversalAll } from './utils/search';
 
-import { Sidebar } from './components/Sidebar';
-import { Header } from './components/Header';
 import { UnifiedToolbar } from './components/UnifiedToolbar';
 import { PrestadorTerminalView } from './components/PrestadorTerminalView';
 import { PrestadorCardsView } from './components/PrestadorCardsView';
@@ -118,12 +117,15 @@ export function PrestadoresRegionalModule({
     }, 2800);
   }, []);
 
-  // Global Keyboard shortcut: Cmd+K / Ctrl+K opens In-Place Spotlight Search
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Global Keyboard shortcut: Cmd+K / Ctrl+K focuses single search input
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        setFocusSearchSignal((prev) => prev + 1);
+        searchInputRef.current?.focus();
+        searchInputRef.current?.select();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -352,16 +354,13 @@ export function PrestadoresRegionalModule({
     if (mainTab === 'prestadores') {
       setEditingPrestador(null);
       setIsModalOpen(true);
-    } else if (mainTab === 'templates') {
-      setEditingTemplate(null);
-      setIsTemplateModalOpen(true);
     } else {
       setIsPontoFixoModalOpen(true);
     }
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#090A0F] text-[#e3e1e9] font-sans selection:bg-[#00d2d3] selection:text-black relative">
+    <div className="flex-1 flex flex-col min-w-0 bg-[#090A0F] text-[#e3e1e9] font-sans relative overflow-y-auto px-4 sm:px-6 py-5 space-y-4">
       {/* Ambient Aurora Glow Background for True Glassmorphism */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 select-none">
         {/* Soft Escala Cyan Aurora Blob Top-Left */}
@@ -370,86 +369,81 @@ export function PrestadoresRegionalModule({
         <div className="absolute top-1/6 -right-20 w-[32rem] h-[32rem] rounded-full bg-cyan-500/6 blur-[160px]" />
       </div>
 
-      {/* 1. Left Sidebar Navigation */}
-      <Sidebar
-        mainTab={mainTab}
-        onMainTabChange={(tab) => {
-          setMainTab(tab);
-          setSearchQuery('');
-          setIsSidebarOpen(false);
-        }}
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-        totalPrestadores={prestadores.length}
-        totalTemplates={templates.length}
-        totalRegrasAgendas={totalRegrasAgendas}
-        showFavoritesOnly={showFavoritesOnly}
-        onToggleFavoritesOnly={() => {
-          setShowFavoritesOnly((prev) => !prev);
-          setMainTab('prestadores');
-          setSearchQuery('');
-        }}
-        favoritesCount={favorites.length}
-        onOpenImportExport={() => setIsImportExportOpen(true)}
-        onOpenShare={() => setIsShareOpen(true)}
-        onOpenReset={() => setIsResetOpen(true)}
-        selectedRegion={selectedRegion}
-        onSelectRegion={(reg) => {
-          setSelectedRegion(reg);
-          setMainTab('prestadores');
-          setSearchQuery('');
-        }}
-        onNavigateToEscala={onNavigateToEscala}
-      />
+      {/* Hero Header with Integrated Search & Action Button */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-2 border-b border-[#1e2029] relative z-10">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+              {mainTab === 'prestadores' ? 'Prestadores de Serviços' : 'Regras, Pontos Fixos & Agendas'}
+            </h1>
+            <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-md bg-cyan-950/60 text-[#00d2d3] border border-[#00d2d3]/30 uppercase">
+              dr.monitora® OPA
+            </span>
+          </div>
+          <p className="text-xs text-slate-400 mt-1">
+            {mainTab === 'prestadores'
+              ? 'Consulta operacional de técnicos, bases regionais e telefones autorizados'
+              : 'Diretrizes operacionais, regras de horário fixo, bases presenciais e agendas'}
+          </p>
+        </div>
 
-      {/* 2. Main Right Column */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative z-10">
-        {/* Sticky Header with THE SINGLE UNIVERSAL SEARCH BAR */}
-        <Header
-          mainTab={mainTab}
-          onOpenSidebar={() => setIsSidebarOpen(true)}
-          onOpenPrimaryCTA={handlePrimaryCTA}
-          onOpenSecondaryCTA={mainTab === 'templates' ? () => setIsFillerModalOpen(true) : undefined}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          totalUniversalMatches={searchQuery ? universalResults.totalMatches : undefined}
-        />
-
-        {/* Scrollable View Body */}
-        <main className="flex-1 overflow-y-auto px-4 sm:px-6 py-5 space-y-4">
-          {/* OPTION 2: Accordion Feed when universal search is active */}
-          {searchQuery.trim().length > 0 ? (
-            <SearchAccordionFeed
-              query={searchQuery}
-              onClearQuery={() => setSearchQuery('')}
-              results={universalResults}
-              onCopySuccess={showToast}
-              favorites={favorites}
-              onToggleFavorite={handleToggleFavorite}
-              onNavigateToTab={(tab) => {
-                setMainTab(tab);
-                setSearchQuery('');
-              }}
+        {/* Search Input + Action Button */}
+        <div className="flex items-center gap-2.5 flex-1 max-w-xl md:justify-end">
+          <div className="relative flex-1">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+              <Search className="w-4 h-4 text-[#00d2d3]" />
+            </div>
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Busca universal (técnico, código, cidade, ponto fixo)..."
+              className="w-full pl-9 pr-16 py-2 bg-[#13151c] text-[#e3e1e9] placeholder-slate-400 text-xs sm:text-sm rounded-xl border border-[#1e2029] focus:border-[#00d2d3] focus:outline-none transition-all shadow-inner font-sans"
             />
-          ) : (
-            <>
-              {/* Page Hero Header with responsive H1 using rem: ~30px on mobile (1.875rem), 36px on desktop (2.25rem) */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 pb-1">
-                <div>
-                  <h1 className="text-[1.875rem] sm:text-4xl font-bold text-white tracking-tight leading-tight">
-                    {mainTab === 'prestadores' && 'Prestadores de Serviços'}
-                    {mainTab === 'templates' && 'Templates OPA Atendimento'}
-                    {mainTab === 'regras' && 'Regras, Pontos Fixos & Agendas'}
-                  </h1>
-                  <p className="text-xs sm:text-sm text-slate-400 mt-1">
-                    {mainTab === 'prestadores' && 'Consulta operacional de técnicos, bases regionais e telefones autorizados'}
-                    {mainTab === 'templates' && 'Mensagens padronizadas com saudação automática pelo horário para WhatsApp e OPA'}
-                    {mainTab === 'regras' && 'Diretrizes operacionais, regras de horário fixo, bases presenciais e agendas'}
-                  </p>
-                </div>
-              </div>
+            {searchQuery ? (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-xs text-slate-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <span className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-[10px] font-mono text-slate-500">
+                Ctrl+K
+              </span>
+            )}
+          </div>
 
-              {/* Module 1: Prestadores */}
+          <button
+            type="button"
+            onClick={handlePrimaryCTA}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#00d2d3] hover:bg-[#00e2e3] active:scale-[0.98] text-[#003731] font-black text-xs shadow-md border border-[#00d2d3] transition-all cursor-pointer whitespace-nowrap shrink-0"
+          >
+            <Plus className="w-4 h-4" />
+            <span>{mainTab === 'prestadores' ? 'Novo Prestador' : 'Novo Ponto Fixo'}</span>
+          </button>
+        </div>
+      </div>
+
+      <div className="relative z-10 space-y-4">
+        {searchQuery.trim().length > 0 ? (
+          <SearchAccordionFeed
+            query={searchQuery}
+            onClearQuery={() => setSearchQuery('')}
+            results={universalResults}
+            onCopySuccess={showToast}
+            favorites={favorites}
+            onToggleFavorite={handleToggleFavorite}
+            onNavigateToTab={(tab) => {
+              setMainTab(tab);
+              setSearchQuery('');
+            }}
+          />
+        ) : (
+          <>
+            {/* Module 1: Prestadores */}
               {mainTab === 'prestadores' && (
                 <div className="space-y-4">
                   <UnifiedToolbar
@@ -508,28 +502,6 @@ export function PrestadoresRegionalModule({
                 </div>
               )}
 
-              {/* Module 2: Frases & Templates OPA */}
-              {mainTab === 'templates' && (
-                <TemplatesView
-                  templates={templates}
-                  onSaveTemplate={handleSaveTemplate}
-                  onDeleteTemplate={handleDeleteTemplate}
-                  onResetTemplates={handleResetTemplates}
-                  onCopySuccess={showToast}
-                  onOpenNewTemplateModal={() => {
-                    setEditingTemplate(null);
-                    setIsTemplateModalOpen(true);
-                  }}
-                  onOpenEditTemplateModal={(t) => {
-                    setEditingTemplate(t);
-                    setIsTemplateModalOpen(true);
-                  }}
-                  onOpenFillerModal={() => setIsFillerModalOpen(true)}
-                  globalSearchQuery=""
-                  onGlobalSearchChange={() => {}}
-                />
-              )}
-
               {/* Module 3: Regras Operacionais, Agendas & Pontos Fixos */}
               {mainTab === 'regras' && (
                 <RegrasAgendasView
@@ -554,8 +526,7 @@ export function PrestadoresRegionalModule({
               )}
             </>
           )}
-        </main>
-      </div>
+        </div>
 
       {/* Modals & Dialogs */}
       <PrestadorModal

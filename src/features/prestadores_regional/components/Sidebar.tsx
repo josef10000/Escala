@@ -85,13 +85,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       count: totalPrestadores,
     },
     {
-      id: 'templates' as MainTab,
-      label: 'Templates OPA',
-      subtitle: 'Respostas Prontas',
-      icon: MessageSquare,
-      count: totalTemplates,
-    },
-    {
       id: 'regras' as MainTab,
       label: 'Regras & Agendas',
       subtitle: 'Pontos Fixos & KM',

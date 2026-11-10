@@ -145,14 +145,11 @@ function ScheduleAppContent() {
             initialTab={
               activeModule === 'pontos_fixos'
                 ? 'regras'
-                : activeModule === 'templates_whatsapp'
-                ? 'templates'
                 : 'prestadores'
             }
             onNavigateToEscala={() => setActiveModule('escala')}
             onTabChange={(tab) => {
               if (tab === 'prestadores') setActiveModule('prestadores_regional');
-              else if (tab === 'templates') setActiveModule('templates_whatsapp');
               else if (tab === 'regras') setActiveModule('pontos_fixos');
             }}
           />

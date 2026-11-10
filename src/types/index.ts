@@ -145,5 +145,5 @@ export interface AttendanceIncident {
 
 export type ViewMode = 'escala' | 'personal-calendar' | 'calendar' | 'matrix' | 'week' | 'agenda' | 'my-schedule';
 export type UserRole = 'supervisor' | 'provider';
-export type ActiveModule = 'escala' | 'prestadores_regional' | 'pontos_fixos' | 'templates_whatsapp';
+export type ActiveModule = 'escala' | 'prestadores_regional' | 'pontos_fixos';
 

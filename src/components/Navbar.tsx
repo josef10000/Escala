@@ -145,20 +145,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="hidden sm:inline">Pontos Fixos & Agendas</span>
               <span className="sm:hidden">Pontos Fixos</span>
             </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveModule('templates_whatsapp')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium whitespace-nowrap ${
-                activeModule === 'templates_whatsapp'
-                  ? 'bg-gradient-to-r from-amber-600/35 to-orange-600/35 text-white font-semibold border border-amber-400/40 shadow-sm'
-                  : 'text-[#bacac5] hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <MessageSquare className="w-3.5 h-3.5 text-amber-400" />
-              <span className="hidden sm:inline">Templates WhatsApp</span>
-              <span className="sm:hidden">WhatsApp</span>
-            </button>
           </nav>
 
           {/* Sub-tabs for Escala */}
