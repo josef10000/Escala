@@ -7,6 +7,10 @@ import {
   Share2,
   User as UserIcon,
   Coins,
+  Calendar,
+  Users,
+  MapPin,
+  MessageSquare,
 } from 'lucide-react';
 import { useSchedule } from '../context/ScheduleContext';
 
@@ -52,6 +56,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     shiftSaleOffers,
     viewMode,
     setViewMode,
+    activeModule,
+    setActiveModule,
   } = useSchedule();
 
   const pendingSwapsCount = swapRequests.filter(s => s.status === 'pending_supervisor').length;
@@ -73,8 +79,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'guest', name: 'Gestor da Escala', role: 'GESTOR DA ESCALA' };
 
   return (
-    <header className="fixed top-0 inset-x-0 z-50 bg-[#0d0e13]/90 backdrop-blur-xl border-b border-white/[0.08] text-[#e3e2e7] h-16">
-      <div className="h-16 w-full px-3 sm:px-6 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
+    <header className="fixed top-0 inset-x-0 z-50 bg-[#0d0e13]/95 backdrop-blur-xl border-b border-white/[0.08] text-[#e3e2e7] h-16">
+      <div className="h-16 w-full px-3 sm:px-6 flex items-center justify-between gap-3 overflow-hidden">
         
         {/* Left: Brand + Navigation Segmented Tabs */}
         <div className="flex items-center gap-3 md:gap-5 shrink-0">
@@ -82,7 +88,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Brand Identity */}
           <button
             type="button"
-            onClick={() => setViewMode('escala')}
+            onClick={() => {
+              setActiveModule('escala');
+              setViewMode('escala');
+            }}
             className="flex items-center gap-2 cursor-pointer group shrink-0"
           >
             <img
@@ -90,65 +99,124 @@ export const Navbar: React.FC<NavbarProps> = ({
               alt="EscalaPro Logo"
               className="w-8 h-8 object-contain rounded-lg shadow-sm group-hover:scale-105 transition-transform"
             />
-            <span className="font-bold text-white tracking-tight text-base hidden sm:inline">
+            <span className="font-bold text-white tracking-tight text-base hidden xl:inline">
               EscalaPro
             </span>
           </button>
 
-          {/* Center Navigation Tabs (Obsidian Segmented Menu) */}
-          <nav className="flex items-center gap-1 p-1 rounded-xl bg-[#1a1b20] border border-white/[0.05] shrink-0">
+          {/* Primary Hub Modules */}
+          <nav className="flex items-center gap-1 p-1 rounded-xl bg-[#14161e] border border-white/[0.08] shrink-0">
             <button
               type="button"
-              onClick={() => setViewMode('escala')}
-              className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium whitespace-nowrap ${
-                viewMode === 'escala'
-                  ? 'bg-[#343439] text-white font-semibold shadow-sm'
-                  : 'text-[#bacac5] hover:text-white hover:bg-[#292a2e]'
+              onClick={() => setActiveModule('escala')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium whitespace-nowrap ${
+                activeModule === 'escala'
+                  ? 'bg-gradient-to-r from-cyan-600/35 to-blue-600/35 text-white font-semibold border border-cyan-400/40 shadow-sm'
+                  : 'text-[#bacac5] hover:text-white hover:bg-white/5'
               }`}
             >
-              Quadro Geral
+              <Calendar className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Escala</span>
             </button>
 
             <button
               type="button"
-              onClick={() => setViewMode('personal-calendar')}
-              className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium whitespace-nowrap ${
-                viewMode === 'personal-calendar'
-                  ? 'bg-[#343439] text-white font-semibold shadow-sm'
-                  : 'text-[#bacac5] hover:text-white hover:bg-[#292a2e]'
+              onClick={() => setActiveModule('prestadores_regional')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium whitespace-nowrap ${
+                activeModule === 'prestadores_regional'
+                  ? 'bg-gradient-to-r from-[#00d2d3]/25 to-teal-500/25 text-white font-semibold border border-[#00d2d3]/40 shadow-sm'
+                  : 'text-[#bacac5] hover:text-white hover:bg-white/5'
               }`}
             >
-              Meu Calendário
+              <Users className="w-3.5 h-3.5 text-[#00d2d3]" />
+              <span>Técnicos & CEP</span>
             </button>
 
             <button
               type="button"
-              onClick={() => setViewMode('agenda')}
-              className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium whitespace-nowrap hidden md:block ${
-                viewMode === 'agenda'
-                  ? 'bg-[#343439] text-white font-semibold shadow-sm'
-                  : 'text-[#bacac5] hover:text-white hover:bg-[#292a2e]'
+              onClick={() => setActiveModule('pontos_fixos')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium whitespace-nowrap ${
+                activeModule === 'pontos_fixos'
+                  ? 'bg-gradient-to-r from-emerald-600/35 to-teal-600/35 text-white font-semibold border border-emerald-400/40 shadow-sm'
+                  : 'text-[#bacac5] hover:text-white hover:bg-white/5'
               }`}
             >
-              Agenda Diária
+              <MapPin className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="hidden sm:inline">Pontos Fixos & Agendas</span>
+              <span className="sm:hidden">Pontos Fixos</span>
             </button>
 
             <button
               type="button"
-              onClick={() => {
-                if (onOpenExecutiveReportModal) {
-                  onOpenExecutiveReportModal();
-                } else if (onOpenProviderModal) {
-                  onOpenProviderModal();
-                } else {
-                  setViewMode('escala');
-                }
-              }}
-              className="px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer text-[#bacac5] hover:text-white hover:bg-[#292a2e] font-medium whitespace-nowrap"
+              onClick={() => setActiveModule('templates_whatsapp')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium whitespace-nowrap ${
+                activeModule === 'templates_whatsapp'
+                  ? 'bg-gradient-to-r from-amber-600/35 to-orange-600/35 text-white font-semibold border border-amber-400/40 shadow-sm'
+                  : 'text-[#bacac5] hover:text-white hover:bg-white/5'
+              }`}
             >
-              Relatórios & Equipe
+              <MessageSquare className="w-3.5 h-3.5 text-amber-400" />
+              <span className="hidden sm:inline">Templates WhatsApp</span>
+              <span className="sm:hidden">WhatsApp</span>
             </button>
           </nav>
+
+          {/* Sub-tabs for Escala */}
+          {activeModule === 'escala' && (
+            <div className="hidden 2xl:flex items-center gap-1 p-0.5 rounded-lg bg-[#1a1b20] border border-white/[0.05] shrink-0">
+              <button
+                type="button"
+                onClick={() => setViewMode('escala')}
+                className={`px-2.5 py-1 rounded text-xs transition-all cursor-pointer font-medium whitespace-nowrap ${
+                  viewMode === 'escala'
+                    ? 'bg-[#343439] text-white font-semibold shadow-xs'
+                    : 'text-[#bacac5] hover:text-white hover:bg-[#292a2e]'
+                }`}
+              >
+                Quadro Geral
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setViewMode('personal-calendar')}
+                className={`px-2.5 py-1 rounded text-xs transition-all cursor-pointer font-medium whitespace-nowrap ${
+                  viewMode === 'personal-calendar'
+                    ? 'bg-[#343439] text-white font-semibold shadow-xs'
+                    : 'text-[#bacac5] hover:text-white hover:bg-[#292a2e]'
+                }`}
+              >
+                Meu Calendário
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setViewMode('agenda')}
+                className={`px-2.5 py-1 rounded text-xs transition-all cursor-pointer font-medium whitespace-nowrap ${
+                  viewMode === 'agenda'
+                    ? 'bg-[#343439] text-white font-semibold shadow-xs'
+                    : 'text-[#bacac5] hover:text-white hover:bg-[#292a2e]'
+                }`}
+              >
+                Agenda Diária
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (onOpenExecutiveReportModal) {
+                    onOpenExecutiveReportModal();
+                  } else if (onOpenProviderModal) {
+                    onOpenProviderModal();
+                  } else {
+                    setViewMode('escala');
+                  }
+                }}
+                className="px-2.5 py-1 rounded text-xs transition-all cursor-pointer text-[#bacac5] hover:text-white hover:bg-[#292a2e] font-medium whitespace-nowrap"
+              >
+                Relatórios & Equipe
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Right Tools, Share, Leader Auth & User Profile */}

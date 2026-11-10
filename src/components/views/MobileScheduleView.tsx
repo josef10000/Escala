@@ -58,6 +58,8 @@ export const MobileScheduleView: React.FC<MobileScheduleViewProps> = ({
     role,
     acknowledgeAllMonthlyShifts,
     isMonthPublished,
+    activeModule,
+    setActiveModule,
   } = useSchedule();
 
   // Bottom Navigation Tab: 'escala' | 'equipe' | 'trocas' (NO 'perfil' tab as requested)
@@ -316,6 +318,54 @@ export const MobileScheduleView: React.FC<MobileScheduleViewProps> = ({
             <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-cyan-400 ring-2 ring-[#0c121c]" />
           </button>
         </div>
+      </div>
+
+      {/* Quick Module Switcher on Mobile (Clean 4-column grid bar, zero scrollbars) */}
+      <div className="px-3 py-2 bg-[#0d1420] border-b border-[#1e2a3a] grid grid-cols-4 gap-1">
+        <button
+          type="button"
+          onClick={() => setActiveModule('escala')}
+          className={`py-1.5 px-1 rounded-lg text-[11px] font-semibold text-center transition-all cursor-pointer ${
+            activeModule === 'escala'
+              ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-xs'
+              : 'bg-slate-800/60 text-slate-300 hover:bg-slate-700 border border-transparent'
+          }`}
+        >
+          📅 Escala
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveModule('prestadores_regional')}
+          className={`py-1.5 px-1 rounded-lg text-[11px] font-semibold text-center transition-all cursor-pointer ${
+            activeModule === 'prestadores_regional'
+              ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40 shadow-xs'
+              : 'bg-slate-800/60 text-slate-300 hover:bg-slate-700 border border-transparent'
+          }`}
+        >
+          👥 Técnicos
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveModule('pontos_fixos')}
+          className={`py-1.5 px-1 rounded-lg text-[11px] font-semibold text-center transition-all cursor-pointer ${
+            activeModule === 'pontos_fixos'
+              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-xs'
+              : 'bg-slate-800/60 text-slate-300 hover:bg-slate-700 border border-transparent'
+          }`}
+        >
+          📍 Postos
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveModule('templates_whatsapp')}
+          className={`py-1.5 px-1 rounded-lg text-[11px] font-semibold text-center transition-all cursor-pointer ${
+            activeModule === 'templates_whatsapp'
+              ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-xs'
+              : 'bg-slate-800/60 text-slate-300 hover:bg-slate-700 border border-transparent'
+          }`}
+        >
+          💬 WhatsApp
+        </button>
       </div>
 
       {/* 🔔 TOMORROW SHIFT REMINDER BANNER */}

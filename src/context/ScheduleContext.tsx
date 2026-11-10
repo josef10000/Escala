@@ -17,6 +17,7 @@ import {
   ShiftSaleOffer,
   ShiftSaleStatus,
   WeekendColumn,
+  ActiveModule,
 } from '../types';
 import {
   INITIAL_DEPARTMENTS,
@@ -70,6 +71,8 @@ interface ScheduleContextType {
   setViewMode: (mode: ViewMode) => void;
   activeRegime: WorkRegime;
   setActiveRegime: (regime: WorkRegime) => void;
+  activeModule: ActiveModule;
+  setActiveModule: (module: ActiveModule) => void;
   filters: FilterState;
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
   resetFilters: () => void;
@@ -245,6 +248,24 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const setActiveRegime = (regime: WorkRegime) => {
     setActiveRegimeState(regime);
     localStorage.setItem(STORAGE_KEYS.REGIME, regime);
+  };
+
+  // Active top-level operational module
+  const [activeModule, setActiveModuleState] = useState<ActiveModule>(() => {
+    try {
+      const saved = localStorage.getItem('escalapro_active_module');
+      if (saved && ['escala', 'prestadores_regional', 'pontos_fixos', 'templates_whatsapp'].includes(saved)) {
+        return saved as ActiveModule;
+      }
+    } catch (_) {}
+    return 'escala';
+  });
+
+  const setActiveModule = (mod: ActiveModule) => {
+    setActiveModuleState(mod);
+    try {
+      localStorage.setItem('escalapro_active_module', mod);
+    } catch (_) {}
   };
 
   // Role: supervisor or provider
@@ -1982,6 +2003,8 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
         setViewMode,
         activeRegime,
         setActiveRegime,
+        activeModule,
+        setActiveModule,
         filters,
         setFilters,
         resetFilters,

@@ -29,6 +29,7 @@ import { AnnouncementsModal } from './components/modals/AnnouncementsModal';
 import { AuditLogModal } from './components/modals/AuditLogModal';
 import { OperationalKpiModal } from './components/modals/OperationalKpiModal';
 import { MobileScheduleView } from './components/views/MobileScheduleView';
+import { PrestadoresRegionalModule } from './features/prestadores_regional/PrestadoresRegionalModule';
 import { Provider, ShiftAssignment } from './types';
 import { Calendar, Clock, CheckCircle2, AlertCircle, Plus, CalendarDays } from 'lucide-react';
 import { formatFriendlyDate } from './utils/dateUtils';
@@ -46,6 +47,8 @@ function ScheduleAppContent() {
     departments,
     authenticatedProviderId,
     isLeaderAuthenticated,
+    activeModule,
+    setActiveModule,
   } = useSchedule();
 
   // Modals state
@@ -114,6 +117,67 @@ function ScheduleAppContent() {
   const myTodayShift = todayShifts.find(a => a.providerId === activeProviderId);
   const myTodayShiftType = myTodayShift ? shiftTypes.find(s => s.id === myTodayShift.shiftTypeId) : null;
   const myTodayDept = myTodayShift ? departments.find(d => d.id === myTodayShift.departmentId) : null;
+
+  if (activeModule !== 'escala') {
+    return (
+      <div className="min-h-screen bg-[#090A0F] text-[#e3e1e9] flex flex-col font-sans selection:bg-[#00d2d3] selection:text-[#003731]">
+        <Navbar
+          onOpenLeaderAuth={() => setLeaderAuthModalOpen(true)}
+          onOpenRequestsCenter={() => setRequestsCenterModalOpen(true)}
+          onOpenNewShiftModal={handleOpenNewShift}
+          onOpenAutoScheduleModal={() => setAutoScheduleModalOpen(true)}
+          onOpenProviderModal={() => setProviderModalOpen(true)}
+          onOpenShareModal={() => setWhatsAppModalOpen(true)}
+          onOpenCollaboratorAuth={() => {
+            setAuthModalProvider(null);
+            setCollaboratorAuthOpen(true);
+          }}
+          onOpenMarketplace={() => setMarketplaceModalOpen(true)}
+          onOpenProfileModal={() => setProfileModalOpen(true)}
+          onOpenImportModal={() => setImportScheduleModalOpen(true)}
+          onOpenAnnouncements={() => setAnnouncementsOpen(true)}
+          onOpenAuditLog={() => setAuditLogOpen(true)}
+          onOpenKpiModal={() => setKpiModalOpen(true)}
+          onOpenExecutiveReportModal={() => setExecutiveReportModalOpen(true)}
+        />
+        <div className="pt-16 flex-1 flex flex-col overflow-hidden">
+          <PrestadoresRegionalModule
+            initialTab={
+              activeModule === 'pontos_fixos'
+                ? 'regras'
+                : activeModule === 'templates_whatsapp'
+                ? 'templates'
+                : 'prestadores'
+            }
+            onNavigateToEscala={() => setActiveModule('escala')}
+            onTabChange={(tab) => {
+              if (tab === 'prestadores') setActiveModule('prestadores_regional');
+              else if (tab === 'templates') setActiveModule('templates_whatsapp');
+              else if (tab === 'regras') setActiveModule('pontos_fixos');
+            }}
+          />
+        </div>
+
+        {/* Global Modals for Navbar */}
+        <LeaderAuthModal
+          isOpen={leaderAuthModalOpen}
+          onClose={() => setLeaderAuthModalOpen(false)}
+        />
+        <CollaboratorProfileModal
+          isOpen={profileModalOpen}
+          onClose={() => setProfileModalOpen(false)}
+        />
+        <CollaboratorAuthModal
+          isOpen={collaboratorAuthOpen}
+          onClose={() => {
+            setCollaboratorAuthOpen(false);
+            setAuthModalProvider(null);
+          }}
+          targetProvider={authModalProvider}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#090A0F] text-[#e3e1e9] flex flex-col font-sans selection:bg-[#00d2d3] selection:text-[#003731]">
