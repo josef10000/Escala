@@ -323,13 +323,16 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.ASSIGNMENTS);
       let parsed = saved ? JSON.parse(saved) : [];
-      parsed = parsed.filter((a: ShiftAssignment) => a.date && !a.date.startsWith('2026-09-'));
+      // Remove September and stale November assignments so exact image data is always loaded
+      parsed = parsed.filter((a: ShiftAssignment) => a.date && !a.date.startsWith('2026-09-') && !a.date.startsWith('2026-11-'));
+      const seed = generateInitialAssignments();
+      const novSeed = seed.filter(s => s.date.startsWith('2026-11-'));
       const hasOctober = parsed.some((a: ShiftAssignment) => a.date && a.date.startsWith('2026-10-'));
-      if (!hasOctober) {
-        const seed = generateInitialAssignments();
-        return [...parsed, ...seed];
-      }
-      return parsed;
+      const octSeed = hasOctober ? [] : seed.filter(s => s.date.startsWith('2026-10-'));
+      
+      const merged = [...parsed, ...octSeed, ...novSeed];
+      localStorage.setItem(STORAGE_KEYS.ASSIGNMENTS, JSON.stringify(merged));
+      return merged;
     } catch {
       return generateInitialAssignments();
     }
@@ -609,20 +612,15 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           return a;
         });
 
+      const novSeed = seed.filter(s => s.date.startsWith('2026-11-'));
+      clean = clean.filter(a => a.date && !a.date.startsWith('2026-11-'));
       const hasOct = clean.some(a => a.date && a.date.startsWith('2026-10-'));
-      const finalAssignments = hasOct ? clean : [...clean, ...seed];
+      const octSeed = hasOct ? [] : seed.filter(s => s.date.startsWith('2026-10-'));
+      const finalAssignments = [...clean, ...octSeed, ...novSeed];
       
       try {
         localStorage.setItem(STORAGE_KEYS.ASSIGNMENTS, JSON.stringify(finalAssignments));
       } catch (_) {}
-
-      const scheduleDocRef = doc(db, 'schedule_store', 'main');
-      setDoc(scheduleDocRef, {
-        assignments: finalAssignments,
-        providers: INITIAL_PROVIDERS,
-        updatedAt: new Date().toISOString(),
-        lastUpdatedBy: 'Sistema'
-      }, { merge: true }).catch(() => {});
 
       return finalAssignments;
     });
@@ -644,16 +642,13 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             localStorage.setItem(STORAGE_KEYS.PROVIDERS, JSON.stringify(data.providers));
           }
           if (data.assignments && Array.isArray(data.assignments)) {
-            let loadedAssignments = data.assignments.filter((a: any) => a.date && !a.date.startsWith('2026-09-'));
+            let loadedAssignments = data.assignments.filter((a: any) => a.date && !a.date.startsWith('2026-09-') && !a.date.startsWith('2026-11-'));
+            const seedAssignments = generateInitialAssignments();
+            const novSeed = seedAssignments.filter(a => a.date && a.date.startsWith('2026-11-'));
             const hasOctober = loadedAssignments.some((a: any) => a.date && a.date.startsWith('2026-10-'));
+            const octSeed = hasOctober ? [] : seedAssignments.filter(a => a.date && a.date.startsWith('2026-10-'));
             
-            if (!hasOctober) {
-              const seedAssignments = generateInitialAssignments();
-              const octoberSeed = seedAssignments.filter(a => a.date && a.date.startsWith('2026-10-'));
-              loadedAssignments = [...loadedAssignments, ...octoberSeed];
-              
-              setDoc(scheduleDocRef, { assignments: loadedAssignments }, { merge: true }).catch(() => {});
-            }
+            loadedAssignments = [...loadedAssignments, ...octSeed, ...novSeed];
             
             setAssignments(loadedAssignments);
             localStorage.setItem(STORAGE_KEYS.ASSIGNMENTS, JSON.stringify(loadedAssignments));
@@ -791,7 +786,12 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
       localStorage.setItem(STORAGE_KEYS.LAST_UPDATED_BY, activeLeader);
       await setDoc(scheduleDocRef, payload, { merge: true });
       return true;
-    } catch (e) {
+    } catch (e: any) {
+      const errStr = String(e?.message || e);
+      if (errStr.includes('resource-exhausted') || errStr.includes('Quota') || errStr.includes('quota')) {
+        console.warn('Firestore quota limit reached. Running locally in offline storage mode.');
+        return false;
+      }
       console.error('Failed to sync to Firebase:', e);
       handleFirestoreError(e, OperationType.WRITE, 'schedule_store/main');
       return false;
@@ -1587,48 +1587,56 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     };
   };
 
-  // Auto Generate Schedule
+  // Helper to find the provider's last working shift (st-t) prior to a target date string
+  const findLastWorkingShiftDate = (providerId: string, beforeDateStr: string): Date | null => {
+    const pastShifts = assignments.filter(
+      a => a.providerId === providerId && a.shiftTypeId === 'st-t' && a.date < beforeDateStr
+    );
+    if (pastShifts.length === 0) return null;
+    pastShifts.sort((a, b) => b.date.localeCompare(a.date));
+    const [y, m, d] = pastShifts[0].date.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  };
+
+  // Auto Generate Schedule (preserves 12x36 continuous cadence from previous month)
   const autoGenerateSchedule = (params: AutoScheduleParams): number => {
     const { year, monthIndex, pattern, teamAProviderIds, teamBProviderIds, departmentIds } = params;
     const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
     const newAssignments: ShiftAssignment[] = [];
     const deptId = departmentIds[0] || 'dept-1';
-
     let count = 0;
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(year, monthIndex, day);
-      const dateStr = formatDateToISO(date);
-      const isEvenDay = day % 2 === 0;
 
-      const workingTeam = isEvenDay ? teamAProviderIds : teamBProviderIds;
-      const restingTeam = isEvenDay ? teamBProviderIds : teamAProviderIds;
+    const firstOfMonthStr = `${year}-${String(monthIndex + 1).padStart(2, '0')}-01`;
+    const allProvidersToSchedule = Array.from(new Set([...teamAProviderIds, ...teamBProviderIds]));
 
-      workingTeam.forEach(provId => {
+    allProvidersToSchedule.forEach(provId => {
+      const lastWorkDate = findLastWorkingShiftDate(provId, firstOfMonthStr);
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, monthIndex, day);
+        const dateStr = formatDateToISO(date);
+
+        let isWorking = false;
+        if (lastWorkDate) {
+          const diffInDays = Math.round((date.getTime() - lastWorkDate.getTime()) / (1000 * 60 * 60 * 24));
+          isWorking = diffInDays % 2 === 0;
+        } else {
+          const isTeamA = teamAProviderIds.includes(provId);
+          isWorking = isTeamA ? day % 2 !== 0 : day % 2 === 0;
+        }
+
         newAssignments.push({
           id: `shift-auto-${Date.now()}-${count++}`,
           date: dateStr,
-          shiftTypeId: 'st-t',
+          shiftTypeId: isWorking ? 'st-t' : 'st-d',
           departmentId: deptId,
           providerId: provId,
           status: 'confirmed',
           acknowledgedByProvider: true,
           createdAt: new Date().toISOString(),
         });
-      });
-
-      restingTeam.forEach(provId => {
-        newAssignments.push({
-          id: `shift-auto-${Date.now()}-${count++}`,
-          date: dateStr,
-          shiftTypeId: 'st-d',
-          departmentId: deptId,
-          providerId: provId,
-          status: 'confirmed',
-          acknowledgedByProvider: true,
-          createdAt: new Date().toISOString(),
-        });
-      });
-    }
+      }
+    });
 
     // Replace assignments for this month
     const existingOtherMonths = assignments.filter(a => {
@@ -1645,7 +1653,6 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
   // Month Publish Status
   const isMonthPublished = (year: number, monthIndex: number): boolean => {
     const key = `${year}-${String(monthIndex + 1).padStart(2, '0')}`;
-    // October 2026 is published by default; for other months, check publishedMonths map (default true if not explicitly set)
     if (key === '2026-10') return publishedMonths[key] !== false;
     return publishedMonths[key] ?? true;
   };
@@ -1661,7 +1668,7 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     syncToFirebase({ publishedMonths: updated });
   };
 
-  // Clone Previous Month Schedule
+  // Clone Previous Month Schedule (Calculates exact 12x36 rotation across month boundaries)
   const clonePreviousMonthSchedule = (
     targetYear: number,
     targetMonthIndex: number,
@@ -1680,19 +1687,18 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     let count = 1;
 
     providers.forEach(prov => {
-      // Check last day of previous month
-      const lastDayPrevStr = `${prevYear}-${String(prevMonthIndex + 1).padStart(2, '0')}-${String(prevDaysCount).padStart(2, '0')}`;
-      const lastShiftPrev = assignments.find(a => a.providerId === prov.id && a.date === lastDayPrevStr);
-      const lastWasWorking = lastShiftPrev?.shiftTypeId === 'st-t';
+      const firstOfMonthStr = `${targetYear}-${String(targetMonthIndex + 1).padStart(2, '0')}-01`;
+      const lastWorkDate = findLastWorkingShiftDate(prov.id, firstOfMonthStr);
 
       for (let d = 1; d <= targetDaysCount; d++) {
+        const dt = new Date(targetYear, targetMonthIndex, d);
         const dateStr = `${targetYear}-${String(targetMonthIndex + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         let shiftCode: 'T' | 'D' = 'D';
 
         if (mode === 'continue_12x36') {
-          // If worked last day of month, day 1 is resting (D), day 2 is working (T), etc.
-          if (lastWasWorking) {
-            shiftCode = d % 2 === 0 ? 'T' : 'D';
+          if (lastWorkDate) {
+            const diffInDays = Math.round((dt.getTime() - lastWorkDate.getTime()) / (1000 * 60 * 60 * 24));
+            shiftCode = diffInDays % 2 === 0 ? 'T' : 'D';
           } else {
             shiftCode = d % 2 !== 0 ? 'T' : 'D';
           }
@@ -1740,16 +1746,22 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     let count = 1;
 
     if (pattern !== 'clear') {
+      const firstOfMonthStr = `${year}-${String(monthIndex + 1).padStart(2, '0')}-01`;
+      const lastWorkDate = findLastWorkingShiftDate(providerId, firstOfMonthStr);
+
       for (let d = 1; d <= daysInMonth; d++) {
         const dt = new Date(year, monthIndex, d);
         const dateStr = formatDateToISO(dt);
         const dayOfWeek = dt.getDay(); // 0 = Sun, 1 = Mon...
         let isWorking = false;
 
-        if (pattern === 'odd_12x36') {
-          isWorking = d % 2 !== 0;
-        } else if (pattern === 'even_12x36') {
-          isWorking = d % 2 === 0;
+        if (pattern === 'odd_12x36' || pattern === 'even_12x36') {
+          if (lastWorkDate) {
+            const diffInDays = Math.round((dt.getTime() - lastWorkDate.getTime()) / (1000 * 60 * 60 * 24));
+            isWorking = diffInDays % 2 === 0;
+          } else {
+            isWorking = pattern === 'odd_12x36' ? d % 2 !== 0 : d % 2 === 0;
+          }
         } else if (pattern === 'mon_to_fri_5x2') {
           isWorking = dayOfWeek >= 1 && dayOfWeek <= 5; // Mon-Fri works, Sat-Sun off
         } else if (pattern === 'mon_wed_fri') {
@@ -1793,19 +1805,19 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     syncToFirebase({ assignments: updated });
   };
 
-  // Apply Team Groups Schedule (Turma A = Ímpares, Turma B = Pares, 5x2 = Seg-Sex)
+  // Apply Team Groups Schedule (Turma A = Ímpares, Turma B = Pares, 5x2 = Seg-Sex) - Preserves continuous 12x36
   const applyTeamGroupsSchedule = (year: number, monthIndex: number): number => {
     const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
     const newAssignments: ShiftAssignment[] = [];
     let count = 1;
 
-    // Filter providers in current active regime
     const currentRegimeProviders = providers.filter(p => (p.regime || '12x36') === activeRegime);
+    const firstOfMonthStr = `${year}-${String(monthIndex + 1).padStart(2, '0')}-01`;
 
     currentRegimeProviders.forEach((prov, provIdx) => {
       const is5x2 = (prov.regime || activeRegime) === '5x2';
-      // Group: if explicit, use it; otherwise alternate
       const group = prov.teamGroup || (provIdx % 2 === 0 ? 'turma_a' : 'turma_b');
+      const lastWorkDate = findLastWorkingShiftDate(prov.id, firstOfMonthStr);
 
       for (let d = 1; d <= daysInMonth; d++) {
         const dt = new Date(year, monthIndex, d);
@@ -1816,10 +1828,11 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
         if (is5x2) {
           isWorking = dayOfWeek >= 1 && dayOfWeek <= 5;
         } else {
-          if (group === 'turma_a') {
-            isWorking = d % 2 !== 0; // Odd days
+          if (lastWorkDate) {
+            const diffInDays = Math.round((dt.getTime() - lastWorkDate.getTime()) / (1000 * 60 * 60 * 24));
+            isWorking = diffInDays % 2 === 0;
           } else {
-            isWorking = d % 2 === 0; // Even days
+            isWorking = group === 'turma_a' ? d % 2 !== 0 : d % 2 === 0;
           }
         }
 

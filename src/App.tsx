@@ -321,6 +321,10 @@ function ScheduleAppContent() {
           setCollaboratorAuthOpen(false);
           setAuthModalProvider(null);
         }}
+        onOpenLeaderAuth={() => {
+          setCollaboratorAuthOpen(false);
+          setLeaderAuthModalOpen(true);
+        }}
       />
 
       {/* Venda & Repasse de Plantões PJ - Marketplace Modal */}

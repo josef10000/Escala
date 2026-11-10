@@ -20,6 +20,7 @@ interface CollaboratorAuthModalProps {
   onClose: () => void;
   targetProvider?: Provider | null;
   onSuccess?: (provider: Provider) => void;
+  onOpenLeaderAuth?: () => void;
 }
 
 export const CollaboratorAuthModal: React.FC<CollaboratorAuthModalProps> = ({
@@ -27,6 +28,7 @@ export const CollaboratorAuthModal: React.FC<CollaboratorAuthModalProps> = ({
   onClose,
   targetProvider,
   onSuccess,
+  onOpenLeaderAuth,
 }) => {
   const {
     providers,
@@ -203,8 +205,23 @@ export const CollaboratorAuthModal: React.FC<CollaboratorAuthModalProps> = ({
         {!selectedProvider ? (
           <div className="space-y-3">
             <p className="text-xs text-zinc-400">
-              Selecione seu nome na lista abaixo para conectar seu perfil neste aparelho. Você poderá consultar escalas e solicitar trocas com agilidade.
+              Selecione seu nome na lista abaixo para conectar seu perfil neste aparelho ou entre diretamente como Gestor.
             </p>
+
+            {/* Quick Gestor Access Button */}
+            {onOpenLeaderAuth && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onOpenLeaderAuth();
+                }}
+                className="w-full py-2.5 px-3 rounded-xl bg-[#00d2d3]/15 hover:bg-[#00d2d3]/25 text-[#00d2d3] border border-[#00d2d3]/30 text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
+              >
+                <Lock className="w-3.5 h-3.5 text-[#00d2d3]" />
+                <span>Sou Gestor / Líder (Entrar com PIN de Gestor)</span>
+              </button>
+            )}
 
             {/* Search Input */}
             <div className="relative">

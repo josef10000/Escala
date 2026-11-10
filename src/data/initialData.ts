@@ -155,38 +155,89 @@ export const INITIAL_PROVIDERS: Provider[] = [
   }
 ];
 
-// Exact shift patterns from the user's reference image for 31 days
-const PATTERN_DANIEL = ['T','D','T','T','T','D','T','D','T','D','D','D','T','D','T','D','T','T','T','T','D','T','D','T','D','D','D','T','D','T','D'];
-const PATTERN_NATASHA = ['D','T','D','D','D','T','D','T','D','D','D','D','D','D','D','T','D','D','D','T','D','T','D','T','T','T','D','T','D','T','D'];
-const PATTERN_JOSE = ['-','-','-','-','T','D','T','D','T','D','D','D','T','D','T','D','T','T','T','T','D','T','D','T','D','D','D','T','D','T','D'];
-const PATTERN_PATRICIA = ['-','-','-','-','-','-','D','T','D','T','T','T','D','T','D','T','D','D','D','T','D','T','D','T','T','T','D','T','D','T','D'];
-const PATTERN_REGIANE = ['D','T','D','D','D','T','D','T','D','T','T','T','D','T','D','T','D','D','D','T','D','T','D','T','T','T','D','T','D','T','D'];
-const PATTERN_STEFANIE = ['T','D','T','T','T','D','T','D','T','D','D','D','T','D','T','D','T','T','T','T','D','T','D','T','D','D','D','T','D','T','D'];
+// Exact shift patterns for October 2026
+const PATTERN_DANIEL_OCT = ['T','D','T','T','T','D','T','D','T','D','D','D','T','D','T','D','T','T','T','T','D','T','D','T','D','D','D','T','D','T','D'];
+const PATTERN_NATASHA_OCT = ['D','T','D','D','D','T','D','T','D','D','D','D','D','D','D','T','D','D','D','T','D','T','D','T','T','T','D','T','D','T','D'];
+const PATTERN_JOSE_OCT = ['-','-','-','-','T','D','T','D','T','D','D','D','T','D','T','D','T','T','T','T','D','T','D','T','D','D','D','T','D','T','D'];
+const PATTERN_PATRICIA_OCT = ['-','-','-','-','-','-','D','T','D','T','T','T','D','T','D','T','D','D','D','T','D','T','D','T','T','T','D','T','D','T','D'];
+const PATTERN_REGIANE_OCT = ['D','T','D','D','D','T','D','T','D','T','T','T','D','T','D','T','D','D','D','T','D','T','D','T','T','T','D','T','D','T','D'];
+const PATTERN_STEFANIE_OCT = ['T','D','T','T','T','D','T','D','T','D','D','D','T','D','T','D','T','T','T','T','D','T','D','T','D','D','D','T','D','T','D'];
 
-const PROVIDER_PATTERNS: { [id: string]: string[] } = {
-  'prov-1': PATTERN_DANIEL,
-  'prov-2': PATTERN_NATASHA,
-  'prov-3': PATTERN_JOSE,
-  'prov-4': PATTERN_PATRICIA,
-  'prov-5': PATTERN_REGIANE,
-  'prov-6': PATTERN_STEFANIE,
+// Exact shift patterns for NOVEMBER 2026 from user's uploaded image (image.png)
+// Group 1: DANIEL, JOSÉ FRAZÃO, STEFANIE (16 work days: 1, 2, 4, 6, 10, 12, 14, 15, 16, 18, 20, 24, 26, 28, 29, 30)
+const PATTERN_NOV_DANIEL = [
+  'T','T','D','T','D','T','D','D','D','T',
+  'D','T','D','T','T','T','D','T','D','T',
+  'D','D','D','T','D','T','D','T','T','T'
+]; // prov-1
+
+// Group 2: NATASHA, PATRICIA, REGIANE (14 work days: 3, 5, 7, 8, 9, 11, 13, 17, 19, 21, 22, 23, 25, 27)
+const PATTERN_NOV_NATASHA = [
+  'D','D','T','D','T','D','T','T','T','D',
+  'T','D','T','D','D','D','T','D','T','D',
+  'T','T','T','D','T','D','T','D','D','D'
+]; // prov-2
+
+const PATTERN_NOV_JOSE = [
+  'T','T','D','T','D','T','D','D','D','T',
+  'D','T','D','T','T','T','D','T','D','T',
+  'D','D','D','T','D','T','D','T','T','T'
+]; // prov-3
+
+const PATTERN_NOV_PATRICIA = [
+  'D','D','T','D','T','D','T','T','T','D',
+  'T','D','T','D','D','D','T','D','T','D',
+  'T','T','T','D','T','D','T','D','D','D'
+]; // prov-4
+
+const PATTERN_NOV_REGIANE = [
+  'D','D','T','D','T','D','T','T','T','D',
+  'T','D','T','D','D','D','T','D','T','D',
+  'T','T','T','D','T','D','T','D','D','D'
+]; // prov-5
+
+const PATTERN_NOV_STEFANIE = [
+  'T','T','D','T','D','T','D','D','D','T',
+  'D','T','D','T','T','T','D','T','D','T',
+  'D','D','D','T','D','T','D','T','T','T'
+]; // prov-6
+
+const PROVIDER_PATTERNS_NOV: { [id: string]: string[] } = {
+  'prov-1': PATTERN_NOV_DANIEL,
+  'prov-2': PATTERN_NOV_NATASHA,
+  'prov-3': PATTERN_NOV_JOSE,
+  'prov-4': PATTERN_NOV_PATRICIA,
+  'prov-5': PATTERN_NOV_REGIANE,
+  'prov-6': PATTERN_NOV_STEFANIE,
+};
+
+const PROVIDER_PATTERNS_OCT: { [id: string]: string[] } = {
+  'prov-1': PATTERN_DANIEL_OCT,
+  'prov-2': PATTERN_NATASHA_OCT,
+  'prov-3': PATTERN_JOSE_OCT,
+  'prov-4': PATTERN_PATRICIA_OCT,
+  'prov-5': PATTERN_REGIANE_OCT,
+  'prov-6': PATTERN_STEFANIE_OCT,
 };
 
 export function generateInitialAssignments(): ShiftAssignment[] {
   const assignments: ShiftAssignment[] = [];
   
-  // Seed specifically for October 2026 ONLY
+  // Seed October 2026 and November 2026
   const monthsToSeed = [
-    { year: 2026, month: 9 }  // October 2026
+    { year: 2026, month: 9 },  // October 2026
+    { year: 2026, month: 10 }, // November 2026
   ];
 
   let idCounter = 1;
 
   monthsToSeed.forEach(({ year, month }) => {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const isNov = month === 10;
+    const patternsMap = isNov ? PROVIDER_PATTERNS_NOV : PROVIDER_PATTERNS_OCT;
 
     INITIAL_PROVIDERS.forEach(prov => {
-      const pattern = PROVIDER_PATTERNS[prov.id] || PATTERN_DANIEL;
+      const pattern = patternsMap[prov.id] || (isNov ? PATTERN_NOV_DANIEL : PATTERN_DANIEL_OCT);
 
       for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(year, month, day);
