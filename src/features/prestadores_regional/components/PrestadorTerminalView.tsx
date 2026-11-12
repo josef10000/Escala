@@ -139,7 +139,7 @@ export const PrestadorTerminalView: React.FC<PrestadorTerminalViewProps> = ({
           const isSelected = selectedIndex === idx;
           const isCopied = copiedId === prestador.id;
           const isFav = favorites.includes(prestador.id);
-          const color = getRegionColor(prestador.regiao);
+          const color = getRegionColor(prestador.regiao, prestador.cor);
 
           return (
             <div

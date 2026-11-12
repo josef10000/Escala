@@ -2,6 +2,7 @@ import { Prestador, TemplateItem, PontoFixoItem, AgendaRegiaoItem, RegraOperacio
 import { INITIAL_PRESTADORES } from '../data/defaultPrestadores';
 import { INITIAL_TEMPLATES } from '../data/defaultTemplates';
 import { PONTOS_FIXOS, AGENDAS_REGIONAIS, REGRAS_OPERACIONAIS } from '../data/defaultRegrasAgendas';
+import { getRegionColor } from './search';
 
 const STORAGE_KEY = 'prestadores_dados_v1';
 const FAVORITES_KEY = 'prestadores_favoritos_v1';
@@ -19,7 +20,22 @@ export function getStoredPrestadores(): Prestador[] {
     }
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed;
+      let needsUpdate = false;
+      const enriched = parsed.map((p: Prestador) => {
+        if (!p.cor) {
+          const match = INITIAL_PRESTADORES.find(
+            (ip) => ip.id === p.id || ip.codigo === p.codigo
+          );
+          const assignedCor = match?.cor || getRegionColor(p.regiao).glow;
+          needsUpdate = true;
+          return { ...p, cor: assignedCor };
+        }
+        return p;
+      });
+      if (needsUpdate) {
+        savePrestadores(enriched);
+      }
+      return enriched;
     }
     savePrestadores(INITIAL_PRESTADORES);
     return INITIAL_PRESTADORES;

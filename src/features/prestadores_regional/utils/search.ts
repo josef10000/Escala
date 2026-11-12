@@ -168,7 +168,19 @@ export function searchUniversalAll(
   };
 }
 
-export function getRegionColor(region: string): { bg: string; text: string; border: string; glow: string } {
+export function getRegionColor(region: string, customColor?: string): { bg: string; text: string; border: string; glow: string } {
+  if (customColor) {
+    const c = customColor.toLowerCase();
+    if (c === 'emerald') return { bg: 'bg-emerald-950/40', text: 'text-emerald-300', border: 'border-emerald-800/60', glow: 'emerald' };
+    if (c === 'amber') return { bg: 'bg-amber-950/40', text: 'text-amber-300', border: 'border-amber-800/60', glow: 'amber' };
+    if (c === 'sky') return { bg: 'bg-sky-950/40', text: 'text-sky-300', border: 'border-sky-800/60', glow: 'sky' };
+    if (c === 'purple') return { bg: 'bg-purple-950/40', text: 'text-purple-300', border: 'border-purple-800/60', glow: 'purple' };
+    if (c === 'rose') return { bg: 'bg-rose-950/40', text: 'text-rose-300', border: 'border-rose-800/60', glow: 'rose' };
+    if (c === 'cyan') return { bg: 'bg-cyan-950/40', text: 'text-cyan-300', border: 'border-cyan-800/60', glow: 'cyan' };
+    if (c === 'indigo') return { bg: 'bg-indigo-950/40', text: 'text-indigo-300', border: 'border-indigo-800/60', glow: 'indigo' };
+    if (c === 'teal') return { bg: 'bg-teal-950/40', text: 'text-teal-300', border: 'border-teal-800/60', glow: 'teal' };
+  }
+
   const norm = normalizeText(region);
   if (norm.startsWith('leste')) {
     return { bg: 'bg-emerald-950/40', text: 'text-emerald-300', border: 'border-emerald-800/60', glow: 'emerald' };
@@ -188,6 +200,9 @@ export function getRegionColor(region: string): { bg: string; text: string; bord
   if (norm.includes('campinas') || norm.includes('sorocaba') || norm.includes('ribeirao') || norm.includes('sao jose') || norm.includes('atibaia')) {
     return { bg: 'bg-cyan-950/40', text: 'text-cyan-300', border: 'border-cyan-800/60', glow: 'cyan' };
   }
-  return { bg: 'bg-[#1a1b22]', text: 'text-zinc-300', border: 'border-[#2a2b32]', glow: 'zinc' };
+  if (norm.includes('tupa') || norm.includes('litoral') || norm.includes('geral') || norm.includes('centro') || norm.includes('teste')) {
+    return { bg: 'bg-indigo-950/40', text: 'text-indigo-300', border: 'border-indigo-800/60', glow: 'indigo' };
+  }
+  return { bg: 'bg-teal-950/40', text: 'text-teal-300', border: 'border-teal-800/60', glow: 'teal' };
 }
 

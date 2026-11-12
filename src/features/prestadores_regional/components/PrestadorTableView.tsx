@@ -113,7 +113,7 @@ export const PrestadorTableView: React.FC<PrestadorTableViewProps> = ({
               {paginatedList.map((p) => {
                 const isCopied = copiedId === p.id;
                 const isFav = favorites.includes(p.id);
-                const color = getRegionColor(p.regiao);
+                const color = getRegionColor(p.regiao, p.cor);
 
                 return (
                   <tr

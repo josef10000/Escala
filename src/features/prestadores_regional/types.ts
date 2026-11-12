@@ -7,6 +7,7 @@ export interface Prestador {
   observacao?: string;
   ativo?: boolean;
   criadoEm?: string;
+  cor?: string;
 }
 
 export type ViewMode = 'cards' | 'table' | 'terminal';

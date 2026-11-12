@@ -542,34 +542,38 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
                       </button>
                     </div>
 
+                    {/* GPS Navigation Actions (Google Maps & Waze) */}
                     <div className="flex items-center gap-2">
-                      {pf.mapsQuery && (
-                        <a
-                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                            pf.mapsQuery
-                          )}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex-1 inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-medium bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 transition-colors"
-                        >
-                          <Navigation className="w-3 h-3 text-sky-400" />
-                          <span>Google Maps</span>
-                          <ExternalLink className="w-2.5 h-2.5 text-slate-400" />
-                        </a>
-                      )}
+                      <a
+                        href={
+                          pf.mapsQuery
+                            ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pf.mapsQuery)}`
+                            : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${pf.endereco}, ${pf.cep}`)}`
+                        }
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 hover:text-white border border-sky-500/25 transition-all shadow-xs cursor-pointer active:scale-95"
+                        title={`Abrir localização de ${pf.nome} no Google Maps`}
+                      >
+                        <Navigation className="w-3.5 h-3.5 text-sky-400" />
+                        <span>Google Maps</span>
+                        <ExternalLink className="w-2.5 h-2.5 text-slate-400" />
+                      </a>
 
-                      {pf.wazeQuery && (
-                        <a
-                          href={pf.wazeQuery}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex-1 inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-medium bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 transition-colors"
-                        >
-                          <Navigation className="w-3 h-3 text-cyan-400" />
-                          <span>Waze</span>
-                          <ExternalLink className="w-2.5 h-2.5 text-slate-400" />
-                        </a>
-                      )}
+                      <a
+                        href={
+                          pf.wazeQuery ||
+                          `https://waze.com/ul?q=${encodeURIComponent(`${pf.endereco}, ${pf.cep}`)}`
+                        }
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 hover:text-white border border-cyan-500/25 transition-all shadow-xs cursor-pointer active:scale-95"
+                        title={`Abrir rota no Waze até ${pf.nome}`}
+                      >
+                        <Navigation className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Waze</span>
+                        <ExternalLink className="w-2.5 h-2.5 text-slate-400" />
+                      </a>
                     </div>
                   </div>
                 </div>

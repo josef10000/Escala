@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { Search, X, Plus } from 'lucide-react';
+import { Search, X, Plus, Clock, Keyboard } from 'lucide-react';
 import {
   Prestador,
   ViewMode,
@@ -32,9 +32,11 @@ import {
   saveRegras,
   resetAllRegrasAgendasToDefault,
 } from './utils/storage';
-import { filterPrestadores, searchUniversalAll } from './utils/search';
+import { filterPrestadores, searchUniversalAll, getRegionColor } from './utils/search';
+import { exportPrestadoresToCSV } from './utils/csvExport';
+import { getPontoFixoStatus } from './utils/pontoFixoSchedule';
 
-import { UnifiedToolbar } from './components/UnifiedToolbar';
+import { UnifiedToolbar, PhoneFilterType } from './components/UnifiedToolbar';
 import { PrestadorTerminalView } from './components/PrestadorTerminalView';
 import { PrestadorCardsView } from './components/PrestadorCardsView';
 import { PrestadorTableView } from './components/PrestadorTableView';
@@ -87,9 +89,51 @@ export function PrestadoresRegionalModule({
   // Search & Filtering
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [phoneFilter, setPhoneFilter] = useState<PhoneFilterType>('all');
+  const [cardDensity, setCardDensity] = useState<'spacious' | 'compact'>(() => {
+    try {
+      return (localStorage.getItem('prestadores_card_density') as 'spacious' | 'compact') || 'spacious';
+    } catch {
+      return 'spacious';
+    }
+  });
+  const [recentConsults, setRecentConsults] = useState<Prestador[]>(() => {
+    try {
+      const raw = localStorage.getItem('prestadores_recent_consults');
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  });
   const [viewMode, setViewMode] = useState<ViewMode>('cards');
   const [favorites, setFavorites] = useState<string[]>(() => getFavoriteIds());
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+
+  const handleCardDensityChange = (density: 'spacious' | 'compact') => {
+    setCardDensity(density);
+    try {
+      localStorage.setItem('prestadores_card_density', density);
+    } catch {}
+  };
+
+  const handleRecordRecent = useCallback((prestador: Prestador) => {
+    setRecentConsults((prev) => {
+      const filtered = prev.filter((p) => p.id !== prestador.id);
+      const updated = [prestador, ...filtered].slice(0, 6);
+      try {
+        localStorage.setItem('prestadores_recent_consults', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  }, []);
+
+  const handleClearRecent = () => {
+    setRecentConsults([]);
+    try {
+      localStorage.removeItem('prestadores_recent_consults');
+    } catch {}
+  };
 
   // Modals & Notifications
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -119,7 +163,7 @@ export function PrestadoresRegionalModule({
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Global Keyboard shortcut: Cmd+K / Ctrl+K focuses single search input
+  // Global Keyboard shortcuts: Cmd+K / Ctrl+K, Alt+N, Alt+P, Alt+R, Alt+E
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
@@ -127,10 +171,33 @@ export function PrestadoresRegionalModule({
         searchInputRef.current?.focus();
         searchInputRef.current?.select();
       }
+      if (e.altKey && e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        if (mainTab === 'prestadores') {
+          setEditingPrestador(null);
+          setIsModalOpen(true);
+        } else {
+          setIsPontoFixoModalOpen(true);
+        }
+      }
+      if (e.altKey && e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        setMainTab('prestadores');
+      }
+      if (e.altKey && e.key.toLowerCase() === 'r') {
+        e.preventDefault();
+        setMainTab('regras');
+      }
+      if (e.altKey && e.key.toLowerCase() === 'e') {
+        if (onNavigateToEscala) {
+          e.preventDefault();
+          onNavigateToEscala();
+        }
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [mainTab, onNavigateToEscala]);
 
   // Sync Prestadores to LocalStorage
   const updatePrestadoresList = (newList: Prestador[]) => {
@@ -265,14 +332,46 @@ export function PrestadoresRegionalModule({
     });
   }, [searchQuery, prestadores, templates, pontosFixos, agendas, regras]);
 
+  // Count of currently open physical bases (Pontos Fixos) in real-time
+  const openBasesCount = useMemo(() => {
+    return pontosFixos.filter((pf) => getPontoFixoStatus(pf).isOpen).length;
+  }, [pontosFixos]);
+
+  // Count of prestadores without phone for quick sanitation
+  const pendingPhoneCount = useMemo(() => {
+    return prestadores.filter((p) => !p.telefone || !p.telefone.trim()).length;
+  }, [prestadores]);
+
   // Filtered Prestadores for the Prestadores view
   const filteredPrestadores = useMemo(() => {
     let base = prestadores;
     if (showFavoritesOnly) {
       base = base.filter((p) => favorites.includes(p.id));
     }
+    // Phone sanitization filter
+    if (phoneFilter === 'with') {
+      base = base.filter((p) => !!p.telefone && p.telefone.trim().length > 0);
+    } else if (phoneFilter === 'without') {
+      base = base.filter((p) => !p.telefone || p.telefone.trim().length === 0);
+    }
+    // Color palette filter
+    if (selectedColor) {
+      base = base.filter((p) => {
+        const itemColor = p.cor ? p.cor.toLowerCase() : getRegionColor(p.regiao).glow;
+        return itemColor === selectedColor.toLowerCase();
+      });
+    }
     return filterPrestadores(base, searchQuery, selectedRegion);
-  }, [prestadores, searchQuery, selectedRegion, showFavoritesOnly, favorites]);
+  }, [prestadores, searchQuery, selectedRegion, showFavoritesOnly, favorites, phoneFilter, selectedColor]);
+
+  const handleExportCSV = () => {
+    if (filteredPrestadores.length === 0) {
+      showToast('Nenhum prestador para exportar com os filtros atuais.');
+      return;
+    }
+    exportPrestadoresToCSV(filteredPrestadores);
+    showToast(`${filteredPrestadores.length} prestadores exportados para CSV!`);
+  };
 
   // Prestadores CRUD Handlers
   const handleSavePrestador = (prestador: Prestador) => {
@@ -369,21 +468,46 @@ export function PrestadoresRegionalModule({
         <div className="absolute top-1/6 -right-20 w-[32rem] h-[32rem] rounded-full bg-cyan-500/6 blur-[160px]" />
       </div>
 
-      {/* Hero Header with Integrated Search & Action Button */}
+      {/* Hero Header with Integrated Search, Live Open Bases Indicator & Action Button */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-2 border-b border-[#1e2029] relative z-10">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
               {mainTab === 'prestadores' ? 'Prestadores de Serviços' : 'Regras, Pontos Fixos & Agendas'}
             </h1>
             <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-md bg-cyan-950/60 text-[#00d2d3] border border-[#00d2d3]/30 uppercase">
               dr.monitora® OPA
             </span>
+            {/* Real-time Open Bases Status Indicator */}
+            <div
+              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border shadow-xs transition-colors ${
+                openBasesCount > 0
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                  : 'bg-rose-500/10 border-rose-500/25 text-rose-300'
+              }`}
+              title="Status em tempo real das bases presenciais dr.monitora®"
+            >
+              <span
+                className={`w-2 h-2 rounded-full shrink-0 ${
+                  openBasesCount > 0 ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'
+                }`}
+              />
+              <span>
+                {openBasesCount > 0
+                  ? `${openBasesCount} ${openBasesCount === 1 ? 'Base Presencial Aberta Agora' : 'Bases Presenciais Abertas Agora'}`
+                  : 'Bases Presenciais Fechadas Agora'}
+              </span>
+            </div>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            {mainTab === 'prestadores'
-              ? 'Consulta operacional de técnicos, bases regionais e telefones autorizados'
-              : 'Diretrizes operacionais, regras de horário fixo, bases presenciais e agendas'}
+          <p className="text-xs text-slate-400 mt-1 flex items-center gap-2 flex-wrap">
+            <span>
+              {mainTab === 'prestadores'
+                ? 'Consulta operacional de técnicos, bases regionais e telefones autorizados'
+                : 'Diretrizes operacionais, regras de horário fixo, bases presenciais e agendas'}
+            </span>
+            <span className="text-[10px] text-slate-500 hidden lg:inline font-mono">
+              [Atalhos: Alt+N (Novo) • Alt+P (Técnicos) • Alt+R (Regras) • Alt+E (Escala)]
+            </span>
           </p>
         </div>
 
@@ -440,67 +564,120 @@ export function PrestadoresRegionalModule({
               setMainTab(tab);
               setSearchQuery('');
             }}
+            onEdit={(p) => {
+              setEditingPrestador(p);
+              setIsModalOpen(true);
+            }}
+            onDelete={handleDeletePrestador}
+            onRecordRecent={handleRecordRecent}
           />
         ) : (
           <>
             {/* Module 1: Prestadores */}
-              {mainTab === 'prestadores' && (
-                <div className="space-y-4">
-                  <UnifiedToolbar
-                    selectedRegion={selectedRegion}
-                    onSelectRegion={setSelectedRegion}
-                    regions={regionStats}
-                    resultCount={filteredPrestadores.length}
-                    totalCount={prestadores.length}
-                    viewMode={viewMode}
-                    onViewModeChange={setViewMode}
+            {mainTab === 'prestadores' && (
+              <div className="space-y-3.5">
+                {/* Recent Consults Strip (if any prestador was consulted) */}
+                {recentConsults.length > 0 && (
+                  <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-[#11141e]/80 border border-[#1e2230] backdrop-blur-md text-xs shadow-sm">
+                    <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+                      <span className="text-slate-400 font-medium text-[11px] flex items-center gap-1 shrink-0">
+                        <Clock className="w-3 h-3 text-cyan-400" />
+                        <span>Acessados Recentemente:</span>
+                      </span>
+                      {recentConsults.map((rc) => {
+                        const color = getRegionColor(rc.regiao, rc.cor);
+                        return (
+                          <button
+                            key={rc.id}
+                            type="button"
+                            onClick={() => {
+                              setSearchQuery(rc.codigo);
+                            }}
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#1a1b26] hover:bg-[#232532] text-white border ${color.border} shrink-0 transition-all cursor-pointer shadow-xs active:scale-95`}
+                            title={`Consultar ${rc.nome} (#${rc.codigo} - ${rc.regiao})`}
+                          >
+                            <span className="font-mono text-[11px] text-cyan-300">#{rc.codigo}</span>
+                            <span className="truncate max-w-[130px]">{rc.nome}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleClearRecent}
+                      className="text-[11px] text-slate-500 hover:text-slate-300 underline shrink-0 cursor-pointer ml-1"
+                      title="Limpar histórico de recentes"
+                    >
+                      Limpar
+                    </button>
+                  </div>
+                )}
+
+                <UnifiedToolbar
+                  selectedRegion={selectedRegion}
+                  onSelectRegion={setSelectedRegion}
+                  regions={regionStats}
+                  resultCount={filteredPrestadores.length}
+                  totalCount={prestadores.length}
+                  viewMode={viewMode}
+                  onViewModeChange={setViewMode}
+                  selectedColor={selectedColor}
+                  onSelectColor={setSelectedColor}
+                  phoneFilter={phoneFilter}
+                  onPhoneFilterChange={setPhoneFilter}
+                  pendingPhoneCount={pendingPhoneCount}
+                  cardDensity={cardDensity}
+                  onCardDensityChange={handleCardDensityChange}
+                  onExportCSV={handleExportCSV}
+                />
+
+                {/* Views */}
+                {viewMode === 'terminal' && (
+                  <PrestadorTerminalView
+                    prestadores={filteredPrestadores}
+                    searchQuery=""
+                    onEdit={(p) => {
+                      setEditingPrestador(p);
+                      setIsModalOpen(true);
+                    }}
+                    onDelete={handleDeletePrestador}
+                    onCopySuccess={showToast}
+                    favorites={favorites}
+                    onToggleFavorite={handleToggleFavorite}
                   />
+                )}
 
-                  {/* Views */}
-                  {viewMode === 'terminal' && (
-                    <PrestadorTerminalView
-                      prestadores={filteredPrestadores}
-                      searchQuery=""
-                      onEdit={(p) => {
-                        setEditingPrestador(p);
-                        setIsModalOpen(true);
-                      }}
-                      onDelete={handleDeletePrestador}
-                      onCopySuccess={showToast}
-                      favorites={favorites}
-                      onToggleFavorite={handleToggleFavorite}
-                    />
-                  )}
+                {viewMode === 'cards' && (
+                  <PrestadorCardsView
+                    prestadores={filteredPrestadores}
+                    onEdit={(p) => {
+                      setEditingPrestador(p);
+                      setIsModalOpen(true);
+                    }}
+                    onDelete={handleDeletePrestador}
+                    onCopySuccess={showToast}
+                    favorites={favorites}
+                    onToggleFavorite={handleToggleFavorite}
+                    density={cardDensity}
+                    onRecordRecent={handleRecordRecent}
+                  />
+                )}
 
-                  {viewMode === 'cards' && (
-                    <PrestadorCardsView
-                      prestadores={filteredPrestadores}
-                      onEdit={(p) => {
-                        setEditingPrestador(p);
-                        setIsModalOpen(true);
-                      }}
-                      onDelete={handleDeletePrestador}
-                      onCopySuccess={showToast}
-                      favorites={favorites}
-                      onToggleFavorite={handleToggleFavorite}
-                    />
-                  )}
-
-                  {viewMode === 'table' && (
-                    <PrestadorTableView
-                      prestadores={filteredPrestadores}
-                      onEdit={(p) => {
-                        setEditingPrestador(p);
-                        setIsModalOpen(true);
-                      }}
-                      onDelete={handleDeletePrestador}
-                      onCopySuccess={showToast}
-                      favorites={favorites}
-                      onToggleFavorite={handleToggleFavorite}
-                    />
-                  )}
-                </div>
-              )}
+                {viewMode === 'table' && (
+                  <PrestadorTableView
+                    prestadores={filteredPrestadores}
+                    onEdit={(p) => {
+                      setEditingPrestador(p);
+                      setIsModalOpen(true);
+                    }}
+                    onDelete={handleDeletePrestador}
+                    onCopySuccess={showToast}
+                    favorites={favorites}
+                    onToggleFavorite={handleToggleFavorite}
+                  />
+                )}
+              </div>
+            )}
 
               {/* Module 3: Regras Operacionais, Agendas & Pontos Fixos */}
               {mainTab === 'regras' && (

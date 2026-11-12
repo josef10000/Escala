@@ -24,6 +24,7 @@ export const PrestadorModal: React.FC<PrestadorModalProps> = ({
   const [regiao, setRegiao] = useState('');
   const [telefone, setTelefone] = useState('');
   const [observacao, setObservacao] = useState('');
+  const [cor, setCor] = useState<string>('cyan');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -33,12 +34,14 @@ export const PrestadorModal: React.FC<PrestadorModalProps> = ({
       setRegiao(editingPrestador.regiao);
       setTelefone(editingPrestador.telefone || '');
       setObservacao(editingPrestador.observacao || '');
+      setCor(editingPrestador.cor || 'cyan');
     } else {
       setCodigo('');
       setNome('');
       setRegiao('');
       setTelefone('');
       setObservacao('');
+      setCor('cyan');
     }
     setError(null);
   }, [editingPrestador, isOpen]);
@@ -73,6 +76,7 @@ export const PrestadorModal: React.FC<PrestadorModalProps> = ({
       regiao: regiao.trim().toUpperCase(),
       telefone: telefone.trim() || undefined,
       observacao: observacao.trim() || undefined,
+      cor,
     };
 
     onSave(payload);
@@ -210,18 +214,47 @@ export const PrestadorModal: React.FC<PrestadorModalProps> = ({
             />
           </div>
 
+          {/* Custom Theme Color Picker */}
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">
+              Cor do Card & Destaque
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { id: 'cyan', name: 'Cyan Escala', bg: 'bg-[#00d2d3]' },
+                { id: 'emerald', name: 'Esmeralda', bg: 'bg-emerald-500' },
+                { id: 'amber', name: 'Âmbar', bg: 'bg-amber-500' },
+                { id: 'purple', name: 'Roxo', bg: 'bg-purple-500' },
+                { id: 'indigo', name: 'Índigo', bg: 'bg-indigo-500' },
+                { id: 'rose', name: 'Rosa', bg: 'bg-rose-500' },
+                { id: 'sky', name: 'Céu', bg: 'bg-sky-500' },
+                { id: 'teal', name: 'Teal', bg: 'bg-teal-500' },
+              ].map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => setCor(c.id)}
+                  title={c.name}
+                  className={`w-6 h-6 rounded-full ${c.bg} transition-all cursor-pointer flex items-center justify-center ${
+                    cor === c.id ? 'ring-2 ring-white scale-110 shadow-md' : 'opacity-70 hover:opacity-100'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+
           {/* Quick presets for region */}
           <div className="pt-0.5">
             <span className="block text-xs text-slate-400 mb-1">
-              Sugestões rápidas:
+              Sugestões rápidas de Região:
             </span>
             <div className="flex flex-wrap gap-1">
-              {['LESTE 1', 'OESTE 1', 'NORTE 1', 'SUL 1', 'CAMPINAS 1', 'ABC 1'].map((reg) => (
+              {['LESTE 1', 'OESTE 1', 'NORTE 1', 'SUL 1', 'CAMPINAS 1', 'ABC 1', 'TUPÃ', 'LITORAL 1'].map((reg) => (
                 <button
                   key={reg}
                   type="button"
                   onClick={() => setRegiao(reg)}
-                  className="px-2.5 py-1 text-xs rounded-md bg-slate-800/80 text-slate-300 border border-slate-700/80 hover:bg-slate-700 hover:text-white transition-colors"
+                  className="px-2.5 py-1 text-xs rounded-md bg-slate-800/80 text-slate-300 border border-slate-700/80 hover:bg-slate-700 hover:text-white transition-colors cursor-pointer"
                 >
                   {reg}
                 </button>

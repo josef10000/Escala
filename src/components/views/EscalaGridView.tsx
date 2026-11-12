@@ -828,33 +828,63 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                         <div className={`rounded-xl bg-[#1A1D24] border border-white/[0.08] flex items-center justify-center font-bold text-white shrink-0 ${rowDensity === 'compact' ? 'w-6 h-6 text-[10px]' : 'w-8 h-8 text-xs'}`}>
                           {getInitials(provider.name)}
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-1.5">
-                            <span className={`font-bold text-white truncate ${rowDensity === 'compact' ? 'text-[11px]' : 'text-xs'}`}>
-                              {provider.name}
-                            </span>
-                            {isSelected && (
-                              <span className="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-[#00d2d3] text-[#003731]">
-                                VOCÊ
+                        <div className="min-w-0 flex-1 flex items-center justify-between gap-1 group/prov">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5">
+                              <span className={`font-bold text-white truncate ${rowDensity === 'compact' ? 'text-[11px]' : 'text-xs'}`}>
+                                {provider.name}
                               </span>
+                              {isSelected && (
+                                <span className="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-[#00d2d3] text-[#003731]">
+                                  VOCÊ
+                                </span>
+                              )}
+                            </div>
+                            {rowDensity !== 'compact' && (
+                              <div className="flex items-center gap-1 text-[11px] text-zinc-400">
+                                <span>{plantõesCount} plantões ({hoursCount}h)</span>
+                                <span className="text-zinc-600">•</span>
+                                <button
+                                  onClick={() => {
+                                    setActiveProviderId(provider.id);
+                                    setViewMode('personal-calendar');
+                                  }}
+                                  className="text-zinc-400 hover:text-[#00d2d3] transition-colors cursor-pointer"
+                                  title="Ver calendário"
+                                >
+                                  <MessageSquare className="w-3 h-3 inline" />
+                                </button>
+                              </div>
                             )}
                           </div>
-                          {rowDensity !== 'compact' && (
-                            <div className="flex items-center gap-1 text-[11px] text-zinc-400">
-                              <span>{plantõesCount} plantões ({hoursCount}h)</span>
-                              <span className="text-zinc-600">•</span>
-                              <button
-                                onClick={() => {
-                                  setActiveProviderId(provider.id);
-                                  setViewMode('personal-calendar');
-                                }}
-                                className="text-zinc-400 hover:text-[#00d2d3] transition-colors cursor-pointer"
-                                title="Ver calendário"
-                              >
-                                <MessageSquare className="w-3 h-3 inline" />
-                              </button>
-                            </div>
-                          )}
+
+                          {/* Quick Edit & Delete Buttons for all providers */}
+                          <div className="flex items-center gap-1 opacity-70 group-hover/prov:opacity-100 transition-opacity shrink-0">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (onAddProvider) onAddProvider();
+                              }}
+                              className="p-1 rounded text-zinc-400 hover:text-[#00d2d3] hover:bg-white/10 transition-colors cursor-pointer"
+                              title={`Editar ${provider.name}`}
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (window.confirm(`Tem certeza que deseja excluir ${provider.name} da escala?`)) {
+                                  deleteProvider(provider.id);
+                                }
+                              }}
+                              className="p-1 rounded text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                              title={`Excluir ${provider.name}`}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </td>

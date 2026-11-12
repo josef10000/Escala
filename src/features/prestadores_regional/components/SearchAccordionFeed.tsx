@@ -15,6 +15,7 @@ import {
   Maximize2,
   Minimize2,
   ShieldAlert,
+  Navigation,
 } from 'lucide-react';
 import {
   Prestador,
@@ -27,6 +28,7 @@ import { UniversalSearchResults, getRegionColor } from '../utils/search';
 import { applyGreetingToText, getGreetingInfo } from '../utils/greeting';
 import { openWhatsApp } from '../utils/whatsapp';
 import { PontoFixoStatusBadge } from './PontoFixoStatusBadge';
+import { PrestadorCard } from './PrestadorCard';
 
 interface SearchAccordionFeedProps {
   query: string;
@@ -36,6 +38,9 @@ interface SearchAccordionFeedProps {
   favorites?: string[];
   onToggleFavorite?: (id: string) => void;
   onNavigateToTab?: (tab: import('../types').MainTab) => void;
+  onEdit?: (p: Prestador) => void;
+  onDelete?: (id: string) => void;
+  onRecordRecent?: (p: Prestador) => void;
 }
 
 const QUICK_SEARCH_CHIPS = [
@@ -57,6 +62,9 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
   favorites = [],
   onToggleFavorite,
   onNavigateToTab,
+  onEdit,
+  onDelete,
+  onRecordRecent,
 }) => {
   const greetingInfo = useMemo(() => getGreetingInfo('auto'), []);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -281,83 +289,19 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
           {/* Accordion Content */}
           {openSections.prestadores && (
             <div className="p-4 sm:p-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-                {results.prestadoresMatches.map((p) => {
-                  const regionStyle = getRegionColor(p.regiao);
-                  const isCopied = copiedId === `acc-tel-${p.id}`;
-
-                  return (
-                    <div
-                      key={p.id}
-                      className="relative overflow-hidden rounded-xl bg-gradient-to-b from-[#141b2b]/90 via-[#101623]/90 to-[#0c101a]/90 backdrop-blur-md border border-white/10 hover:border-white/20 p-4 flex flex-col justify-between gap-3 transition-all hover:-translate-y-0.5 shadow-md group"
-                    >
-                      <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent pointer-events-none" />
-
-                      <div>
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="font-mono text-xs font-bold text-white tracking-tight bg-white/10 px-2 py-0.5 rounded-md border border-white/15">
-                            {p.codigo}
-                          </span>
-                          <span
-                            className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${regionStyle.bg} ${regionStyle.text} ${regionStyle.border} shadow-xs`}
-                          >
-                            {p.regiao}
-                          </span>
-                        </div>
-                        <h4 className="text-xs sm:text-sm font-bold text-white mt-1.5 truncate group-hover:text-blue-300 transition-colors">
-                          {p.nome}
-                        </h4>
-                        {p.observacao && (
-                          <p className="text-xs text-slate-400 mt-1 line-clamp-2">
-                            {p.observacao}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Direct Actions */}
-                      <div className="flex items-center gap-2 pt-2.5 border-t border-white/10">
-                        {p.telefone ? (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => handleCopy(`acc-tel-${p.id}`, p.telefone!, `Telefone ${p.nome}`)}
-                              className={`flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-xs active:scale-95 ${
-                                isCopied
-                                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                                  : 'bg-white/10 hover:bg-white/15 text-slate-200 border border-white/15'
-                              }`}
-                            >
-                              {isCopied ? (
-                                <>
-                                  <Check className="w-3.5 h-3.5 text-emerald-400" />
-                                  <span>Copiado!</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Copy className="w-3.5 h-3.5 text-slate-400" />
-                                  <span>Copiar Tel</span>
-                                </>
-                              )}
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => openWhatsApp(p.telefone!, p.nome, p.codigo)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white shadow-md shadow-emerald-500/25 border-t border-white/25 transition-all active:scale-95"
-                            >
-                              <Phone className="w-3.5 h-3.5" />
-                              <span>WhatsApp</span>
-                            </button>
-                          </>
-                        ) : (
-                          <span className="text-xs text-slate-500 italic">
-                            Sem telefone cadastrado
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {results.prestadoresMatches.map((p) => (
+                  <PrestadorCard
+                    key={p.id}
+                    prestador={p}
+                    onEdit={onEdit || (() => {})}
+                    onDelete={onDelete || (() => {})}
+                    onCopySuccess={onCopySuccess}
+                    isFavorite={favorites.includes(p.id)}
+                    onToggleFavorite={onToggleFavorite || (() => {})}
+                    onRecordRecent={onRecordRecent}
+                  />
+                ))}
               </div>
             </div>
           )}
@@ -635,6 +579,32 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
                             </>
                           )}
                         </button>
+                      </div>
+
+                      {/* GPS Navigation Actions (Google Maps & Waze) */}
+                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/5">
+                        <a
+                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                            pf.mapsQuery || `${pf.endereco}, ${pf.cep}`
+                          )}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-xl text-[11px] font-semibold bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 border border-sky-500/25 transition-all shadow-xs"
+                          title={`Ver ${pf.nome} no Google Maps`}
+                        >
+                          <Navigation className="w-3 h-3 text-sky-400" />
+                          <span>Google Maps</span>
+                        </a>
+                        <a
+                          href={pf.wazeQuery || `https://waze.com/ul?q=${encodeURIComponent(`${pf.endereco}, ${pf.cep}`)}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-xl text-[11px] font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/25 transition-all shadow-xs"
+                          title={`Abrir rota no Waze até ${pf.nome}`}
+                        >
+                          <Navigation className="w-3 h-3 text-cyan-400" />
+                          <span>Waze</span>
+                        </a>
                       </div>
                     </div>
                   );

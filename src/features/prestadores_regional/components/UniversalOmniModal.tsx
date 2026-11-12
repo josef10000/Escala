@@ -20,6 +20,7 @@ import {
   RegraOperacionalItem,
   MainTab,
 } from '../types';
+import { getRegionColor } from '../utils/search';
 import { PontoFixoStatusBadge } from './PontoFixoStatusBadge';
 
 interface UniversalOmniModalProps {
@@ -404,31 +405,38 @@ export const UniversalOmniModal: React.FC<UniversalOmniModalProps> = ({
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-                    {prestadores.slice(0, 10).map((p) => (
-                      <div
-                        key={p.id}
-                        className="relative overflow-hidden rounded-xl bg-gradient-to-b from-[#141b2b]/90 via-[#101623]/90 to-[#0c101a]/90 backdrop-blur-md border border-white/10 hover:border-white/20 p-3 flex items-center justify-between shadow-md"
-                      >
-                        <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent pointer-events-none" />
+                    {prestadores.slice(0, 10).map((p) => {
+                      const color = getRegionColor(p.regiao, p.cor);
+                      return (
+                        <div
+                          key={p.id}
+                          className="relative overflow-hidden rounded-xl bg-gradient-to-b from-[#141b2b]/90 via-[#101623]/90 to-[#0c101a]/90 backdrop-blur-md border border-white/10 hover:border-white/20 p-3 flex items-center justify-between shadow-md"
+                        >
+                          <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent pointer-events-none" />
 
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono text-xs font-bold text-blue-300 bg-white/10 px-2 py-0.5 rounded-md border border-white/10">{p.codigo}</span>
-                            <span className="text-xs font-bold text-white">{p.nome}</span>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono text-xs font-bold text-white bg-white/10 px-2 py-0.5 rounded-md border border-white/10">#{p.codigo}</span>
+                              <span className="text-xs font-bold text-white">{p.nome}</span>
+                            </div>
+                            <span className={`text-[10px] font-semibold mt-1 inline-block px-2 py-0.5 rounded-md border ${color.bg} ${color.text} ${color.border}`}>
+                              {p.regiao}
+                            </span>
                           </div>
-                          <span className="text-xs text-slate-400 mt-0.5 block">{p.regiao}</span>
+                          {p.telefone ? (
+                            <button
+                              type="button"
+                              onClick={() => handleCopy(`omni-tel-${p.id}`, p.telefone!, p.nome)}
+                              className="text-xs text-slate-200 hover:text-white px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 font-mono font-medium transition-all active:scale-95 shadow-xs"
+                            >
+                              {p.telefone}
+                            </button>
+                          ) : (
+                            <span className="text-[11px] text-slate-500 italic">Sem telefone</span>
+                          )}
                         </div>
-                        {p.telefone && (
-                          <button
-                            type="button"
-                            onClick={() => handleCopy(`omni-tel-${p.id}`, p.telefone!, p.nome)}
-                            className="text-xs text-slate-200 hover:text-white px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 font-mono font-medium transition-all active:scale-95 shadow-xs"
-                          >
-                            {p.telefone}
-                          </button>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}

@@ -35,13 +35,20 @@ export function isMobileDevice(): boolean {
   return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
 
-export function getWhatsAppUrl(phone: string, prestadorNome?: string, prestadorCodigo?: string): string {
+export function getWhatsAppUrl(
+  phone: string,
+  prestadorNome?: string,
+  prestadorCodigo?: string,
+  customMessage?: string
+): string {
   const clean = cleanPhoneNumber(phone);
   if (!clean) return '';
 
-  const message = prestadorNome
-    ? `Olá ${prestadorNome}${prestadorCodigo ? ` (${prestadorCodigo})` : ''}, contato da central dr.monitora®. Tudo bem?`
-    : 'Olá, contato da central dr.monitora®.';
+  const message =
+    customMessage ||
+    (prestadorNome
+      ? `Olá ${prestadorNome}${prestadorCodigo ? ` (${prestadorCodigo})` : ''}, contato da central dr.monitora®. Tudo bem?`
+      : 'Olá, contato da central dr.monitora®.');
 
   const encodedMessage = encodeURIComponent(message);
 
@@ -51,7 +58,6 @@ export function getWhatsAppUrl(phone: string, prestadorNome?: string, prestadorC
   }
 
   // On desktop, directly target web.whatsapp.com so it reuses the open WhatsApp Web tab
-  // without intermediate "Continuar para a conversa" confirmation pages
   return `https://web.whatsapp.com/send?phone=${clean}&text=${encodedMessage}`;
 }
 
@@ -59,8 +65,13 @@ export function getWhatsAppUrl(phone: string, prestadorNome?: string, prestadorC
  * Opens WhatsApp in the same dedicated tab ('dr_monitora_whatsapp')
  * preventing multiple duplicate tabs from being created.
  */
-export function openWhatsApp(phone: string, prestadorNome?: string, prestadorCodigo?: string): void {
-  const url = getWhatsAppUrl(phone, prestadorNome, prestadorCodigo);
+export function openWhatsApp(
+  phone: string,
+  prestadorNome?: string,
+  prestadorCodigo?: string,
+  customMessage?: string
+): void {
+  const url = getWhatsAppUrl(phone, prestadorNome, prestadorCodigo, customMessage);
   if (!url) return;
 
   const win = window.open(url, WHATSAPP_TAB_NAME);
@@ -72,3 +83,4 @@ export function openWhatsApp(phone: string, prestadorNome?: string, prestadorCod
     }
   }
 }
+
