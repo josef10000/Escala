@@ -157,11 +157,9 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
   const monthName = MONTH_NAMES_PT[currentMonthIndex];
   const monthNameUpper = monthName.toUpperCase();
 
-  // Active / Highlighted user (default to authenticated or active provider or first provider)
-  const spotlightProvider =
-    providers.find(p => p.id === (authenticatedProviderId || activeProviderId)) ||
-    displayedProviders[0] ||
-    providers[0];
+  // Active / Highlighted user (only if explicitly authenticated/active)
+  const activeUserProvId = authenticatedProviderId || activeProviderId;
+  const spotlightProvider = activeUserProvId ? providers.find(p => p.id === activeUserProvId) || null : null;
 
   // Calculate REAL stats for spotlight provider
   const spotlightShifts = assignments.filter(a => {

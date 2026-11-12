@@ -109,7 +109,8 @@ function ScheduleAppContent() {
     setShiftModalOpen(true);
   };
 
-  const currentProviderObj = providers.find(p => p.id === activeProviderId) || providers[0];
+  const activeUserProvId = authenticatedProviderId || activeProviderId;
+  const currentProviderObj = activeUserProvId ? providers.find(p => p.id === activeUserProvId) || null : null;
 
   // Today's summary
   const todayStr = new Date().toISOString().split('T')[0];
@@ -246,13 +247,26 @@ function ScheduleAppContent() {
           )}
 
           {viewMode === 'personal-calendar' && (
-            <PersonalMonthlyCalendar
-              provider={currentProviderObj}
-              onBackToGrid={() => setViewMode('escala')}
-              onOpenPrintModal={() => setPrintModalOpen(true)}
-              onOpenMarketplace={() => setMarketplaceModalOpen(true)}
-              onOpenSellModal={handleOpenSellModal}
-            />
+            currentProviderObj ? (
+              <PersonalMonthlyCalendar
+                provider={currentProviderObj}
+                onBackToGrid={() => setViewMode('escala')}
+                onOpenPrintModal={() => setPrintModalOpen(true)}
+                onOpenMarketplace={() => setMarketplaceModalOpen(true)}
+                onOpenSellModal={handleOpenSellModal}
+              />
+            ) : (
+              <div className="bg-[#12141A] border border-white/[0.08] rounded-2xl p-8 text-center max-w-lg mx-auto my-8 space-y-3">
+                <h3 className="text-base font-bold text-white">Nenhum Perfil Selecionado</h3>
+                <p className="text-xs text-zinc-400">Selecione o seu nome na lista e insira seu PIN para visualizar seu calendário pessoal.</p>
+                <button
+                  onClick={() => setCollaboratorAuthOpen(true)}
+                  className="px-4 py-2 bg-[#00d2d3] text-[#003731] font-bold text-xs rounded-xl hover:bg-[#57f1db] transition-all cursor-pointer shadow-sm"
+                >
+                  + Entrar no Meu Perfil
+                </button>
+              </div>
+            )
           )}
 
           {viewMode === 'calendar' && (

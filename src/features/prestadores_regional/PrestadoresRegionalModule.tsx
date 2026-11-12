@@ -560,10 +560,6 @@ export function PrestadoresRegionalModule({
             onCopySuccess={showToast}
             favorites={favorites}
             onToggleFavorite={handleToggleFavorite}
-            onNavigateToTab={(tab) => {
-              setMainTab(tab);
-              setSearchQuery('');
-            }}
             onEdit={(p) => {
               setEditingPrestador(p);
               setIsModalOpen(true);

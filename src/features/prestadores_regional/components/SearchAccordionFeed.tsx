@@ -37,7 +37,6 @@ interface SearchAccordionFeedProps {
   onCopySuccess: (msg: string) => void;
   favorites?: string[];
   onToggleFavorite?: (id: string) => void;
-  onNavigateToTab?: (tab: import('../types').MainTab) => void;
   onEdit?: (p: Prestador) => void;
   onDelete?: (id: string) => void;
   onRecordRecent?: (p: Prestador) => void;
@@ -61,7 +60,6 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
   onCopySuccess,
   favorites = [],
   onToggleFavorite,
-  onNavigateToTab,
   onEdit,
   onDelete,
   onRecordRecent,
@@ -263,19 +261,6 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
-              {onNavigateToTab && (
-                <span
-                  role="button"
-                  tabIndex={0}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onNavigateToTab('prestadores');
-                  }}
-                  className="hidden sm:inline-flex items-center text-xs font-bold text-blue-300 hover:text-white px-2.5 py-1 rounded-xl bg-blue-500/15 border border-blue-500/30 transition-colors cursor-pointer"
-                >
-                  Ir para Módulo →
-                </span>
-              )}
               <div className="p-1.5 rounded-lg text-slate-400 hover:text-white bg-white/5 border border-white/10">
                 {openSections.prestadores ? (
                   <ChevronUp className="w-4 h-4" />
@@ -337,19 +322,6 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
-              {onNavigateToTab && (
-                <span
-                  role="button"
-                  tabIndex={0}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onNavigateToTab('templates');
-                  }}
-                  className="hidden sm:inline-flex items-center text-xs font-bold text-purple-300 hover:text-white px-2.5 py-1 rounded-xl bg-purple-500/15 border border-purple-500/30 transition-colors cursor-pointer"
-                >
-                  Ir para Módulo →
-                </span>
-              )}
               <div className="p-1.5 rounded-lg text-slate-400 hover:text-white bg-white/5 border border-white/10">
                 {openSections.templates ? (
                   <ChevronUp className="w-4 h-4" />
@@ -456,19 +428,6 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
-              {onNavigateToTab && (
-                <span
-                  role="button"
-                  tabIndex={0}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onNavigateToTab('regras');
-                  }}
-                  className="hidden sm:inline-flex items-center text-xs font-bold text-sky-300 hover:text-white px-2.5 py-1 rounded-xl bg-sky-500/15 border border-sky-500/30 transition-colors cursor-pointer"
-                >
-                  Ir para Módulo →
-                </span>
-              )}
               <div className="p-1.5 rounded-lg text-slate-400 hover:text-white bg-white/5 border border-white/10">
                 {openSections.pontosFixos ? (
                   <ChevronUp className="w-4 h-4" />
@@ -644,19 +603,6 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
-              {onNavigateToTab && (
-                <span
-                  role="button"
-                  tabIndex={0}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onNavigateToTab('regras');
-                  }}
-                  className="hidden sm:inline-flex items-center text-xs font-bold text-amber-300 hover:text-white px-2.5 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 transition-colors cursor-pointer"
-                >
-                  Ir para Módulo →
-                </span>
-              )}
               <div className="p-1.5 rounded-lg text-slate-400 hover:text-white bg-white/5 border border-white/10">
                 {openSections.regras ? (
                   <ChevronUp className="w-4 h-4" />
@@ -761,19 +707,6 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
-              {onNavigateToTab && (
-                <span
-                  role="button"
-                  tabIndex={0}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onNavigateToTab('regras');
-                  }}
-                  className="hidden sm:inline-flex items-center text-xs font-bold text-emerald-300 hover:text-white px-2.5 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/30 transition-colors cursor-pointer"
-                >
-                  Ir para Módulo →
-                </span>
-              )}
               <div className="p-1.5 rounded-lg text-slate-400 hover:text-white bg-white/5 border border-white/10">
                 {openSections.agendas ? (
                   <ChevronUp className="w-4 h-4" />

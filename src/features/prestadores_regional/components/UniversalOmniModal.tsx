@@ -160,17 +160,6 @@ export const UniversalOmniModal: React.FC<UniversalOmniModalProps> = ({
                       <MapPin className="w-3.5 h-3.5" />
                       <span>Pontos Fixos de Atendimento ({pontosFixos.length})</span>
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onNavigateToTab('regras');
-                        onClose();
-                      }}
-                      className="text-xs text-blue-400 hover:text-blue-300 inline-flex items-center gap-1 hover:underline font-medium"
-                    >
-                      <span>Abrir na aba Regras & Agendas</span>
-                      <ArrowRight className="w-3 h-3" />
-                    </button>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -279,17 +268,6 @@ export const UniversalOmniModal: React.FC<UniversalOmniModalProps> = ({
                       <CalendarCheck className="w-3.5 h-3.5" />
                       <span>Regras Operacionais & Isenções ({regras.length})</span>
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onNavigateToTab('regras');
-                        onClose();
-                      }}
-                      className="text-xs text-amber-300 hover:text-white inline-flex items-center gap-1 hover:underline font-bold"
-                    >
-                      <span>Abrir na aba Regras & Agendas</span>
-                      <ArrowRight className="w-3 h-3" />
-                    </button>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -344,17 +322,6 @@ export const UniversalOmniModal: React.FC<UniversalOmniModalProps> = ({
                       <Clock className="w-3.5 h-3.5" />
                       <span>Agendas por Região ({agendas.length})</span>
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onNavigateToTab('regras');
-                        onClose();
-                      }}
-                      className="text-xs text-emerald-300 hover:text-white inline-flex items-center gap-1 hover:underline font-bold"
-                    >
-                      <span>Abrir na aba Regras & Agendas</span>
-                      <ArrowRight className="w-3 h-3" />
-                    </button>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -391,17 +358,6 @@ export const UniversalOmniModal: React.FC<UniversalOmniModalProps> = ({
                       <Users className="w-3.5 h-3.5" />
                       <span>Prestadores de Serviço ({prestadores.length})</span>
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onNavigateToTab('prestadores');
-                        onClose();
-                      }}
-                      className="text-xs text-sky-300 hover:text-white inline-flex items-center gap-1 hover:underline font-bold"
-                    >
-                      <span>Abrir na aba Prestadores</span>
-                      <ArrowRight className="w-3 h-3" />
-                    </button>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
@@ -449,17 +405,6 @@ export const UniversalOmniModal: React.FC<UniversalOmniModalProps> = ({
                       <MessageSquare className="w-3.5 h-3.5" />
                       <span>Templates OPA ({templates.length})</span>
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onNavigateToTab('templates');
-                        onClose();
-                      }}
-                      className="text-xs text-purple-300 hover:text-white inline-flex items-center gap-1 hover:underline font-bold"
-                    >
-                      <span>Abrir na aba Templates</span>
-                      <ArrowRight className="w-3 h-3" />
-                    </button>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">

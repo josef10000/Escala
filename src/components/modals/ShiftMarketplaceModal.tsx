@@ -99,7 +99,7 @@ export const ShiftMarketplaceModal: React.FC<ShiftMarketplaceModalProps> = ({
     if (!confirmBuyOffer) return;
     setIsProcessing(true);
     try {
-      const ok = await buyShiftSaleOffer(confirmBuyOffer.id, currentUserId);
+      const ok = await buyShiftSaleOffer(confirmBuyOffer.id, currentUserId || 'guest');
       if (ok) {
         setToastMessage({
           type: 'success',

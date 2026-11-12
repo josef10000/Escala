@@ -66,8 +66,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   const availableSalesCount = shiftSaleOffers.filter(s => s.status === 'available').length;
 
   // Active or authenticated collaborator / leader profile
-  const authProviderObj = providers.find(p => p.id === authenticatedProviderId);
-  const activeProviderObj = providers.find(p => p.id === activeProviderId);
+  const authProviderObj = authenticatedProviderId ? providers.find(p => p.id === authenticatedProviderId) : null;
+  const activeProviderObj = activeProviderId ? providers.find(p => p.id === activeProviderId) : null;
   const leaderProviderObj = leaderName ? providers.find(p => p.name.toLowerCase() === leaderName.toLowerCase()) : null;
 
   const displayUser =
@@ -75,8 +75,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     leaderProviderObj ||
     (isLeaderAuthenticated && leaderName ? { id: 'leader-temp', name: leaderName, role: 'GESTOR DA ESCALA' } : null) ||
     activeProviderObj ||
-    providers[0] ||
-    { id: 'guest', name: 'Gestor da Escala', role: 'GESTOR DA ESCALA' };
+    null;
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 bg-[#0d0e13]/95 backdrop-blur-xl border-b border-white/[0.08] text-[#e3e2e7] h-16">
@@ -323,21 +322,34 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => {
-                if (onOpenProfileModal) {
+                if (displayUser && onOpenProfileModal) {
                   onOpenProfileModal();
                 } else if (onOpenCollaboratorAuth) {
                   onOpenCollaboratorAuth();
                 }
               }}
               className="hidden md:flex flex-col text-right cursor-pointer group hover:opacity-90 max-w-[130px] lg:max-w-[180px] shrink-0"
-              title="Clique para ver ou alterar seu perfil (Nome, WhatsApp, PIX, PIN ou Sair)"
+              title={displayUser ? "Clique para ver ou alterar seu perfil (Nome, WhatsApp, PIN ou Sair)" : "Clique para entrar no seu perfil"}
             >
-              <span className="text-xs text-white font-semibold truncate leading-tight group-hover:text-[#00d2d3] transition-colors">
-                {displayUser.name}
-              </span>
-              <span className="text-[10px] font-mono text-[#00d2d3] tracking-wider uppercase truncate">
-                {isLeaderAuthenticated ? 'GESTOR DA ESCALA' : authProviderObj ? 'PERFIL ATIVO' : 'SELEÇÃO DE PERFIL'}
-              </span>
+              {displayUser ? (
+                <>
+                  <span className="text-xs text-white font-semibold truncate leading-tight group-hover:text-[#00d2d3] transition-colors">
+                    {displayUser.name}
+                  </span>
+                  <span className="text-[10px] font-mono text-[#00d2d3] tracking-wider uppercase truncate">
+                    {isLeaderAuthenticated ? 'GESTOR DA ESCALA' : authProviderObj ? 'PERFIL ATIVO' : 'PERFIL SELECIONADO'}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="text-xs text-cyan-300 font-bold truncate leading-tight group-hover:text-white transition-colors">
+                    Nenhum Perfil Ativo
+                  </span>
+                  <span className="text-[10px] font-mono text-zinc-400 tracking-wider uppercase truncate">
+                    Clique para Entrar
+                  </span>
+                </>
+              )}
             </button>
 
             {/* Profile Avatar / Trigger */}
@@ -345,30 +357,35 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 type="button"
                 onClick={() => {
-                  if (onOpenProfileModal) {
+                  if (displayUser && onOpenProfileModal) {
                     onOpenProfileModal();
                   } else if (onOpenCollaboratorAuth) {
                     onOpenCollaboratorAuth();
                   }
                 }}
-                className="w-8 h-8 rounded-full bg-[#00d2d3] hover:brightness-110 active:scale-95 transition-all flex items-center justify-center text-[#003731] font-bold shadow-md cursor-pointer shrink-0"
-                title="Meu Perfil (Editar Nome, WhatsApp, PIX, PIN ou Sair)"
+                className={`w-8 h-8 rounded-full transition-all flex items-center justify-center font-bold shadow-md cursor-pointer shrink-0 ${
+                  displayUser
+                    ? 'bg-[#00d2d3] hover:brightness-110 text-[#003731]'
+                    : 'bg-zinc-800 hover:bg-zinc-700 text-cyan-300 border border-cyan-500/30'
+                }`}
+                title={displayUser ? "Meu Perfil (Editar ou Sair)" : "Entrar no meu perfil"}
               >
-                <UserIcon className="w-4 h-4 text-[#003731]" />
+                <UserIcon className={`w-4 h-4 ${displayUser ? 'text-[#003731]' : 'text-cyan-300'}`} />
               </button>
 
               {/* Quick logout badge if authenticated */}
-              {(authProviderObj || isLeaderAuthenticated) && (
+              {(authProviderObj || activeProviderObj || isLeaderAuthenticated) && (
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     if (isLeaderAuthenticated) logoutLeader();
-                    if (authProviderObj) logoutProvider();
+                    logoutProvider();
                   }}
                   className="hidden group-hover:flex absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-rose-600 text-white items-center justify-center hover:bg-rose-500 cursor-pointer shadow-sm"
-                  title="Sair do perfil"
+                  title="Sair do perfil / Desconectar"
                 >
-                  <LogOut className="w-2.5 h-2.5" />
+                  <LogOut className="w-2.5 h-2.5 text-white" />
                 </button>
               )}
             </div>

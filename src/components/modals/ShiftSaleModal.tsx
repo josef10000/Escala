@@ -42,7 +42,7 @@ export const ShiftSaleModal: React.FC<ShiftSaleModalProps> = ({
   } = useSchedule();
 
   // Current active provider to sell for
-  const currentProviderId = defaultProviderId || authenticatedProviderId || activeProviderId;
+  const currentProviderId = defaultProviderId || authenticatedProviderId || activeProviderId || providers[0]?.id || '';
   const [selectedProviderId, setSelectedProviderId] = useState<string>(currentProviderId);
   const [selectedDate, setSelectedDate] = useState<string>(defaultDate || '');
   const [price, setPrice] = useState<number>(150);
@@ -75,7 +75,7 @@ export const ShiftSaleModal: React.FC<ShiftSaleModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      const pid = defaultProviderId || authenticatedProviderId || activeProviderId;
+      const pid = defaultProviderId || authenticatedProviderId || activeProviderId || providers[0]?.id || '';
       setSelectedProviderId(pid);
       const prov = providers.find(p => p.id === pid);
       if (prov) {

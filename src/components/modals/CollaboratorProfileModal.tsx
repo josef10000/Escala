@@ -42,7 +42,7 @@ export const CollaboratorProfileModal: React.FC<CollaboratorProfileModalProps> =
   } = useSchedule();
 
   const targetId = providerId || authenticatedProviderId || activeProviderId;
-  const currentProviderObj = providers.find(p => p.id === targetId) || providers[0];
+  const currentProviderObj = targetId ? providers.find(p => p.id === targetId) || null : null;
 
   // If leader is authenticated but no matching provider object, construct virtual or use provider
   const displayProviderName = isLeaderAuthenticated && leaderName ? leaderName : currentProviderObj?.name || 'Prestador';
@@ -75,7 +75,50 @@ export const CollaboratorProfileModal: React.FC<CollaboratorProfileModalProps> =
     }
   }, [isOpen, currentProviderObj, isLeaderAuthenticated, leaderName]);
 
-  if (!isOpen || !currentProviderObj) return null;
+  if (!isOpen) return null;
+
+  if (!currentProviderObj) {
+    return (
+      <div
+        onClick={onClose}
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 cursor-pointer"
+      >
+        <div
+          onClick={e => e.stopPropagation()}
+          className="relative w-full max-w-md bg-[#0e1017] border border-white/[0.09] rounded-3xl shadow-2xl p-6 text-center space-y-4 cursor-default"
+        >
+          <div className="w-14 h-14 rounded-2xl bg-cyan-950/60 border border-cyan-800/80 flex items-center justify-center text-cyan-400 mx-auto shadow-sm">
+            <User className="w-7 h-7" />
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-white tracking-tight">Nenhum Perfil Conectado</h3>
+            <p className="text-xs text-neutral-400 mt-1 leading-relaxed">
+              Você não está logado em nenhum perfil no momento. Selecione seu nome na lista e insira seu PIN para acessar suas configurações e calendário pessoal.
+            </p>
+          </div>
+          <div className="pt-2 flex items-center justify-center gap-2">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 rounded-xl text-xs font-semibold text-neutral-400 hover:text-white bg-white/[0.04] border border-white/[0.08]"
+            >
+              Cancelar
+            </button>
+            {onOpenCollaboratorAuth && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenCollaboratorAuth();
+                }}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-[#00d2d3] hover:bg-[#57f1db] text-[#003731] transition-all"
+              >
+                + Entrar no Meu Perfil
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Monthly stats
   const monthAssignments = assignments.filter(

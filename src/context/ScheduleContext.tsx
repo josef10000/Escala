@@ -59,8 +59,8 @@ interface AutoScheduleParams {
 interface ScheduleContextType {
   role: UserRole;
   setRole: (role: UserRole) => void;
-  activeProviderId: string;
-  setActiveProviderId: (id: string) => void;
+  activeProviderId: string | null;
+  setActiveProviderId: (id: string | null) => void;
   currentYear: number;
   currentMonthIndex: number;
   goToPreviousMonth: () => void;
@@ -287,7 +287,9 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return localStorage.getItem(STORAGE_KEYS.AUTH_PROVIDER) || sessionStorage.getItem(STORAGE_KEYS.AUTH_PROVIDER) || null;
   });
 
-  const [activeProviderId, setActiveProviderIdState] = useState<string>('prov-1');
+  const [activeProviderId, setActiveProviderIdState] = useState<string | null>(() => {
+    return localStorage.getItem(STORAGE_KEYS.AUTH_PROVIDER) || localStorage.getItem(STORAGE_KEYS.ACTIVE_PROVIDER) || null;
+  });
   const [isPublished, setIsPublishedState] = useState<boolean>(true);
   const [publishedMonths, setPublishedMonths] = useState<Record<string, boolean>>(() => {
     try {
@@ -1013,8 +1015,10 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
 
   const logoutProvider = () => {
     setAuthenticatedProviderId(null);
+    setActiveProviderIdState(null);
     localStorage.removeItem(STORAGE_KEYS.AUTH_PROVIDER);
     sessionStorage.removeItem(STORAGE_KEYS.AUTH_PROVIDER);
+    localStorage.removeItem(STORAGE_KEYS.ACTIVE_PROVIDER);
   };
 
   const updateProviderWhatsapp = async (providerId: string, whatsapp: string): Promise<void> => {
@@ -1152,9 +1156,13 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     setRoleState(newRole);
   };
 
-  const setActiveProviderId = (id: string) => {
+  const setActiveProviderId = (id: string | null) => {
     setActiveProviderIdState(id);
-    localStorage.setItem(STORAGE_KEYS.ACTIVE_PROVIDER, id);
+    if (id) {
+      localStorage.setItem(STORAGE_KEYS.ACTIVE_PROVIDER, id);
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.ACTIVE_PROVIDER);
+    }
   };
 
   const setIsPublished = (published: boolean) => {
