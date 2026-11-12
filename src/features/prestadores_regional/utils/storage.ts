@@ -19,7 +19,7 @@ export function getStoredPrestadores(): Prestador[] {
       return INITIAL_PRESTADORES;
     }
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
+    if (Array.isArray(parsed)) {
       let needsUpdate = false;
       const enriched = parsed.map((p: Prestador) => {
         if (!p.cor) {
@@ -71,7 +71,7 @@ export function getStoredTemplates(): TemplateItem[] {
       return INITIAL_TEMPLATES;
     }
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
+    if (Array.isArray(parsed)) {
       return parsed;
     }
     saveTemplates(INITIAL_TEMPLATES);
@@ -111,7 +111,7 @@ export function getStoredPontosFixos(): PontoFixoItem[] {
       return PONTOS_FIXOS;
     }
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
+    if (Array.isArray(parsed)) {
       return parsed;
     }
     savePontosFixos(PONTOS_FIXOS);
@@ -151,7 +151,7 @@ export function getStoredAgendas(): AgendaRegiaoItem[] {
       return AGENDAS_REGIONAIS;
     }
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
+    if (Array.isArray(parsed)) {
       return parsed;
     }
     saveAgendas(AGENDAS_REGIONAIS);
@@ -191,7 +191,7 @@ export function getStoredRegras(): RegraOperacionalItem[] {
       return REGRAS_OPERACIONAIS;
     }
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
+    if (Array.isArray(parsed)) {
       return parsed;
     }
     saveRegras(REGRAS_OPERACIONAIS);

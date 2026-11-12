@@ -1,0 +1,8 @@
+{
+  "firestore": [
+    {
+      "database": "ai-studio-escalaprogestoev-8075aa9d-5f43-4b63-97ca-7cd460f2368a",
+      "rules": "firestore.rules"
+    }
+  ]
+}

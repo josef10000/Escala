@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { MONTH_NAMES_PT } from '../../utils/dateUtils';
 import { ShiftAssignment, WorkModality } from '../../types';
+import { auth } from '../../lib/firebase';
 
 interface ImportScheduleModalProps {
   isOpen: boolean;
@@ -34,6 +35,8 @@ export const ImportScheduleModal: React.FC<ImportScheduleModalProps> = ({
     currentYear,
     currentMonthIndex,
     providers,
+    departments,
+    shiftTypes,
     assignments,
     addAssignment,
     clearMonthAssignments,
@@ -88,11 +91,13 @@ export const ImportScheduleModal: React.FC<ImportScheduleModalProps> = ({
     try {
       const response = await fetch('/api/ai/parse-schedule', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(auth.currentUser ? { Authorization: `Bearer ${await auth.currentUser.getIdToken()}` } : {}) },
         body: JSON.stringify({
           imageBase64: imagePreview,
           textContent: rawText.trim() || undefined,
           providersList: providers.map(p => ({ id: p.id, name: p.name })),
+          year: currentYear,
+          month: currentMonthIndex + 1,
         }),
       });
 
@@ -126,18 +131,29 @@ export const ImportScheduleModal: React.FC<ImportScheduleModalProps> = ({
     let appliedCount = 0;
     aiPreviewData.forEach(item => {
       // Find matching provider
+      const normalizeName = (value: string) => value.trim().toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ');
       let targetProv = providers.find(p => p.id === item.providerId);
       if (!targetProv && item.providerName) {
-        const q = item.providerName.toLowerCase();
-        targetProv = providers.find(p => p.name.toLowerCase().includes(q));
+        const requestedName = normalizeName(String(item.providerName));
+        targetProv = providers.find(p => normalizeName(p.name) === requestedName);
       }
+      const validDate = typeof item.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(item.date)
+        && item.date.startsWith(`${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-`)
+        && Number(item.date.slice(-2)) >= 1
+        && Number(item.date.slice(-2)) <= new Date(currentYear, currentMonthIndex + 1, 0).getDate();
+      const shiftCode = String(item.shiftCode).toUpperCase();
+      const validShift = ['T', 'D', 'HO'].includes(shiftCode);
+      const shiftTypeId = shiftCode === 'D' ? 'st-d' : 'st-t';
+      const validShiftType = shiftTypes.some(shift => shift.id === shiftTypeId);
+      const department = departments.find(dept => dept.id === item.departmentId) || departments[0];
+      const alreadyExists = assignments.some(assignment => assignment.providerId === targetProv?.id && assignment.date === item.date && assignment.shiftTypeId === shiftTypeId);
 
-      if (targetProv && item.date) {
+      if (targetProv && validDate && validShift && validShiftType && department && !alreadyExists) {
         addAssignment({
           providerId: targetProv.id,
           date: item.date,
-          shiftTypeId: item.shiftCode === 'D' ? 'st-d' : 'st-t',
-          departmentId: 'dept-1',
+          shiftTypeId,
+          departmentId: department.id,
           status: 'confirmed',
           workModality: (item.shiftCode === 'HO' ? 'home_office' : 'presencial') as WorkModality,
           notes: item.notes || 'Importado via IA',

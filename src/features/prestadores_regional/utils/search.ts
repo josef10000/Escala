@@ -12,6 +12,10 @@ export function normalizeText(str: string): string {
 /**
  * Normalizes tokens for query matching, treating 'leste1' as 'leste 1', etc.
  */
+export function canonicalRegion(region: string): string {
+  return normalizeText(region).replace(/([a-z]+)\s*(\\d+)/g, '$1 $2').replace(/\s+/g, ' ').trim().toUpperCase();
+}
+
 export function tokenizeQuery(query: string): string[] {
   const norm = normalizeText(query);
   if (!norm) return [];
@@ -25,8 +29,8 @@ export function filterPrestadores(prestadores: Prestador[], query: string, selec
   let list = prestadores;
 
   if (selectedRegion && selectedRegion !== 'TODAS') {
-    const normRegion = normalizeText(selectedRegion);
-    list = list.filter(p => normalizeText(p.regiao) === normRegion);
+    const normRegion = canonicalRegion(selectedRegion);
+    list = list.filter(p => canonicalRegion(p.regiao) === normRegion);
   }
 
   const tokens = tokenizeQuery(query);

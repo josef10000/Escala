@@ -33,6 +33,7 @@ import { PrestadoresRegionalModule } from './features/prestadores_regional/Prest
 import { Provider, ShiftAssignment } from './types';
 import { Calendar, Clock, CheckCircle2, AlertCircle, Plus, CalendarDays } from 'lucide-react';
 import { formatFriendlyDate } from './utils/dateUtils';
+import { AuthGate } from './components/AuthGate';
 
 function ScheduleAppContent() {
   const {
@@ -457,8 +458,10 @@ function ScheduleAppContent() {
 
 export default function App() {
   return (
-    <ScheduleProvider>
-      <ScheduleAppContent />
-    </ScheduleProvider>
+    <AuthGate>
+      <ScheduleProvider>
+        <ScheduleAppContent />
+      </ScheduleProvider>
+    </AuthGate>
   );
 }
