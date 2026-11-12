@@ -95,13 +95,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="flex items-center gap-2 cursor-pointer group shrink-0"
           >
             <img
-              src="/assets/aistudio/image_fb26a50f.png"
-              alt="EscalaPro Logo"
-              className="w-8 h-8 object-contain rounded-lg shadow-sm group-hover:scale-105 transition-transform"
+              src="/assets/aistudio/1-Photoroom_fd21f84e.png"
+              alt="OminiHub Logo"
+              className="h-[40px] sm:h-[45px] w-auto object-contain transition-transform group-hover:scale-105 filter drop-shadow-md"
             />
-            <span className="font-bold text-white tracking-tight text-base hidden xl:inline">
-              EscalaPro
-            </span>
           </button>
 
           {/* Primary Hub Modules */}

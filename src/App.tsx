@@ -283,7 +283,7 @@ function ScheduleAppContent() {
       <footer className="border-t border-white/[0.08] bg-[#090A0F]/95 backdrop-blur-md py-4 px-6 text-xs text-zinc-400">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
           <span className="font-medium text-zinc-400">
-            © 2025 EscalaPro • Gestão Humanizada de Escalas • <span className="font-mono text-zinc-500">v2.4.1 (build 940)</span>
+            © 2026 OminiHub • Gestão Humanizada de Escalas • <span className="font-mono text-zinc-500">v2.5.0 (build 950)</span>
           </span>
           <div className="flex items-center gap-3 text-zinc-400 font-medium">
             <span>Plantões Auditados</span>

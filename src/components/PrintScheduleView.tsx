@@ -63,7 +63,7 @@ export const PrintScheduleView: React.FC<PrintScheduleViewProps> = ({ onClose })
             </p>
           </div>
           <div className="text-right text-xs">
-            <div className="font-bold text-slate-800">EscalaPro - Sistema Operacional</div>
+            <div className="font-bold text-slate-800">OminiHub - Sistema Operacional</div>
             <div className="text-slate-500">Status: {isPublished ? 'OFICIAL / PUBLICADA' : 'RASCUNHO EM APROVAÇÃO'}</div>
             <div className="text-slate-500 font-mono-nums">Emissão: {new Date().toLocaleDateString('pt-BR')}</div>
           </div>

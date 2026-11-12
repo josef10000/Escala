@@ -449,7 +449,7 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return [
         {
           id: 'ann-1',
-          title: 'Bem-vindo ao Sistema EscalaPro',
+          title: 'Bem-vindo ao Sistema OminiHub',
           message: 'Novo painel unificado de plantões, trocas, repasses PJ e mural de avisos ativo para todos os prestadores.',
           priority: 'normal',
           authorName: 'Liderança',
