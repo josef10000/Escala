@@ -621,8 +621,6 @@ export function PrestadoresRegionalModule({
                   totalCount={prestadores.length}
                   viewMode={viewMode}
                   onViewModeChange={setViewMode}
-                  selectedColor={selectedColor}
-                  onSelectColor={setSelectedColor}
                   phoneFilter={phoneFilter}
                   onPhoneFilterChange={setPhoneFilter}
                   pendingPhoneCount={pendingPhoneCount}

@@ -375,10 +375,10 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
               return (
                 <div
                   key={pf.id}
-                  className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#141b2b]/95 via-[#101623]/95 to-[#0c101a]/95 backdrop-blur-xl border border-white/10 border-t-slate-700/80 hover:border-t-sky-400/50 hover:border-white/20 p-5 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 shadow-[0_12px_28px_-6px_rgba(0,0,0,0.65)] hover:shadow-[0_22px_45px_-10px_rgba(0,0,0,0.9)] group"
+                  className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#151c2e]/95 via-[#101625]/95 to-[#0a0e18]/95 backdrop-blur-xl border border-[#22293d] border-t-white/20 border-b-black/90 hover:border-sky-400/60 p-5 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.01] shadow-[0_14px_35px_-8px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.1)] hover:shadow-[0_22px_48px_-10px_rgba(0,0,0,0.95),0_0_25px_rgba(14,165,233,0.18)] group"
                 >
                   {/* Top Specular Line */}
-                  <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
+                  <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-sky-400/40 to-transparent pointer-events-none" />
 
                   <div className="space-y-3">
                     <div className="flex items-start justify-between gap-2">

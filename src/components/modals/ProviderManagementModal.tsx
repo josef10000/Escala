@@ -39,7 +39,13 @@ export const ProviderManagementModal: React.FC<ProviderManagementModalProps> = (
     resetProviderPin,
     activeRegime,
     batchAddProviders,
+    isLeaderAuthenticated,
+    authenticatedProviderId,
+    activeProviderId,
   } = useSchedule();
+
+  const loggedInProvId = authenticatedProviderId || activeProviderId;
+  const canManageProvider = (pId: string) => isLeaderAuthenticated || (loggedInProvId ? pId === loggedInProvId : false);
 
   const [activeTab, setActiveTab] = useState<'list' | 'batch_import'>('list');
   const [isAdding, setIsAdding] = useState(false);
@@ -269,17 +275,19 @@ export const ProviderManagementModal: React.FC<ProviderManagementModalProps> = (
             <span>Colaboradores Cadastrados ({providers.length})</span>
           </button>
 
-          <button
-            onClick={() => setActiveTab('batch_import')}
-            className={`pb-2.5 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === 'batch_import'
-                ? 'border-cyan-400 text-cyan-300'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Upload className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Importação em Lote (Colar Lista)</span>
-          </button>
+          {isLeaderAuthenticated && (
+            <button
+              onClick={() => setActiveTab('batch_import')}
+              className={`pb-2.5 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'batch_import'
+                  ? 'border-cyan-400 text-cyan-300'
+                  : 'border-transparent text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Upload className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Importação em Lote (Colar Lista)</span>
+            </button>
+          )}
         </div>
 
         {/* Content */}
@@ -292,16 +300,18 @@ export const ProviderManagementModal: React.FC<ProviderManagementModalProps> = (
                   <span className="text-xs text-slate-300 font-medium">
                     Regime Ativo: <strong className="text-cyan-400">{activeRegime}</strong>
                   </span>
-                  <button
-                    onClick={() => {
-                      resetForm();
-                      setIsAdding(true);
-                    }}
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-950/40 cursor-pointer active:scale-98"
-                  >
-                    <UserPlus className="w-4 h-4 text-cyan-200" />
-                    <span>+ Novo Colaborador</span>
-                  </button>
+                  {isLeaderAuthenticated && (
+                    <button
+                      onClick={() => {
+                        resetForm();
+                        setIsAdding(true);
+                      }}
+                      className="flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-950/40 cursor-pointer active:scale-98"
+                    >
+                      <UserPlus className="w-4 h-4 text-cyan-200" />
+                      <span>+ Novo Colaborador</span>
+                    </button>
+                  )}
                 </div>
               ) : (
                 <form onSubmit={handleSave} className="p-4 bg-[#0c121c] border border-[#1e2a3a] rounded-2xl space-y-3">
@@ -521,78 +531,97 @@ export const ProviderManagementModal: React.FC<ProviderManagementModalProps> = (
 
               {/* Provider List */}
               <div className="space-y-2">
-                {providers.map(p => (
-                  <div
-                    key={p.id}
-                    className="p-3 bg-[#0c121c] border border-[#1e2a3a] rounded-2xl flex items-center justify-between gap-3 hover:border-cyan-500/40 transition-all"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-xl bg-blue-950/70 border border-blue-800/80 flex items-center justify-center font-extrabold text-xs text-cyan-300 shrink-0">
-                        {p.name.substring(0, 2).toUpperCase()}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="font-bold text-xs text-white truncate">{p.name}</h4>
-                          <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-slate-800 text-cyan-300 border border-slate-700">
-                            {p.regime || '12x36'}
-                          </span>
-                          {p.baseSalaryOrFee && (
-                            <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-emerald-950/70 text-emerald-300 border border-emerald-800/80">
-                              Base: R$ {p.baseSalaryOrFee}
-                            </span>
-                          )}
+                {providers.map(p => {
+                  const canManage = canManageProvider(p.id);
+                  const isSelf = loggedInProvId ? p.id === loggedInProvId : false;
+
+                  return (
+                    <div
+                      key={p.id}
+                      className="p-3 bg-[#0c121c] border border-[#1e2a3a] rounded-2xl flex items-center justify-between gap-3 hover:border-cyan-500/40 transition-all"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-8 h-8 rounded-xl bg-blue-950/70 border border-blue-800/80 flex items-center justify-center font-extrabold text-xs text-cyan-300 shrink-0">
+                          {p.name.substring(0, 2).toUpperCase()}
                         </div>
-                        <p className="text-xs text-slate-400 font-medium truncate">
-                          {p.role} • Bônus: R$ {p.bonusAmount || 600} (Desc. {p.deductionMode === 'percentage_of_bonus' ? '%' : 'R$'} sobre bônus)
-                        </p>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="font-bold text-xs text-white truncate">{p.name}</h4>
+                            {isSelf && (
+                              <span className="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-[#00d2d3] text-[#003731]">
+                                SEU PERFIL
+                              </span>
+                            )}
+                            <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-slate-800 text-cyan-300 border border-slate-700">
+                              {p.regime || '12x36'}
+                            </span>
+                            {p.baseSalaryOrFee && (
+                              <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-emerald-950/70 text-emerald-300 border border-emerald-800/80">
+                                Base: R$ {p.baseSalaryOrFee}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-slate-400 font-medium truncate">
+                            {p.role} • Bônus: R$ {p.bonusAmount || 600} (Desc. {p.deductionMode === 'percentage_of_bonus' ? '%' : 'R$'} sobre bônus)
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {/* Actions only visible if leader or self */}
+                        {canManage ? (
+                          <>
+                            {/* PIN status badge and reset button */}
+                            {p.pin ? (
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  if (window.confirm(`Deseja resetar o PIN de ${p.name}? O colaborador poderá criar um novo PIN no próximo acesso.`)) {
+                                    await resetProviderPin(p.id);
+                                  }
+                                }}
+                                className="flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-lg bg-emerald-950/70 hover:bg-emerald-900 text-emerald-300 border border-emerald-800/80 transition-colors cursor-pointer"
+                                title="PIN cadastrado. Clique para resetar o PIN deste colaborador."
+                              >
+                                <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                                <span>Resetar PIN</span>
+                              </button>
+                            ) : (
+                              <span
+                                className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg bg-[#141c28] text-slate-400 border border-[#1e2a3a]"
+                                title="Colaborador ainda não criou seu PIN de primeiro acesso."
+                              >
+                                <KeyRound className="w-3 h-3 text-slate-500" />
+                                <span>Sem PIN</span>
+                              </span>
+                            )}
+
+                            <button
+                              type="button"
+                              onClick={() => handleStartEdit(p)}
+                              className="p-1.5 text-slate-400 hover:text-cyan-300 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+                              title="Editar prestador"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(p.id, p.name)}
+                              className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+                              title="Remover prestador"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </>
+                        ) : (
+                          <span className="text-[10px] text-slate-500 italic px-2 py-1 rounded bg-[#0e1420] border border-slate-800">
+                            Somente leitura
+                          </span>
+                        )}
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      {/* PIN status badge and reset button */}
-                      {p.pin ? (
-                        <button
-                          type="button"
-                          onClick={async () => {
-                            if (window.confirm(`Deseja resetar o PIN de ${p.name}? O colaborador poderá criar um novo PIN no próximo acesso.`)) {
-                              await resetProviderPin(p.id);
-                            }
-                          }}
-                          className="flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-lg bg-emerald-950/70 hover:bg-emerald-900 text-emerald-300 border border-emerald-800/80 transition-colors cursor-pointer"
-                          title="PIN cadastrado. Clique para resetar o PIN deste colaborador."
-                        >
-                          <ShieldCheck className="w-3 h-3 text-emerald-400" />
-                          <span>Resetar PIN</span>
-                        </button>
-                      ) : (
-                        <span
-                          className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg bg-[#141c28] text-slate-400 border border-[#1e2a3a]"
-                          title="Colaborador ainda não criou seu PIN de primeiro acesso."
-                        >
-                          <KeyRound className="w-3 h-3 text-slate-500" />
-                          <span>Sem PIN</span>
-                        </span>
-                      )}
-
-                      <button
-                        type="button"
-                        onClick={() => handleStartEdit(p)}
-                        className="p-1.5 text-slate-400 hover:text-cyan-300 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
-                        title="Editar prestador"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(p.id, p.name)}
-                        className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
-                        title="Remover prestador"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </>
           )}

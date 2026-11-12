@@ -470,8 +470,10 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
         </div>
       </div>
 
-      {/* 2. CONTROL WORKSPACE TOOLBAR */}
-      <div className="bg-[#12141A] border border-white/[0.08] rounded-2xl p-2.5 sm:px-3 sm:py-2.5 flex flex-wrap items-center justify-between gap-2.5 shadow-sm">
+      {/* 2. CONTROL WORKSPACE TOOLBAR (3D Spatial Glass) */}
+      <div className="bg-gradient-to-b from-[#181b26]/95 via-[#12141d]/95 to-[#0c0e15]/95 backdrop-blur-xl border border-[#232738] border-t-white/15 border-b-black/90 rounded-2xl p-2.5 sm:px-3.5 sm:py-3 flex flex-wrap items-center justify-between gap-2.5 shadow-[0_12px_30px_-8px_rgba(0,0,0,0.8)] relative overflow-hidden">
+        {/* Specular Highlight Line */}
+        <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent pointer-events-none" />
         {/* Left Side: Month navigation, Hoje, 12x36 / 5x2 segmented switch, Vigente badge */}
         <div className="flex items-center gap-2 flex-wrap">
           {/* Month selector pill */}
@@ -810,6 +812,10 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
             <tbody className="divide-y divide-white/[0.05] text-xs">
               {displayedProviders.map(provider => {
                 const isSelected = provider.id === spotlightProvider?.id;
+                const loggedInProvId = authenticatedProviderId || activeProviderId;
+                const isSelf = loggedInProvId ? provider.id === loggedInProvId : false;
+                const canManageThisProvider = isLeaderAuthenticated || isSelf;
+
                 const provShifts = assignments.filter(a => {
                   const [y, m] = a.date.split('-').map(Number);
                   return a.providerId === provider.id && y === currentYear && m === currentMonthIndex + 1 && a.shiftTypeId === 'st-t';
@@ -834,7 +840,7 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                               <span className={`font-bold text-white truncate ${rowDensity === 'compact' ? 'text-[11px]' : 'text-xs'}`}>
                                 {provider.name}
                               </span>
-                              {isSelected && (
+                              {isSelf && (
                                 <span className="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-[#00d2d3] text-[#003731]">
                                   VOCÊ
                                 </span>
@@ -858,33 +864,36 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                             )}
                           </div>
 
-                          {/* Quick Edit & Delete Buttons for all providers */}
-                          <div className="flex items-center gap-1 opacity-70 group-hover/prov:opacity-100 transition-opacity shrink-0">
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (onAddProvider) onAddProvider();
-                              }}
-                              className="p-1 rounded text-zinc-400 hover:text-[#00d2d3] hover:bg-white/10 transition-colors cursor-pointer"
-                              title={`Editar ${provider.name}`}
-                            >
-                              <Edit2 className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (window.confirm(`Tem certeza que deseja excluir ${provider.name} da escala?`)) {
-                                  deleteProvider(provider.id);
-                                }
-                              }}
-                              className="p-1 rounded text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
-                              title={`Excluir ${provider.name}`}
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
+                          {/* Quick Edit & Delete Buttons - Only visible to Leader or Self */}
+                          {canManageThisProvider && (
+                            <div className="flex items-center gap-1 opacity-70 group-hover/prov:opacity-100 transition-opacity shrink-0">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActiveProviderId(provider.id);
+                                  if (onAddProvider) onAddProvider();
+                                }}
+                                className="p-1 rounded text-zinc-400 hover:text-[#00d2d3] hover:bg-white/10 transition-colors cursor-pointer"
+                                title={`Editar ${provider.name}`}
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (window.confirm(`Tem certeza que deseja excluir ${provider.name} da escala?`)) {
+                                    deleteProvider(provider.id);
+                                  }
+                                }}
+                                className="p-1 rounded text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                                title={`Excluir ${provider.name}`}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </td>
@@ -914,18 +923,18 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                       if (shift) {
                         if (shift.shiftTypeId === 'st-d') {
                           code = 'D';
-                          chipStyle = 'bg-[#27272a] text-[#a1a1aa] font-bold shadow-xs';
+                          chipStyle = 'bg-gradient-to-b from-[#2e313d] to-[#1a1c26] text-[#c0c4d6] font-bold border-t border-white/10 border-b-2 border-b-black/90 shadow-md active:translate-y-[1px]';
                         } else if (shift.workModality === 'home_office') {
                           code = 'HO';
-                          chipStyle = 'bg-[#571bc1] text-[#f3e8ff] font-bold shadow-xs';
+                          chipStyle = 'bg-gradient-to-b from-[#7026e8] to-[#4514a1] text-white font-bold border-t border-purple-300/40 border-b-2 border-b-[#2a0b69] shadow-[0_3px_8px_rgba(112,38,232,0.4)] active:translate-y-[1px]';
                         } else {
                           code = 'T';
-                          chipStyle = 'bg-[#00d2d3] text-[#003731] font-black shadow-sm';
+                          chipStyle = 'bg-gradient-to-b from-[#00f2f3] to-[#00a6a7] text-[#002723] font-black border-t border-white/60 border-b-2 border-b-[#005e5d] shadow-[0_3px_8px_rgba(0,210,211,0.4)] active:translate-y-[1px]';
                         }
                       }
 
                       if (saleOffer && code === 'T') {
-                        chipStyle = 'bg-gradient-to-br from-amber-400 to-amber-500 text-black font-black shadow-md shadow-amber-500/30 ring-2 ring-amber-400/70';
+                        chipStyle = 'bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 text-black font-black border-t border-white/70 border-b-2 border-b-amber-950 shadow-[0_4px_12px_rgba(245,158,11,0.5)] active:translate-y-[1px]';
                       }
 
                       return (
@@ -940,10 +949,10 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                             }
                           }}
                           onContextMenu={e => handleOpenCellEditor(e, provider, d.dateStr, d.dayNumber)}
-                          className={`text-center border-r border-white/[0.04] cursor-pointer transition-all ${
+                          className={`text-center border-r border-[#1a1c28] cursor-pointer transition-all bg-[#090a10] shadow-[inset_0_2px_4px_rgba(0,0,0,0.85)] ${
                             rowDensity === 'compact' ? 'py-0.5 px-0.5' : 'py-1.5 px-1'
                           } ${
-                            isDayToday ? 'bg-[#00d2d3]/[0.05]' : ''
+                            isDayToday ? 'bg-[#00d2d3]/[0.08]' : ''
                           } ${isCellSelected ? 'ring-2 ring-[#00d2d3] ring-inset' : ''}`}
                           title={
                             saleOffer
@@ -958,7 +967,7 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                               </span>
                             ) : (
                               <div
-                                className={`rounded-lg flex items-center justify-center transition-transform active:scale-95 relative ${chipStyle} ${
+                                className={`rounded-lg flex items-center justify-center transition-all duration-150 active:translate-y-[1px] active:shadow-inner relative ${chipStyle} ${
                                   rowDensity === 'compact' ? 'w-5 h-5 text-[10px]' : 'w-7 h-7 text-xs'
                                 }`}
                               >

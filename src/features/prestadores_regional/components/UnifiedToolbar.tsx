@@ -23,9 +23,6 @@ interface UnifiedToolbarProps {
   totalCount: number;
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
-  // Color filter (discrete dots)
-  selectedColor: string | null;
-  onSelectColor: (color: string | null) => void;
   // Phone sanitization filter
   phoneFilter: PhoneFilterType;
   onPhoneFilterChange: (filter: PhoneFilterType) => void;
@@ -37,25 +34,54 @@ interface UnifiedToolbarProps {
 }
 
 const QUICK_MACRO_REGIONS = [
-  { label: 'Todas', val: null },
-  { label: 'Leste', val: 'LESTE 1' },
-  { label: 'Oeste', val: 'OESTE 1' },
-  { label: 'Norte', val: 'NORTE 1' },
-  { label: 'Sul', val: 'SUL 1' },
-  { label: 'Campinas', val: 'CAMPINAS 1' },
-  { label: 'Sorocaba', val: 'SOROCABA' },
-  { label: 'ABC', val: 'ABC 1' },
-];
-
-const COLOR_PALETTE_DOTS = [
-  { id: 'cyan', title: 'Cyan (Escala)', dot: 'bg-cyan-400 hover:bg-cyan-300' },
-  { id: 'emerald', title: 'Esmeralda', dot: 'bg-emerald-400 hover:bg-emerald-300' },
-  { id: 'amber', title: 'Âmbar', dot: 'bg-amber-400 hover:bg-amber-300' },
-  { id: 'purple', title: 'Roxo', dot: 'bg-purple-400 hover:bg-purple-300' },
-  { id: 'indigo', title: 'Índigo', dot: 'bg-indigo-400 hover:bg-indigo-300' },
-  { id: 'rose', title: 'Rosa', dot: 'bg-rose-400 hover:bg-rose-300' },
-  { id: 'sky', title: 'Céu', dot: 'bg-sky-400 hover:bg-sky-300' },
-  { id: 'teal', title: 'Teal', dot: 'bg-teal-400 hover:bg-teal-300' },
+  {
+    label: 'Todas',
+    val: null,
+    inactive: 'bg-[#181a24]/80 text-slate-300 border-[#2a2d3d] hover:bg-[#202332] hover:text-white',
+    active: 'bg-white/20 text-white border-white/40 shadow-xs font-bold ring-1 ring-white/30',
+  },
+  {
+    label: 'Leste',
+    val: 'LESTE 1',
+    inactive: 'bg-emerald-950/30 text-emerald-300/90 border-emerald-800/35 hover:bg-emerald-900/40 hover:text-emerald-200',
+    active: 'bg-emerald-500/25 text-emerald-200 border-emerald-400/60 shadow-[0_0_12px_rgba(16,185,129,0.25)] font-bold ring-1 ring-emerald-400/30',
+  },
+  {
+    label: 'Oeste',
+    val: 'OESTE 1',
+    inactive: 'bg-amber-950/30 text-amber-300/90 border-amber-800/35 hover:bg-amber-900/40 hover:text-amber-200',
+    active: 'bg-amber-500/25 text-amber-200 border-amber-400/60 shadow-[0_0_12px_rgba(245,158,11,0.25)] font-bold ring-1 ring-amber-400/30',
+  },
+  {
+    label: 'Norte',
+    val: 'NORTE 1',
+    inactive: 'bg-sky-950/30 text-sky-300/90 border-sky-800/35 hover:bg-sky-900/40 hover:text-sky-200',
+    active: 'bg-sky-500/25 text-sky-200 border-sky-400/60 shadow-[0_0_12px_rgba(14,165,233,0.25)] font-bold ring-1 ring-sky-400/30',
+  },
+  {
+    label: 'Sul',
+    val: 'SUL 1',
+    inactive: 'bg-purple-950/30 text-purple-300/90 border-purple-800/35 hover:bg-purple-900/40 hover:text-purple-200',
+    active: 'bg-purple-500/25 text-purple-200 border-purple-400/60 shadow-[0_0_12px_rgba(168,85,247,0.25)] font-bold ring-1 ring-purple-400/30',
+  },
+  {
+    label: 'Campinas',
+    val: 'CAMPINAS 1',
+    inactive: 'bg-cyan-950/30 text-cyan-300/90 border-cyan-800/35 hover:bg-cyan-900/40 hover:text-cyan-200',
+    active: 'bg-cyan-500/25 text-cyan-200 border-cyan-400/60 shadow-[0_0_12px_rgba(0,210,211,0.25)] font-bold ring-1 ring-cyan-400/30',
+  },
+  {
+    label: 'Sorocaba',
+    val: 'SOROCABA',
+    inactive: 'bg-cyan-950/30 text-cyan-300/90 border-cyan-800/35 hover:bg-cyan-900/40 hover:text-cyan-200',
+    active: 'bg-cyan-500/25 text-cyan-200 border-cyan-400/60 shadow-[0_0_12px_rgba(0,210,211,0.25)] font-bold ring-1 ring-cyan-400/30',
+  },
+  {
+    label: 'ABC',
+    val: 'ABC 1',
+    inactive: 'bg-rose-950/30 text-rose-300/90 border-rose-800/35 hover:bg-rose-900/40 hover:text-rose-200',
+    active: 'bg-rose-500/25 text-rose-200 border-rose-400/60 shadow-[0_0_12px_rgba(244,63,94,0.25)] font-bold ring-1 ring-rose-400/30',
+  },
 ];
 
 export const UnifiedToolbar: React.FC<UnifiedToolbarProps> = ({
@@ -66,8 +92,6 @@ export const UnifiedToolbar: React.FC<UnifiedToolbarProps> = ({
   totalCount,
   viewMode,
   onViewModeChange,
-  selectedColor,
-  onSelectColor,
   phoneFilter,
   onPhoneFilterChange,
   pendingPhoneCount,
@@ -80,14 +104,14 @@ export const UnifiedToolbar: React.FC<UnifiedToolbarProps> = ({
       {/* Subtle top reflection line */}
       <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
 
-      {/* Left Column: Regions + Color Dots (ONLY dots on the same line, no text) */}
+      {/* Left Column: Region Chips with Frosted Glass Colors Embedded Directly into Words */}
       <div className="flex flex-wrap items-center gap-2 relative z-10">
         <span className="text-slate-400 font-medium text-xs flex items-center gap-1.5 mr-1">
           <Filter className="w-3.5 h-3.5 text-cyan-400" />
           <span>Região:</span>
         </span>
 
-        {/* Region Chips */}
+        {/* Frosted Glass Color Region Chips */}
         {QUICK_MACRO_REGIONS.map((chip) => {
           const isActive =
             (chip.val === null && !selectedRegion) ||
@@ -98,10 +122,8 @@ export const UnifiedToolbar: React.FC<UnifiedToolbarProps> = ({
               key={chip.label}
               type="button"
               onClick={() => onSelectRegion(chip.val)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 active:scale-95 cursor-pointer ${
-                isActive
-                  ? 'bg-[#00d2d3] text-black font-bold shadow-xs'
-                  : 'bg-[#1a1b22] hover:bg-[#23252f] text-slate-300 border border-[#2a2b32]'
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold backdrop-blur-md border transition-all duration-200 active:scale-95 cursor-pointer ${
+                isActive ? chip.active : chip.inactive
               }`}
             >
               {chip.label}
@@ -113,45 +135,11 @@ export const UnifiedToolbar: React.FC<UnifiedToolbarProps> = ({
           <button
             type="button"
             onClick={() => onSelectRegion(null)}
-            className="text-xs text-cyan-400 hover:text-cyan-300 underline ml-1 transition-colors font-medium cursor-pointer"
+            className="text-xs text-cyan-400 hover:text-cyan-300 underline ml-1.5 transition-colors font-medium cursor-pointer"
           >
             Limpar
           </button>
         )}
-
-        {/* Separator Divider */}
-        <div className="h-4 w-[1px] bg-slate-800 mx-1 hidden sm:block" />
-
-        {/* Color Dots ONLY (Without text labels, directly on the same line) */}
-        <div className="flex items-center gap-1.5 ml-1">
-          {COLOR_PALETTE_DOTS.map((c) => {
-            const isSelected = selectedColor === c.id;
-            return (
-              <button
-                key={c.id}
-                type="button"
-                onClick={() => onSelectColor(isSelected ? null : c.id)}
-                className={`w-4 h-4 rounded-full ${c.dot} transition-all duration-150 cursor-pointer flex items-center justify-center ${
-                  isSelected
-                    ? 'ring-2 ring-white ring-offset-2 ring-offset-[#13151c] scale-110 shadow-sm'
-                    : 'opacity-70 hover:opacity-100 hover:scale-105'
-                }`}
-                title={`Filtrar prestadores: ${c.title}`}
-              />
-            );
-          })}
-
-          {selectedColor && (
-            <button
-              type="button"
-              onClick={() => onSelectColor(null)}
-              className="text-[11px] text-slate-400 hover:text-white underline ml-1 transition-colors font-medium cursor-pointer"
-              title="Limpar filtro de cor"
-            >
-              (todas)
-            </button>
-          )}
-        </div>
       </div>
 
       {/* Right Column: Phone Sanitation, Density, CSV Export, Dropdown & View Mode Switcher */}
