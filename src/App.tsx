@@ -29,6 +29,7 @@ import { AnnouncementsModal } from './components/modals/AnnouncementsModal';
 import { AuditLogModal } from './components/modals/AuditLogModal';
 import { OperationalKpiModal } from './components/modals/OperationalKpiModal';
 import { WeekendDutyModal } from './components/modals/WeekendDutyModal';
+import { GestorFeedbacksPage } from './components/views/GestorFeedbacksPage';
 import { MobileScheduleView } from './components/views/MobileScheduleView';
 import { PrestadoresRegionalModule } from './features/prestadores_regional/PrestadoresRegionalModule';
 import { Provider, ShiftAssignment } from './types';
@@ -145,18 +146,22 @@ function ScheduleAppContent() {
           onOpenExecutiveReportModal={() => setExecutiveReportModalOpen(true)}
         />
         <div className="pt-16 flex-1 flex flex-col overflow-hidden">
-          <PrestadoresRegionalModule
-            initialTab={
-              activeModule === 'pontos_fixos'
-                ? 'regras'
-                : 'prestadores'
-            }
-            onNavigateToEscala={() => setActiveModule('escala')}
-            onTabChange={(tab) => {
-              if (tab === 'prestadores') setActiveModule('prestadores_regional');
-              else if (tab === 'regras') setActiveModule('pontos_fixos');
-            }}
-          />
+          {activeModule === 'gestor_feedbacks' ? (
+            <GestorFeedbacksPage />
+          ) : (
+            <PrestadoresRegionalModule
+              initialTab={
+                activeModule === 'pontos_fixos'
+                  ? 'regras'
+                  : 'prestadores'
+              }
+              onNavigateToEscala={() => setActiveModule('escala')}
+              onTabChange={(tab) => {
+                if (tab === 'prestadores') setActiveModule('prestadores_regional');
+                else if (tab === 'regras') setActiveModule('pontos_fixos');
+              }}
+            />
+          )}
         </div>
 
         {/* Global Modals for Navbar */}

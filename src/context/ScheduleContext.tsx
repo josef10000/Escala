@@ -159,6 +159,12 @@ interface ScheduleContextType {
   updateAttendanceIncident: (id: string, updates: Partial<AttendanceIncident>) => void;
   deleteAttendanceIncident: (id: string) => void;
 
+  // Team Feedbacks (Diário do Gestor)
+  teamFeedbacks: TeamFeedback[];
+  addTeamFeedback: (data: Omit<TeamFeedback, 'id' | 'createdAt'>) => string;
+  updateTeamFeedback: (id: string, updates: Partial<TeamFeedback>) => void;
+  deleteTeamFeedback: (id: string) => void;
+
   // Swap requests
   requestSwap: (data: {
     requesterShiftId: string;
@@ -231,6 +237,7 @@ const STORAGE_KEYS = {
   SHIFT_SALES: 'escalapro_shift_sales_oct2026_v1',
   WEEKEND_COLUMNS: 'escalapro_weekend_columns_v1',
   WEEKEND_ASSIGNMENTS: 'escalapro_weekend_assignments_v1',
+  TEAM_FEEDBACKS: 'escalapro_team_feedbacks_v1',
 };
 
 export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -416,6 +423,40 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           registeredByRole: 'supervisor',
           status: 'registrado',
           createdAt: '2026-10-14T21:00:00Z',
+        },
+      ];
+    } catch {
+      return [];
+    }
+  });
+
+  // Team Feedbacks State (Diário do Gestor)
+  const [teamFeedbacks, setTeamFeedbacks] = useState<TeamFeedback[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.TEAM_FEEDBACKS);
+      if (saved) return JSON.parse(saved);
+      return [
+        {
+          id: 'fb-1',
+          providerId: 'prov-5',
+          providerName: 'REGIANE JUCA DE CARVALHO',
+          date: '2026-11-07',
+          type: 'elogio',
+          title: 'Excelente atuação na fila OPA e encaixes',
+          notes: 'Demonstrou muita proatividade e agilidade na gestão da fila de encaixes do final de semana, com resolução rápida das demandas sem acúmulo.',
+          shiftContext: 'Plantão FDS Home',
+          createdAt: '2026-11-07T14:30:00Z',
+        },
+        {
+          id: 'fb-2',
+          providerId: 'prov-4',
+          providerName: 'PATRICIA VIEIRA DA CONCEICAO',
+          date: '2026-11-07',
+          type: 'elogio',
+          title: 'Ótima cobertura no Full Grupo',
+          notes: 'Manteve a comunicação clara, paciente e assertiva com todos os prestadores da escala durante o sábado.',
+          shiftContext: 'Plantão FDS Home',
+          createdAt: '2026-11-07T16:00:00Z',
         },
       ];
     } catch {
@@ -1336,6 +1377,38 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     syncToFirebase({ attendanceIncidents: updated });
   };
 
+  // Team Feedbacks CRUD (Diário do Gestor)
+  const addTeamFeedback = (data: Omit<TeamFeedback, 'id' | 'createdAt'>): string => {
+    const newId = `fb-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+    const newFb: TeamFeedback = {
+      ...data,
+      id: newId,
+      createdAt: new Date().toISOString(),
+    };
+    const updated = [newFb, ...teamFeedbacks];
+    setTeamFeedbacks(updated);
+    try {
+      localStorage.setItem(STORAGE_KEYS.TEAM_FEEDBACKS, JSON.stringify(updated));
+    } catch (_) {}
+    return newId;
+  };
+
+  const updateTeamFeedback = (id: string, updates: Partial<TeamFeedback>) => {
+    const updated = teamFeedbacks.map(f => (f.id === id ? { ...f, ...updates } : f));
+    setTeamFeedbacks(updated);
+    try {
+      localStorage.setItem(STORAGE_KEYS.TEAM_FEEDBACKS, JSON.stringify(updated));
+    } catch (_) {}
+  };
+
+  const deleteTeamFeedback = (id: string) => {
+    const updated = teamFeedbacks.filter(f => f.id !== id);
+    setTeamFeedbacks(updated);
+    try {
+      localStorage.setItem(STORAGE_KEYS.TEAM_FEEDBACKS, JSON.stringify(updated));
+    } catch (_) {}
+  };
+
   // Swap requests between collaborators
   const requestSwap = (data: {
     requesterShiftId: string;
@@ -2076,6 +2149,11 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
         addAttendanceIncident,
         updateAttendanceIncident,
         deleteAttendanceIncident,
+
+        teamFeedbacks,
+        addTeamFeedback,
+        updateTeamFeedback,
+        deleteTeamFeedback,
 
         requestSwap,
         approveSwap,

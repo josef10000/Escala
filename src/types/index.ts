@@ -143,7 +143,19 @@ export interface AttendanceIncident {
   createdAt: string;
 }
 
+export interface TeamFeedback {
+  id: string;
+  providerId: string;
+  providerName: string;
+  date: string; // "YYYY-MM-DD"
+  type: 'elogio' | 'atencao' | 'alinhamento' | 'anotacao';
+  title: string;
+  notes: string;
+  shiftContext?: string; // e.g. "Plantão FDS Home", "Atendimento OPA", "Semana Presencial"
+  createdAt: string;
+}
+
 export type ViewMode = 'escala' | 'personal-calendar' | 'calendar' | 'matrix' | 'week' | 'agenda' | 'my-schedule';
 export type UserRole = 'supervisor' | 'provider';
-export type ActiveModule = 'escala' | 'prestadores_regional' | 'pontos_fixos';
+export type ActiveModule = 'escala' | 'prestadores_regional' | 'pontos_fixos' | 'gestor_feedbacks';
 

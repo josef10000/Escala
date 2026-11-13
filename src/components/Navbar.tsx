@@ -143,6 +143,22 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="hidden sm:inline">Pontos Fixos & Agendas</span>
               <span className="sm:hidden">Pontos Fixos</span>
             </button>
+
+            {/* Exclusive Feedbacks Tab for Authenticated Leader */}
+            {isLeaderAuthenticated && (
+              <button
+                type="button"
+                onClick={() => setActiveModule('gestor_feedbacks')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium whitespace-nowrap ${
+                  activeModule === 'gestor_feedbacks'
+                    ? 'bg-gradient-to-r from-purple-600/35 to-indigo-600/35 text-white font-semibold border border-purple-400/40 shadow-sm'
+                    : 'text-purple-300/80 hover:text-white hover:bg-white/5'
+                }`}
+                title="Caderno confidencial de registros e feedbacks do gestor"
+              >
+                <span>📓 Feedbacks Gestor</span>
+              </button>
+            )}
           </nav>
 
           {/* Sub-tabs for Escala */}
