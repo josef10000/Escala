@@ -29,6 +29,7 @@ interface NavbarProps {
   onOpenAnnouncements?: () => void;
   onOpenAuditLog?: () => void;
   onOpenKpiModal?: () => void;
+  onOpenWeekendDutyModal?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -42,6 +43,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenProfileModal,
   onOpenAuditLog,
   onOpenKpiModal,
+  onOpenWeekendDutyModal,
 }) => {
   const {
     providers,
@@ -225,6 +227,17 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Gestor Only Additional Tools */}
           {isLeaderAuthenticated && (
             <div className="hidden lg:flex items-center gap-1.5 pl-1 border-l border-white/[0.08]">
+              {onOpenWeekendDutyModal && (
+                <button
+                  type="button"
+                  onClick={onOpenWeekendDutyModal}
+                  className="h-8 px-2.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 text-xs font-semibold border border-emerald-500/30 flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+                  title="Gerar confirmação de plantão fim de semana para o WhatsApp"
+                >
+                  <span>📲 Plantão FDS</span>
+                </button>
+              )}
+
               {onOpenKpiModal && (
                 <button
                   type="button"

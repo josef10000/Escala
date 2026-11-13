@@ -28,6 +28,7 @@ import { ImportScheduleModal } from './components/modals/ImportScheduleModal';
 import { AnnouncementsModal } from './components/modals/AnnouncementsModal';
 import { AuditLogModal } from './components/modals/AuditLogModal';
 import { OperationalKpiModal } from './components/modals/OperationalKpiModal';
+import { WeekendDutyModal } from './components/modals/WeekendDutyModal';
 import { MobileScheduleView } from './components/views/MobileScheduleView';
 import { PrestadoresRegionalModule } from './features/prestadores_regional/PrestadoresRegionalModule';
 import { Provider, ShiftAssignment } from './types';
@@ -80,6 +81,7 @@ function ScheduleAppContent() {
   const [announcementsOpen, setAnnouncementsOpen] = useState(false);
   const [auditLogOpen, setAuditLogOpen] = useState(false);
   const [kpiModalOpen, setKpiModalOpen] = useState(false);
+  const [weekendDutyModalOpen, setWeekendDutyModalOpen] = useState(false);
   const [saleModalDefaultDate, setSaleModalDefaultDate] = useState<string>('');
   const [saleModalDefaultProviderId, setSaleModalDefaultProviderId] = useState<string>('');
 
@@ -139,6 +141,7 @@ function ScheduleAppContent() {
           onOpenAnnouncements={() => setAnnouncementsOpen(true)}
           onOpenAuditLog={() => setAuditLogOpen(true)}
           onOpenKpiModal={() => setKpiModalOpen(true)}
+          onOpenWeekendDutyModal={() => setWeekendDutyModalOpen(true)}
           onOpenExecutiveReportModal={() => setExecutiveReportModalOpen(true)}
         />
         <div className="pt-16 flex-1 flex flex-col overflow-hidden">
@@ -213,6 +216,7 @@ function ScheduleAppContent() {
           onOpenAnnouncements={() => setAnnouncementsOpen(true)}
           onOpenAuditLog={() => setAuditLogOpen(true)}
           onOpenKpiModal={() => setKpiModalOpen(true)}
+          onOpenWeekendDutyModal={() => setWeekendDutyModalOpen(true)}
           onOpenExecutiveReportModal={() => setExecutiveReportModalOpen(true)}
         />
 
@@ -450,6 +454,12 @@ function ScheduleAppContent() {
       <OperationalKpiModal
         isOpen={kpiModalOpen}
         onClose={() => setKpiModalOpen(false)}
+      />
+
+      {/* Confirmação de Plantão Fim de Semana (Exclusivo Gestor) */}
+      <WeekendDutyModal
+        isOpen={weekendDutyModalOpen}
+        onClose={() => setWeekendDutyModalOpen(false)}
       />
     </div>
   );
