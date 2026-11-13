@@ -867,8 +867,8 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
       return true;
     }
 
-    // 2. Master Leader PIN check or custom PIN
-    if (cleanPin === leaderPin.trim() || cleanPin.length >= 4) {
+    // 2. Master Leader PIN check (exact match only - prevents arbitrary 4+ digit bypass)
+    if (cleanPin === leaderPin.trim()) {
       setIsLeaderAuthenticated(true);
       setRoleState('supervisor');
       setLeaderName(cleanName);

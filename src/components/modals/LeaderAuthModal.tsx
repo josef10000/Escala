@@ -49,7 +49,7 @@ export const LeaderAuthModal: React.FC<LeaderAuthModalProps> = ({ isOpen, onClos
       setInputPin('');
       onClose();
     } else {
-      setErrorMsg('Senha ou PIN incorreto. Use seu PIN individual cadastrado ou a senha Mestra (1234). Se for seu primeiro acesso, use a aba "Primeiro Acesso".');
+      setErrorMsg('Senha ou PIN incorreto. Use seu PIN individual cadastrado ou o PIN mestre de gestor. Se for seu primeiro acesso, use a aba "Primeiro Acesso".');
     }
   };
 

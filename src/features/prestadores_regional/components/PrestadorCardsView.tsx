@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Prestador } from '../types';
 import { MapPin } from 'lucide-react';
 import { Pagination } from './Pagination';
-import { PrestadorCard, GLOW_COLOR_MAP, getInitials } from './PrestadorCard';
+import { PrestadorCard, getInitials } from './PrestadorCard';
 
-export { GLOW_COLOR_MAP, getInitials };
+export { getInitials };
 
 interface PrestadorCardsViewProps {
   prestadores: Prestador[];
