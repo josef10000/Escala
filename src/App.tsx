@@ -27,7 +27,6 @@ import { CollaboratorProfileModal } from './components/modals/CollaboratorProfil
 import { ImportScheduleModal } from './components/modals/ImportScheduleModal';
 import { AnnouncementsModal } from './components/modals/AnnouncementsModal';
 import { AuditLogModal } from './components/modals/AuditLogModal';
-import { OperationalKpiModal } from './components/modals/OperationalKpiModal';
 import { WeekendDutyModal } from './components/modals/WeekendDutyModal';
 import { GestorFeedbacksPage } from './components/views/GestorFeedbacksPage';
 import { MobileScheduleView } from './components/views/MobileScheduleView';
@@ -81,7 +80,6 @@ function ScheduleAppContent() {
   const [importScheduleModalOpen, setImportScheduleModalOpen] = useState(false);
   const [announcementsOpen, setAnnouncementsOpen] = useState(false);
   const [auditLogOpen, setAuditLogOpen] = useState(false);
-  const [kpiModalOpen, setKpiModalOpen] = useState(false);
   const [weekendDutyModalOpen, setWeekendDutyModalOpen] = useState(false);
   const [saleModalDefaultDate, setSaleModalDefaultDate] = useState<string>('');
   const [saleModalDefaultProviderId, setSaleModalDefaultProviderId] = useState<string>('');
@@ -141,7 +139,6 @@ function ScheduleAppContent() {
           onOpenImportModal={() => setImportScheduleModalOpen(true)}
           onOpenAnnouncements={() => setAnnouncementsOpen(true)}
           onOpenAuditLog={() => setAuditLogOpen(true)}
-          onOpenKpiModal={() => setKpiModalOpen(true)}
           onOpenWeekendDutyModal={() => setWeekendDutyModalOpen(true)}
           onOpenExecutiveReportModal={() => setExecutiveReportModalOpen(true)}
         />
@@ -220,7 +217,6 @@ function ScheduleAppContent() {
           onOpenImportModal={() => setImportScheduleModalOpen(true)}
           onOpenAnnouncements={() => setAnnouncementsOpen(true)}
           onOpenAuditLog={() => setAuditLogOpen(true)}
-          onOpenKpiModal={() => setKpiModalOpen(true)}
           onOpenWeekendDutyModal={() => setWeekendDutyModalOpen(true)}
           onOpenExecutiveReportModal={() => setExecutiveReportModalOpen(true)}
         />
@@ -453,12 +449,6 @@ function ScheduleAppContent() {
       <AuditLogModal
         isOpen={auditLogOpen}
         onClose={() => setAuditLogOpen(false)}
-      />
-
-      {/* Indicadores Operacionais & KPIs */}
-      <OperationalKpiModal
-        isOpen={kpiModalOpen}
-        onClose={() => setKpiModalOpen(false)}
       />
 
       {/* Confirmação de Plantão Fim de Semana (Exclusivo Gestor) */}

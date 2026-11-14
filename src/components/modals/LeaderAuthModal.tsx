@@ -49,7 +49,7 @@ export const LeaderAuthModal: React.FC<LeaderAuthModalProps> = ({ isOpen, onClos
       setInputPin('');
       onClose();
     } else {
-      setErrorMsg('Senha ou PIN incorreto. Use seu PIN individual cadastrado ou o PIN mestre de gestor. Se for seu primeiro acesso, use a aba "Primeiro Acesso".');
+      setErrorMsg('Acesso negado. Apenas gestores cadastrados com o PIN correto podem acessar o painel da liderança.');
     }
   };
 
@@ -300,18 +300,18 @@ export const LeaderAuthModal: React.FC<LeaderAuthModalProps> = ({ isOpen, onClos
 
                 <div>
                   <label className="block text-xs font-bold text-zinc-300 mb-1">
-                    PIN Pessoal ou Senha Mestra:
+                    PIN do Gestor (4 dígitos numéricos):
                   </label>
                   <input
                     type="password"
-                    maxLength={10}
+                    maxLength={6}
                     value={inputPin}
                     onChange={e => setInputPin(e.target.value)}
-                    placeholder="Digite seu PIN ou a senha Mestra (1234)"
+                    placeholder="Digite seu PIN de Gestor"
                     className="w-full px-3 py-2 text-xs bg-[#1A1D24] text-white border border-white/[0.08] rounded-xl focus:border-[#00d2d3] focus:outline-none font-medium font-mono tracking-widest text-center"
                   />
                   <p className="text-[10px] text-zinc-500 mt-1">
-                    Aceita seu PIN individual de 4 dígitos ou a senha Mestra (1234).
+                    Insira o PIN de 4 dígitos cadastrado no seu perfil de gestão.
                   </p>
                 </div>
 

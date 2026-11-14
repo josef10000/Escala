@@ -884,79 +884,98 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     localStorage.setItem(STORAGE_KEYS.SHIFT_SALES, JSON.stringify(shiftSaleOffers));
   }, [shiftSaleOffers]);
 
-  // Leader Authentication Methods
+  // Leader Authentication Methods (Strict Security & Auto-Profile)
   const authenticateLeader = (name: string, pin: string): boolean => {
     const cleanPin = pin.trim();
     const cleanName = name.trim();
     if (!cleanPin || !cleanName) return false;
 
-    // 1. Check if any provider matches this name (case-insensitive) and has a personal PIN matching cleanPin
+    // 1. Find if matching provider exists in the base
     const matchingProv = providers.find(
-      p => p.name.toLowerCase() === cleanName.toLowerCase() && p.pin && p.pin.trim() === cleanPin
+      p => p.name.toLowerCase() === cleanName.toLowerCase() ||
+           p.name.toLowerCase() === cleanName.toLowerCase().trim()
     );
 
+    const isMatchingProvPin = matchingProv && matchingProv.pin && matchingProv.pin.trim() === cleanPin;
+    const isMasterPin = cleanPin === leaderPin.trim();
+    const isConfiguredLeaderName = Boolean(leaderName && leaderName.toLowerCase() === cleanName.toLowerCase());
+    const isLeaderRole = matchingProv && (
+      matchingProv.role.toLowerCase().includes('gestor') ||
+      matchingProv.role.toLowerCase().includes('lider') ||
+      matchingProv.role.toLowerCase().includes('supervisor')
+    );
+
+    // Strict Authorization Check:
+    // Only allow login if:
+    // a) The user is a recognized supervisor/gestor provider with matching PIN; OR
+    // b) The user matches the registered leader name and the PIN is correct; OR
+    // c) If no leader has been registered yet in the system, allow first initialization with the master PIN.
+    const isAuthorized = Boolean(
+      (matchingProv && isLeaderRole && (isMatchingProvPin || isMasterPin)) ||
+      (isConfiguredLeaderName && (isMatchingProvPin || isMasterPin)) ||
+      (!leaderName && isMasterPin)
+    );
+
+    if (!isAuthorized) {
+      return false;
+    }
+
+    // Set authenticated leader state
+    setIsLeaderAuthenticated(true);
+    setRoleState('supervisor');
+    setLeaderName(cleanName.toUpperCase());
+
+    // Ensure a full Collaborator Profile exists for this Gestor ("como todos tem")
+    let targetProvId = '';
     if (matchingProv) {
-      setIsLeaderAuthenticated(true);
-      setRoleState('supervisor');
-      setLeaderName(matchingProv.name);
-      setAuthenticatedProviderId(matchingProv.id);
-      setActiveProviderIdState(matchingProv.id);
-      localStorage.setItem(STORAGE_KEYS.AUTH_PROVIDER, matchingProv.id);
-      sessionStorage.setItem(STORAGE_KEYS.AUTH_PROVIDER, matchingProv.id);
-      sessionStorage.setItem(STORAGE_KEYS.LEADER_AUTH, 'true');
-      sessionStorage.setItem(STORAGE_KEYS.LEADER_NAME, matchingProv.name);
-      localStorage.setItem(STORAGE_KEYS.LEADER_NAME, matchingProv.name);
-      return true;
+      targetProvId = matchingProv.id;
+      // Ensure provider has Gestor role and updated PIN
+      const updatedProviders = providers.map(p => {
+        if (p.id === matchingProv.id) {
+          return {
+            ...p,
+            role: p.role.toLowerCase().includes('gestor') ? p.role : 'Gestor da Escala',
+            pin: cleanPin,
+          };
+        }
+        return p;
+      });
+      setProviders(updatedProviders);
+      localStorage.setItem(STORAGE_KEYS.PROVIDERS, JSON.stringify(updatedProviders));
+      syncToFirebase({ providers: updatedProviders });
+    } else {
+      // Create new full Provider record for this Gestor
+      const newLeaderProv: Provider = {
+        id: `prov-gestor-${Date.now()}`,
+        name: cleanName.toUpperCase(),
+        role: 'Gestor da Escala',
+        regime: '5x2',
+        teamGroup: 'none',
+        entryTime: '08h00',
+        exitTime: '17h00',
+        email: `${cleanName.toLowerCase().replace(/[^a-z0-9]/g, '.')}@escala.com`,
+        phone: '',
+        whatsapp: '',
+        color: 'cyan',
+        pin: cleanPin,
+        maxMonthlyHours: 160,
+        status: 'active',
+      };
+      targetProvId = newLeaderProv.id;
+      const updatedProviders = [...providers, newLeaderProv];
+      setProviders(updatedProviders);
+      localStorage.setItem(STORAGE_KEYS.PROVIDERS, JSON.stringify(updatedProviders));
+      syncToFirebase({ providers: updatedProviders });
     }
 
-    // 2. Master Leader PIN check (exact match only - prevents arbitrary 4+ digit bypass)
-    if (cleanPin === leaderPin.trim()) {
-      setIsLeaderAuthenticated(true);
-      setRoleState('supervisor');
-      setLeaderName(cleanName);
-
-      // Match provider by name if available
-      let nameMatch = providers.find(p => p.name.toLowerCase() === cleanName.toLowerCase());
-      if (!nameMatch) {
-        nameMatch = providers.find(p => p.name.toLowerCase().includes(cleanName.toLowerCase()));
-      }
-
-      if (nameMatch) {
-        setAuthenticatedProviderId(nameMatch.id);
-        setActiveProviderIdState(nameMatch.id);
-        localStorage.setItem(STORAGE_KEYS.AUTH_PROVIDER, nameMatch.id);
-        sessionStorage.setItem(STORAGE_KEYS.AUTH_PROVIDER, nameMatch.id);
-      } else {
-        // Create new provider record for this new gestor name
-        const newLeaderProv: Provider = {
-          id: `prov-leader-${Date.now()}`,
-          name: cleanName,
-          role: 'Gestor da Escala',
-          email: `${cleanName.toLowerCase().replace(/\s+/g, '')}@escalapro.com`,
-          phone: '',
-          color: '#00d2d3',
-          status: 'active',
-          maxMonthlyHours: 160,
-          pin: cleanPin,
-        };
-        const updatedProviders = [...providers, newLeaderProv];
-        setProviders(updatedProviders);
-        localStorage.setItem(STORAGE_KEYS.PROVIDERS, JSON.stringify(updatedProviders));
-        syncToFirebase({ providers: updatedProviders });
-
-        setAuthenticatedProviderId(newLeaderProv.id);
-        setActiveProviderIdState(newLeaderProv.id);
-        localStorage.setItem(STORAGE_KEYS.AUTH_PROVIDER, newLeaderProv.id);
-        sessionStorage.setItem(STORAGE_KEYS.AUTH_PROVIDER, newLeaderProv.id);
-      }
-
-      sessionStorage.setItem(STORAGE_KEYS.LEADER_AUTH, 'true');
-      sessionStorage.setItem(STORAGE_KEYS.LEADER_NAME, cleanName);
-      localStorage.setItem(STORAGE_KEYS.LEADER_NAME, cleanName);
-      return true;
-    }
-
-    return false;
+    setAuthenticatedProviderId(targetProvId);
+    setActiveProviderIdState(targetProvId);
+    localStorage.setItem(STORAGE_KEYS.AUTH_PROVIDER, targetProvId);
+    sessionStorage.setItem(STORAGE_KEYS.AUTH_PROVIDER, targetProvId);
+    sessionStorage.setItem(STORAGE_KEYS.LEADER_AUTH, 'true');
+    sessionStorage.setItem(STORAGE_KEYS.LEADER_NAME, cleanName.toUpperCase());
+    localStorage.setItem(STORAGE_KEYS.LEADER_NAME, cleanName.toUpperCase());
+    return true;
   };
 
   const logoutLeader = () => {

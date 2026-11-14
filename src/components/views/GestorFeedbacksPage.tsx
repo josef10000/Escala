@@ -216,49 +216,6 @@ export const GestorFeedbacksPage: React.FC = () => {
 
       <div className="max-w-7xl w-full mx-auto p-6 space-y-6">
         
-        {/* KPI Mini-Cards with Duotone Icons & Glass Docks */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-          <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-sm flex items-center justify-between">
-            <div>
-              <span className="text-[11px] text-slate-400 uppercase font-medium block">Total Registros</span>
-              <span className="text-2xl font-bold text-white font-mono mt-0.5 block">{stats.total}</span>
-            </div>
-            <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-300 shadow-inner">
-              <Notebook size={22} weight="duotone" />
-            </div>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-sm flex items-center justify-between">
-            <div>
-              <span className="text-[11px] text-emerald-400 uppercase font-medium block">Pontos Fortes</span>
-              <span className="text-2xl font-bold text-emerald-300 font-mono mt-0.5 block">{stats.elogios}</span>
-            </div>
-            <div className="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-inner">
-              <CheckCircle size={22} weight="duotone" />
-            </div>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-sm flex items-center justify-between">
-            <div>
-              <span className="text-[11px] text-amber-400 uppercase font-medium block">Pontos de Atenção</span>
-              <span className="text-2xl font-bold text-amber-300 font-mono mt-0.5 block">{stats.atencao}</span>
-            </div>
-            <div className="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shadow-inner">
-              <Warning size={22} weight="duotone" />
-            </div>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-sm flex items-center justify-between">
-            <div>
-              <span className="text-[11px] text-sky-400 uppercase font-medium block">Alinhamentos 1:1</span>
-              <span className="text-2xl font-bold text-sky-300 font-mono mt-0.5 block">{stats.alinhamento}</span>
-            </div>
-            <div className="w-11 h-11 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 shadow-inner">
-              <ChatCircleText size={22} weight="duotone" />
-            </div>
-          </div>
-        </div>
-
         {/* Filters Toolbar (iOS Frosted Glass) */}
         <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shadow-sm">
           
