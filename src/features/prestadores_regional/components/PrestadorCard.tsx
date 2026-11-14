@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Prestador } from '../types';
 import { Copy, Check, Edit2, Trash2, Phone, Star, MapPin, ChevronDown, MessageSquare } from 'lucide-react';
-import { getRegionColor, normalizeText } from '../utils/search';
+import { normalizeText } from '../utils/search';
 import { WhatsAppIcon } from './WhatsAppIcon';
 import { getWhatsAppUrl, cleanPhoneNumber, openWhatsApp, WHATSAPP_TAB_NAME } from '../utils/whatsapp';
 import { useSchedule } from '../../../context/ScheduleContext';
@@ -14,25 +14,55 @@ export function getInitials(name: string) {
   return (name.slice(0, 2) || 'PR').toUpperCase();
 }
 
-// Sophisticated, clean iOS/Enterprise Region styling for PrestadorCard
-const getRegionGlassBadge = (region: string) => {
+// Apple iOS Glassmorphic Region Tokens
+const getRegionStyle = (region: string) => {
   const norm = normalizeText(region);
   if (norm.startsWith('leste')) {
-    return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
+    return {
+      badge: 'bg-emerald-500/10 text-emerald-300 border-emerald-400/20 shadow-[0_0_12px_rgba(16,185,129,0.15)]',
+      dot: 'bg-emerald-400',
+      avatarRing: 'ring-emerald-500/30 text-emerald-300 bg-emerald-500/10',
+      glow: 'from-emerald-500/[0.07]',
+    };
   }
   if (norm.startsWith('oeste')) {
-    return 'bg-amber-500/15 text-amber-300 border-amber-500/30';
+    return {
+      badge: 'bg-amber-500/10 text-amber-300 border-amber-400/20 shadow-[0_0_12px_rgba(245,158,11,0.15)]',
+      dot: 'bg-amber-400',
+      avatarRing: 'ring-amber-500/30 text-amber-300 bg-amber-500/10',
+      glow: 'from-amber-500/[0.07]',
+    };
   }
   if (norm.startsWith('norte')) {
-    return 'bg-sky-500/15 text-sky-300 border-sky-500/30';
+    return {
+      badge: 'bg-sky-500/10 text-sky-300 border-sky-400/20 shadow-[0_0_12px_rgba(14,165,233,0.15)]',
+      dot: 'bg-sky-400',
+      avatarRing: 'ring-sky-500/30 text-sky-300 bg-sky-500/10',
+      glow: 'from-sky-500/[0.07]',
+    };
   }
   if (norm.startsWith('sul')) {
-    return 'bg-purple-500/15 text-purple-300 border-purple-500/30';
+    return {
+      badge: 'bg-purple-500/10 text-purple-300 border-purple-400/20 shadow-[0_0_12px_rgba(168,85,247,0.15)]',
+      dot: 'bg-purple-400',
+      avatarRing: 'ring-purple-500/30 text-purple-300 bg-purple-500/10',
+      glow: 'from-purple-500/[0.07]',
+    };
   }
   if (norm.startsWith('abc')) {
-    return 'bg-rose-500/15 text-rose-300 border-rose-500/30';
+    return {
+      badge: 'bg-rose-500/10 text-rose-300 border-rose-400/20 shadow-[0_0_12px_rgba(244,63,94,0.15)]',
+      dot: 'bg-rose-400',
+      avatarRing: 'ring-rose-500/30 text-rose-300 bg-rose-500/10',
+      glow: 'from-rose-500/[0.07]',
+    };
   }
-  return 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30';
+  return {
+    badge: 'bg-cyan-500/10 text-cyan-300 border-cyan-400/20 shadow-[0_0_12px_rgba(6,182,212,0.15)]',
+    dot: 'bg-cyan-400',
+    avatarRing: 'ring-cyan-500/30 text-cyan-300 bg-cyan-500/10',
+    glow: 'from-cyan-500/[0.07]',
+  };
 };
 
 export interface PrestadorCardProps {
@@ -65,7 +95,7 @@ export const PrestadorCard: React.FC<PrestadorCardProps> = ({
   const quickMsgRef = useRef<HTMLDivElement>(null);
 
   const initials = getInitials(p.nome);
-  const regionBadgeClass = getRegionGlassBadge(p.regiao);
+  const regStyle = getRegionStyle(p.regiao);
 
   // Close quick message dropdown on outside click
   useEffect(() => {
@@ -149,36 +179,42 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
   ];
 
   // -------------------------------------------------------------
-  // COMPACT VIEW (Clean Slate / iOS Frosted Glass)
+  // COMPACT VIEW (Apple Liquid Glass Pill)
   // -------------------------------------------------------------
   if (density === 'compact') {
     return (
       <div
-        className="relative rounded-xl p-3 flex items-center justify-between gap-3 group transition-all duration-200
-          bg-slate-900/80 hover:bg-slate-900/95 backdrop-blur-md
-          border border-slate-800 hover:border-slate-700
-          shadow-sm hover:shadow-md"
+        className="relative rounded-2xl p-3 flex items-center justify-between gap-3 group transition-all duration-300
+          bg-gradient-to-b from-white/[0.08] to-white/[0.02]
+          hover:from-white/[0.12] hover:to-white/[0.04]
+          backdrop-blur-2xl
+          border border-white/[0.10] hover:border-white/[0.22]
+          shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]
+          hover:shadow-[0_12px_40px_0_rgba(0,0,0,0.5)]"
       >
+        {/* Apple Top Hairline Sheen */}
+        <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none rounded-t-2xl" />
+
         {/* Left: Avatar + Details */}
         <div className="flex items-center gap-2.5 min-w-0 relative z-10 flex-1">
-          <div className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700/80 flex items-center justify-center font-bold font-mono text-xs text-slate-200 shrink-0">
+          <div className={`w-8 h-8 rounded-full ring-1 flex items-center justify-center font-bold font-mono text-xs shrink-0 backdrop-blur-md ${regStyle.avatarRing}`}>
             {initials}
           </div>
 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="font-mono text-[11px] font-bold text-slate-400 bg-slate-950/80 px-1.5 py-0.5 rounded border border-slate-800">
+              <span className="font-mono text-[11px] font-semibold text-white/70 bg-white/[0.06] px-1.5 py-0.5 rounded-full border border-white/10">
                 #{p.codigo}
               </span>
-              <span className="text-xs font-semibold text-slate-100 truncate">{p.nome}</span>
-              <span className={`text-[10px] font-medium font-mono uppercase px-2 py-0.5 rounded-full border backdrop-blur-sm ${regionBadgeClass}`}>
+              <span className="text-xs font-semibold text-white truncate drop-shadow-sm">{p.nome}</span>
+              <span className={`text-[10px] font-medium font-mono uppercase px-2 py-0.5 rounded-full border backdrop-blur-md ${regStyle.badge}`}>
                 {p.regiao}
               </span>
             </div>
 
             {p.telefone && (
-              <div className="text-[11px] text-slate-400 font-mono mt-0.5 flex items-center gap-1">
-                <Phone className="w-3 h-3 text-slate-500" />
+              <div className="text-[11px] text-white/60 font-mono mt-0.5 flex items-center gap-1">
+                <Phone className="w-3 h-3 text-white/40" />
                 <span>{p.telefone}</span>
               </div>
             )}
@@ -191,10 +227,10 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
             type="button"
             onClick={() => onToggleFavorite(p.id)}
             title={isFavorite ? 'Remover dos favoritos' : 'Favoritar prestador'}
-            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+            className={`p-1.5 rounded-xl transition-all cursor-pointer ${
               isFavorite
-                ? 'text-amber-400 bg-amber-500/10'
-                : 'text-slate-500 hover:text-amber-400 hover:bg-slate-800'
+                ? 'text-amber-400 bg-amber-400/15 border border-amber-400/30'
+                : 'text-white/40 hover:text-amber-300 hover:bg-white/[0.08]'
             }`}
           >
             <Star className={`w-3.5 h-3.5 ${isFavorite ? 'fill-amber-400' : ''}`} />
@@ -204,7 +240,7 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
             type="button"
             onClick={handleCopyCard}
             title="Copiar dados"
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+            className="p-1.5 rounded-xl text-white/50 hover:text-white hover:bg-white/[0.08] transition-all cursor-pointer"
           >
             {copiedId === `card-${p.id}` ? (
               <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -218,7 +254,7 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
               type="button"
               onClick={() => handleOpenWhatsApp()}
               title="Abrir WhatsApp"
-              className="p-1.5 rounded-lg text-emerald-400 hover:bg-emerald-500/10 transition-colors cursor-pointer"
+              className="p-1.5 rounded-xl text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all cursor-pointer"
             >
               <WhatsAppIcon className="w-3.5 h-3.5" />
             </button>
@@ -233,7 +269,7 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
                   onEdit(p);
                 }}
                 title="Editar prestador"
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                className="p-1.5 rounded-xl text-white/50 hover:text-white hover:bg-white/[0.08] transition-all cursor-pointer"
               >
                 <Edit2 className="w-3.5 h-3.5" />
               </button>
@@ -242,7 +278,7 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
                 type="button"
                 onClick={() => onDelete(p.id)}
                 title="Excluir prestador"
-                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                className="p-1.5 rounded-xl text-white/50 hover:text-rose-400 hover:bg-rose-500/15 transition-all cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
@@ -254,41 +290,55 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
   }
 
   // -------------------------------------------------------------
-  // SPACIOUS VIEW (Executive Slate / Refined Glass Theme)
+  // SPACIOUS VIEW (Apple Sonoma / iOS 18 Frosted Glass)
   // -------------------------------------------------------------
   return (
     <div
-      className="relative rounded-2xl p-5 flex flex-col justify-between group transition-all duration-200
-        bg-slate-900/90 hover:bg-slate-900 backdrop-blur-xl
-        border border-slate-800 hover:border-slate-700
-        shadow-sm hover:shadow-md overflow-visible"
+      className="relative rounded-3xl p-5 flex flex-col justify-between group transition-all duration-300
+        bg-gradient-to-b from-white/[0.07] via-white/[0.03] to-transparent
+        hover:from-white/[0.11] hover:via-white/[0.05] hover:to-white/[0.01]
+        backdrop-blur-2xl
+        border border-white/[0.12] hover:border-white/[0.24]
+        shadow-[0_12px_40px_0_rgba(0,0,0,0.45)]
+        hover:shadow-[0_20px_50px_0_rgba(0,0,0,0.65)]
+        hover:-translate-y-0.5 overflow-hidden"
     >
+      {/* 1. Apple Specular Edge Light (brilho suave superior) */}
+      <div className="absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
+
+      {/* 2. Soft Ambient Regional Glow (Halo difuso de fundo) */}
+      <div
+        className={`absolute -top-16 -right-16 w-44 h-44 rounded-full bg-gradient-to-br ${regStyle.glow} to-transparent blur-3xl pointer-events-none opacity-60 group-hover:opacity-100 transition-opacity duration-500`}
+      />
+
       <div className="relative z-10">
-        {/* Top Row: Region & Code + Action Toolbar */}
-        <div className="flex items-center justify-between gap-2 mb-3.5">
+        {/* Top Header: Code & Region Pill + Quick Action Toolbar */}
+        <div className="flex items-center justify-between gap-2 mb-4">
           <div className="flex items-center gap-2 flex-wrap min-w-0">
-            <span className="font-mono text-xs font-semibold text-slate-400 bg-slate-950 px-2 py-0.5 rounded-md border border-slate-800 shrink-0">
+            {/* Monospace Code Pill */}
+            <span className="font-mono text-[11px] font-semibold text-white/80 bg-white/[0.07] px-2.5 py-0.5 rounded-full border border-white/10 shrink-0 backdrop-blur-md">
               #{p.codigo}
             </span>
 
+            {/* Apple Region Glass Pill */}
             <span
-              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold font-mono uppercase tracking-wide border backdrop-blur-md ${regionBadgeClass} truncate`}
+              className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-semibold font-mono uppercase tracking-wide border backdrop-blur-md ${regStyle.badge} truncate`}
             >
-              <MapPin className="w-3 h-3 opacity-80 shrink-0" />
+              <span className={`w-1.5 h-1.5 rounded-full ${regStyle.dot} animate-pulse shrink-0`} />
               <span className="truncate">{p.regiao}</span>
             </span>
           </div>
 
-          {/* Action Toolbar */}
-          <div className="flex items-center gap-1 shrink-0 bg-slate-950/70 p-1 rounded-lg border border-slate-800/80">
+          {/* Action Toolbar (Glass Segment) */}
+          <div className="flex items-center gap-1 shrink-0 bg-white/[0.04] p-1 rounded-2xl border border-white/[0.08] backdrop-blur-md">
             <button
               type="button"
               onClick={() => onToggleFavorite(p.id)}
               title={isFavorite ? 'Remover dos favoritos' : 'Favoritar prestador'}
-              className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+              className={`p-1.5 rounded-xl transition-all cursor-pointer ${
                 isFavorite
-                  ? 'text-amber-400 bg-amber-500/10'
-                  : 'text-slate-500 hover:text-amber-400 hover:bg-slate-800'
+                  ? 'text-amber-400 bg-amber-400/15 border border-amber-400/30'
+                  : 'text-white/40 hover:text-amber-300 hover:bg-white/[0.08]'
               }`}
             >
               <Star className={`w-3.5 h-3.5 ${isFavorite ? 'fill-amber-400' : ''}`} />
@@ -303,7 +353,7 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
                     onEdit(p);
                   }}
                   title="Editar prestador"
-                  className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                  className="p-1.5 rounded-xl text-white/50 hover:text-white hover:bg-white/[0.08] transition-all cursor-pointer"
                 >
                   <Edit2 className="w-3.5 h-3.5" />
                 </button>
@@ -312,7 +362,7 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
                   type="button"
                   onClick={() => onDelete(p.id)}
                   title="Excluir prestador"
-                  className="p-1.5 rounded-md text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                  className="p-1.5 rounded-xl text-white/50 hover:text-rose-400 hover:bg-rose-500/15 transition-all cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -321,29 +371,31 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
           </div>
         </div>
 
-        {/* Main Body: Avatar + Name + Phone */}
-        <div className="flex items-start gap-3 my-2">
-          {/* Avatar */}
-          <div className="w-10 h-10 rounded-xl bg-slate-800/90 border border-slate-700/80 flex items-center justify-center font-bold font-mono text-xs text-slate-200 shrink-0">
+        {/* Main Body: Avatar + Name */}
+        <div className="flex items-start gap-3.5 my-1">
+          {/* Avatar (Circle Glass Ring) */}
+          <div
+            className={`w-11 h-11 rounded-2xl ring-1 flex items-center justify-center font-bold font-mono text-sm shrink-0 backdrop-blur-md shadow-inner ${regStyle.avatarRing}`}
+          >
             {initials}
           </div>
 
           <div className="min-w-0 flex-1">
             <h3
-              className="text-base font-semibold text-slate-100 tracking-tight leading-snug truncate"
+              className="text-base font-bold text-white tracking-tight leading-snug truncate drop-shadow-sm"
               title={p.nome}
             >
               {p.nome}
             </h3>
 
-            {/* Phone Dock */}
+            {/* Phone Dock (Apple Frosted Sub-Surface) */}
             {p.telefone ? (
-              <div className="flex items-center justify-between gap-2 mt-2 p-1.5 px-2.5 rounded-xl bg-slate-950/80 border border-slate-800/90">
+              <div className="flex items-center justify-between gap-2 mt-2.5 p-1.5 px-3 rounded-2xl bg-white/[0.04] border border-white/[0.08] backdrop-blur-md hover:border-white/[0.15] transition-colors">
                 <div className="flex items-center gap-2 min-w-0">
-                  <Phone className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                  <Phone className="w-3.5 h-3.5 text-white/40 shrink-0" />
                   <a
                     href={`tel:${p.telefone}`}
-                    className="text-xs font-mono text-slate-300 hover:text-white transition-colors truncate"
+                    className="text-xs font-mono text-white/80 hover:text-white transition-colors truncate"
                   >
                     {p.telefone}
                   </a>
@@ -352,10 +404,10 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
                 <button
                   type="button"
                   onClick={handleCopyPhone}
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xl text-xs font-medium transition-all cursor-pointer border ${
                     copiedId === `phone-${p.id}`
-                      ? 'bg-emerald-600/30 text-emerald-300 border border-emerald-500/40'
-                      : 'bg-slate-800 hover:bg-slate-750 text-slate-300 border border-slate-700/80 hover:text-white'
+                      ? 'bg-emerald-500/25 text-emerald-300 border-emerald-400/40'
+                      : 'bg-white/[0.06] hover:bg-white/[0.12] text-white/80 border-white/10 hover:text-white'
                   }`}
                   title="Copiar telefone"
                 >
@@ -366,7 +418,7 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
                     </>
                   ) : (
                     <>
-                      <Copy className="w-3 h-3 text-slate-400" />
+                      <Copy className="w-3 h-3 text-white/40" />
                       <span>Copiar</span>
                     </>
                   )}
@@ -379,14 +431,14 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
                   onRecordRecent?.(p);
                   onEdit(p);
                 }}
-                className="w-full flex items-center justify-between gap-2 mt-2 p-1.5 px-2.5 rounded-xl bg-slate-950/50 hover:bg-slate-950 border border-dashed border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-all text-xs cursor-pointer"
+                className="w-full flex items-center justify-between gap-2 mt-2.5 p-1.5 px-3 rounded-2xl bg-white/[0.02] hover:bg-white/[0.06] border border-dashed border-white/[0.10] hover:border-white/[0.20] text-white/40 hover:text-white/80 transition-all text-xs cursor-pointer"
                 title="Cadastrar telefone para este prestador"
               >
-                <span className="flex items-center gap-1.5 text-xs text-slate-500">
+                <span className="flex items-center gap-1.5 text-xs text-white/40">
                   <Phone className="w-3 h-3" />
                   <span>Sem telefone</span>
                 </span>
-                <span className="font-medium text-[11px] text-cyan-400 hover:underline">
+                <span className="font-semibold text-[11px] text-cyan-400 hover:text-cyan-300">
                   + Adicionar
                 </span>
               </button>
@@ -394,7 +446,7 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
 
             {/* Observação */}
             {p.observacao && (
-              <div className="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed bg-slate-950/50 p-2 rounded-lg border border-slate-800/80">
+              <div className="text-xs text-white/60 mt-2.5 line-clamp-2 leading-relaxed bg-white/[0.02] p-2.5 rounded-2xl border border-white/[0.06]">
                 {p.observacao}
               </div>
             )}
@@ -403,14 +455,15 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
       </div>
 
       {/* Bottom Actions + WhatsApp Quick Pre-Fill */}
-      <div className="mt-4 pt-3 border-t border-slate-800 flex items-center gap-2 relative z-10">
+      <div className="mt-4 pt-3.5 border-t border-white/[0.08] flex items-center gap-2.5 relative z-10">
+        {/* Copy Card Data Pill */}
         <button
           type="button"
           onClick={handleCopyCard}
-          className={`flex-1 py-2 px-3 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer border ${
+          className={`flex-1 py-2 px-3 rounded-2xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer border backdrop-blur-md ${
             copiedId === `card-${p.id}`
-              ? 'bg-emerald-600/30 text-emerald-300 border-emerald-500/40'
-              : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700/80 hover:text-white'
+              ? 'bg-emerald-500/25 text-emerald-300 border-emerald-400/40'
+              : 'bg-white/[0.05] hover:bg-white/[0.10] text-white/80 border-white/[0.10] hover:border-white/[0.20] hover:text-white'
           }`}
           title="Copiar dados formatados"
         >
@@ -421,20 +474,21 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
             </>
           ) : (
             <>
-              <Copy className="w-3.5 h-3.5 shrink-0 text-slate-400" />
+              <Copy className="w-3.5 h-3.5 shrink-0 text-white/50" />
               <span>Copiar Dados</span>
             </>
           )}
         </button>
 
+        {/* WhatsApp Pill with Quick Message Popover */}
         {p.telefone && cleanPhoneNumber(p.telefone) ? (
           <div className="flex-1 relative" ref={quickMsgRef}>
-            <div className="flex rounded-xl overflow-hidden border border-emerald-600/40 bg-emerald-600/20 hover:bg-emerald-600/30 transition-colors">
+            <div className="flex rounded-2xl overflow-hidden border border-emerald-400/30 bg-emerald-500/15 hover:bg-emerald-500/25 transition-all shadow-[0_0_20px_rgba(16,185,129,0.15)] backdrop-blur-md">
               {/* WhatsApp Button */}
               <button
                 type="button"
                 onClick={() => handleOpenWhatsApp()}
-                className="flex-1 py-2 px-2.5 text-xs font-semibold flex items-center justify-center gap-1.5 text-emerald-300 hover:text-emerald-200 cursor-pointer"
+                className="flex-1 py-2 px-2.5 text-xs font-bold flex items-center justify-center gap-1.5 text-emerald-300 hover:text-emerald-200 cursor-pointer"
                 title={`Abrir WhatsApp com ${p.nome}`}
               >
                 <WhatsAppIcon className="w-3.5 h-3.5 shrink-0" />
@@ -448,22 +502,24 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
                   e.stopPropagation();
                   setIsQuickMsgOpen((prev) => !prev);
                 }}
-                className="px-2 border-l border-emerald-600/30 text-emerald-300 hover:text-white flex items-center justify-center cursor-pointer transition-colors"
+                className="px-2 border-l border-emerald-400/20 text-emerald-300 hover:text-white flex items-center justify-center cursor-pointer transition-colors"
                 title="Mensagens rápidas prontas"
               >
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isQuickMsgOpen ? 'rotate-180' : ''}`} />
               </button>
             </div>
 
-            {/* Quick Message Popover Menu */}
+            {/* Quick Message Popover Menu (Apple Glass Sheet) */}
             {isQuickMsgOpen && (
-              <div className="absolute right-0 bottom-full mb-2 w-72 bg-slate-900 border border-slate-700/80 rounded-xl shadow-xl p-2 z-50 animate-in fade-in duration-150 space-y-1">
-                <div className="px-2.5 py-1.5 border-b border-slate-800 flex items-center justify-between">
-                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <MessageSquare className="w-3 h-3 text-emerald-400" />
+              <div className="absolute right-0 bottom-full mb-2 w-72 bg-slate-950/90 backdrop-blur-3xl border border-white/[0.15] rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] p-2 z-50 animate-in fade-in duration-150 space-y-1">
+                <div className="px-3 py-2 border-b border-white/[0.08] flex items-center justify-between">
+                  <span className="text-[11px] font-semibold text-white/60 uppercase tracking-wider flex items-center gap-1.5">
+                    <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
                     <span>Disparo Rápido</span>
                   </span>
-                  <span className="text-[10px] text-emerald-400 font-mono font-semibold">1-clique</span>
+                  <span className="text-[10px] text-emerald-400 font-mono font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                    1-clique
+                  </span>
                 </div>
 
                 {QUICK_MESSAGES.map((qm, i) => (
@@ -471,13 +527,13 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
                     key={i}
                     type="button"
                     onClick={() => handleOpenWhatsApp(qm.msg)}
-                    className="w-full text-left p-2 rounded-lg hover:bg-slate-800 transition-colors group/item cursor-pointer"
+                    className="w-full text-left p-2.5 rounded-2xl hover:bg-white/[0.08] transition-all group/item cursor-pointer"
                   >
-                    <div className="text-xs font-semibold text-slate-200 group-hover/item:text-emerald-300 flex items-center justify-between">
+                    <div className="text-xs font-semibold text-white group-hover/item:text-emerald-300 flex items-center justify-between">
                       <span>{qm.title}</span>
                       <WhatsAppIcon className="w-3 h-3 opacity-60 group-hover/item:opacity-100" />
                     </div>
-                    <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">{qm.desc}</p>
+                    <p className="text-[11px] text-white/50 mt-0.5 line-clamp-1">{qm.desc}</p>
                   </button>
                 ))}
               </div>
@@ -490,10 +546,10 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
               onRecordRecent?.(p);
               onEdit(p);
             }}
-            className="flex-1 py-2 px-3 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 transition-colors cursor-pointer"
+            className="flex-1 py-2 px-3 rounded-2xl text-xs font-semibold flex items-center justify-center gap-1.5 bg-white/[0.05] hover:bg-white/[0.10] text-white/80 hover:text-white border border-white/[0.10] hover:border-white/[0.20] transition-all cursor-pointer backdrop-blur-md"
             title={`Editar cadastro de ${p.nome}`}
           >
-            <Edit2 className="w-3.5 h-3.5 shrink-0 text-slate-400" />
+            <Edit2 className="w-3.5 h-3.5 shrink-0 text-white/50" />
             <span>Editar</span>
           </button>
         )}
