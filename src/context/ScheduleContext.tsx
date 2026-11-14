@@ -18,6 +18,7 @@ import {
   ShiftSaleStatus,
   WeekendColumn,
   ActiveModule,
+  TeamFeedback,
 } from '../types';
 import {
   INITIAL_DEPARTMENTS,
