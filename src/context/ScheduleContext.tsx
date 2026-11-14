@@ -83,6 +83,7 @@ interface ScheduleContextType {
   leaderPin: string;
   leaderName: string | null;
   authenticateLeader: (name: string, pin: string) => boolean;
+  registerLeader: (name: string, pin: string) => Promise<boolean>;
   logoutLeader: () => void;
   changeLeaderPin: (newPin: string) => Promise<boolean>;
 
@@ -890,6 +891,10 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     const cleanName = name.trim();
     if (!cleanPin || !cleanName) return false;
 
+    // Check localStorage fallbacks to avoid React asynchronous state closures
+    const currentStoredPin = localStorage.getItem(STORAGE_KEYS.LEADER_PIN) || leaderPin || '';
+    const currentStoredName = localStorage.getItem(STORAGE_KEYS.LEADER_NAME) || leaderName || '';
+
     // 1. Find if matching provider exists in the base
     const matchingProv = providers.find(
       p => p.name.toLowerCase() === cleanName.toLowerCase() ||
@@ -897,8 +902,11 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     );
 
     const isMatchingProvPin = matchingProv && matchingProv.pin && matchingProv.pin.trim() === cleanPin;
-    const isMasterPin = cleanPin === leaderPin.trim();
-    const isConfiguredLeaderName = Boolean(leaderName && leaderName.toLowerCase() === cleanName.toLowerCase());
+    const isMasterPin = cleanPin === currentStoredPin.trim() || cleanPin === leaderPin.trim();
+    const isConfiguredLeaderName = Boolean(
+      (currentStoredName && currentStoredName.toLowerCase() === cleanName.toLowerCase()) ||
+      (leaderName && leaderName.toLowerCase() === cleanName.toLowerCase())
+    );
     const isLeaderRole = matchingProv && (
       matchingProv.role.toLowerCase().includes('gestor') ||
       matchingProv.role.toLowerCase().includes('lider') ||
@@ -907,13 +915,13 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
 
     // Strict Authorization Check:
     // Only allow login if:
-    // a) The user is a recognized supervisor/gestor provider with matching PIN; OR
-    // b) The user matches the registered leader name and the PIN is correct; OR
-    // c) If no leader has been registered yet in the system, allow first initialization with the master PIN.
+    // a) Recognized supervisor/gestor provider with matching personal PIN or master PIN; OR
+    // b) Matches the registered leader name and the PIN is correct; OR
+    // c) Initial setup before any leader is configured.
     const isAuthorized = Boolean(
       (matchingProv && isLeaderRole && (isMatchingProvPin || isMasterPin)) ||
       (isConfiguredLeaderName && (isMatchingProvPin || isMasterPin)) ||
-      (!leaderName && isMasterPin)
+      (!currentStoredName && isMasterPin)
     );
 
     if (!isAuthorized) {
@@ -929,7 +937,6 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     let targetProvId = '';
     if (matchingProv) {
       targetProvId = matchingProv.id;
-      // Ensure provider has Gestor role and updated PIN
       const updatedProviders = providers.map(p => {
         if (p.id === matchingProv.id) {
           return {
@@ -944,7 +951,6 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
       localStorage.setItem(STORAGE_KEYS.PROVIDERS, JSON.stringify(updatedProviders));
       syncToFirebase({ providers: updatedProviders });
     } else {
-      // Create new full Provider record for this Gestor
       const newLeaderProv: Provider = {
         id: `prov-gestor-${Date.now()}`,
         name: cleanName.toUpperCase(),
@@ -975,6 +981,73 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     sessionStorage.setItem(STORAGE_KEYS.LEADER_AUTH, 'true');
     sessionStorage.setItem(STORAGE_KEYS.LEADER_NAME, cleanName.toUpperCase());
     localStorage.setItem(STORAGE_KEYS.LEADER_NAME, cleanName.toUpperCase());
+    return true;
+  };
+
+  // Register or create Leader Profile & PIN (First Access)
+  const registerLeader = async (name: string, pin: string): Promise<boolean> => {
+    const cleanPin = pin.trim();
+    const cleanName = name.trim().toUpperCase();
+    if (!cleanPin || !cleanName || cleanPin.length !== 4) return false;
+
+    // 1. Update Leader state & storage
+    setLeaderPin(cleanPin);
+    setLeaderName(cleanName);
+    setIsLeaderAuthenticated(true);
+    setRoleState('supervisor');
+
+    localStorage.setItem(STORAGE_KEYS.LEADER_PIN, cleanPin);
+    localStorage.setItem(STORAGE_KEYS.LEADER_NAME, cleanName);
+    sessionStorage.setItem(STORAGE_KEYS.LEADER_AUTH, 'true');
+    sessionStorage.setItem(STORAGE_KEYS.LEADER_NAME, cleanName);
+
+    // 2. Ensure Provider profile exists or is upgraded
+    let targetProvId = '';
+    const existing = providers.find(p => p.name.toUpperCase() === cleanName);
+    if (existing) {
+      targetProvId = existing.id;
+      const updatedProviders = providers.map(p => {
+        if (p.id === existing.id) {
+          return {
+            ...p,
+            role: 'Gestor da Escala',
+            pin: cleanPin,
+          };
+        }
+        return p;
+      });
+      setProviders(updatedProviders);
+      localStorage.setItem(STORAGE_KEYS.PROVIDERS, JSON.stringify(updatedProviders));
+      syncToFirebase({ providers: updatedProviders, leaderPin: cleanPin });
+    } else {
+      const newLeaderProv: Provider = {
+        id: `prov-gestor-${Date.now()}`,
+        name: cleanName,
+        role: 'Gestor da Escala',
+        regime: '5x2',
+        teamGroup: 'none',
+        entryTime: '08h00',
+        exitTime: '17h00',
+        email: `${cleanName.toLowerCase().replace(/[^a-z0-9]/g, '.')}@escala.com`,
+        phone: '',
+        whatsapp: '',
+        color: 'cyan',
+        pin: cleanPin,
+        maxMonthlyHours: 160,
+        status: 'active',
+      };
+      targetProvId = newLeaderProv.id;
+      const updatedProviders = [...providers, newLeaderProv];
+      setProviders(updatedProviders);
+      localStorage.setItem(STORAGE_KEYS.PROVIDERS, JSON.stringify(updatedProviders));
+      syncToFirebase({ providers: updatedProviders, leaderPin: cleanPin });
+    }
+
+    setAuthenticatedProviderId(targetProvId);
+    setActiveProviderIdState(targetProvId);
+    localStorage.setItem(STORAGE_KEYS.AUTH_PROVIDER, targetProvId);
+    sessionStorage.setItem(STORAGE_KEYS.AUTH_PROVIDER, targetProvId);
+
     return true;
   };
 
@@ -2114,6 +2187,7 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
         leaderPin,
         leaderName,
         authenticateLeader,
+        registerLeader,
         logoutLeader,
         changeLeaderPin,
 

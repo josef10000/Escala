@@ -499,15 +499,10 @@ export function PrestadoresRegionalModule({
               </span>
             </div>
           </div>
-          <p className="text-xs text-slate-400 mt-1 flex items-center gap-2 flex-wrap">
-            <span>
-              {mainTab === 'prestadores'
-                ? 'Consulta operacional de técnicos, bases regionais e telefones autorizados'
-                : 'Diretrizes operacionais, regras de horário fixo, bases presenciais e agendas'}
-            </span>
-            <span className="text-[10px] text-slate-500 hidden lg:inline font-mono">
-              [Atalhos: Alt+N (Novo) • Alt+P (Técnicos) • Alt+R (Regras) • Alt+E (Escala)]
-            </span>
+          <p className="text-xs text-white/50 mt-1">
+            {mainTab === 'prestadores'
+              ? 'Consulta operacional de técnicos, bases regionais e telefones autorizados'
+              : 'Diretrizes operacionais, regras de horário fixo, bases presenciais e agendas'}
           </p>
         </div>
 

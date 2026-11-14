@@ -11,6 +11,7 @@ export const LeaderAuthModal: React.FC<LeaderAuthModalProps> = ({ isOpen, onClos
   const {
     isLeaderAuthenticated,
     authenticateLeader,
+    registerLeader,
     logoutLeader,
     changeLeaderPin,
     leaderName,
@@ -74,16 +75,11 @@ export const LeaderAuthModal: React.FC<LeaderAuthModalProps> = ({ isOpen, onClos
       return;
     }
 
-    // Match provider or create PIN
-    const provMatch = providers.find(p => p.name.toLowerCase() === cleanName.toLowerCase());
-    if (provMatch) {
-      await setupProviderPin(provMatch.id, cleanPin);
-    }
-    await changeLeaderPin(cleanPin);
-    const success = authenticateLeader(cleanName, cleanPin);
+    // Register or promote Leader profile and PIN directly
+    const success = await registerLeader(cleanName, cleanPin);
 
     if (success) {
-      setSuccessMsg('PIN cadastrado e acesso de Gestor ativado com sucesso!');
+      setSuccessMsg('PIN cadastrado e perfil de Gestor criado com sucesso!');
       setTimeout(() => {
         onClose();
       }, 500);

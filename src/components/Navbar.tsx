@@ -496,91 +496,44 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Hairline Divider */}
           <div className="h-5 w-px bg-white/[0.08] hidden sm:block shrink-0" />
 
-          {/* User Profile Block */}
-          <div className="flex items-center gap-2 pl-1 shrink-0">
-            {onOpenCollaboratorAuth && !authProviderObj && !isLeaderAuthenticated && (
-              <button
-                type="button"
-                onClick={onOpenCollaboratorAuth}
-                className="h-8 px-2.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/30 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-98 shrink-0"
-                title="Clique para escolher seu nome na lista, criar seu PIN e entrar no seu perfil"
-              >
-                <UserIcon className="w-3.5 h-3.5 text-cyan-400" />
-                <span className="hidden sm:inline whitespace-nowrap">Meu Perfil</span>
-              </button>
-            )}
-
-            {/* Profile Name Badge */}
-            <button
-              type="button"
-              onClick={() => {
-                if (displayUser && onOpenProfileModal) {
-                  onOpenProfileModal();
-                } else if (onOpenCollaboratorAuth) {
-                  onOpenCollaboratorAuth();
-                }
-              }}
-              className="hidden md:flex flex-col text-right cursor-pointer group hover:opacity-90 max-w-[130px] lg:max-w-[180px] shrink-0"
-              title={displayUser ? "Clique para ver ou alterar seu perfil (Nome, WhatsApp, PIN ou Sair)" : "Clique para entrar no seu perfil"}
-            >
-              {displayUser ? (
-                <>
-                  <span className="text-xs text-white font-semibold truncate leading-tight group-hover:text-cyan-400 transition-colors">
-                    {displayUser.name}
-                  </span>
-                  <span className="text-[10px] font-mono text-cyan-400 tracking-wider uppercase truncate">
-                    {isLeaderAuthenticated ? 'GESTOR DA ESCALA' : authProviderObj ? 'PERFIL ATIVO' : 'PERFIL SELECIONADO'}
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span className="text-xs text-cyan-300 font-bold truncate leading-tight group-hover:text-white transition-colors">
-                    Nenhum Perfil Ativo
-                  </span>
-                  <span className="text-[10px] font-mono text-white/40 tracking-wider uppercase truncate">
-                    Clique para Entrar
-                  </span>
-                </>
-              )}
-            </button>
-
-            {/* Profile Avatar / Trigger */}
-            <div className="relative group shrink-0">
+          {/* Unified Apple Glass User Profile Pill */}
+          <div className="flex items-center pl-1 shrink-0">
+            {displayUser ? (
               <button
                 type="button"
                 onClick={() => {
-                  if (displayUser && onOpenProfileModal) {
+                  if (onOpenProfileModal) {
                     onOpenProfileModal();
                   } else if (onOpenCollaboratorAuth) {
                     onOpenCollaboratorAuth();
                   }
                 }}
-                className={`w-8 h-8 rounded-full transition-all flex items-center justify-center font-bold shadow-md cursor-pointer shrink-0 ${
-                  displayUser
-                    ? 'bg-cyan-400 hover:brightness-110 text-slate-950 ring-2 ring-cyan-400/30'
-                    : 'bg-zinc-800 hover:bg-zinc-700 text-cyan-300 border border-cyan-500/30'
-                }`}
-                title={displayUser ? "Meu Perfil (Editar ou Sair)" : "Entrar no meu perfil"}
+                className="h-8.5 px-3 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/[0.20] backdrop-blur-md flex items-center gap-2.5 transition-all cursor-pointer group shrink-0"
+                title="Clique para ver ou editar seu perfil (Telefone, PIX, Senha ou Sair)"
               >
-                <UserIcon className={`w-4 h-4 ${displayUser ? 'text-slate-950' : 'text-cyan-300'}`} />
+                <div className="w-6 h-6 rounded-full bg-cyan-400 text-slate-950 font-bold text-[10px] flex items-center justify-center font-mono shadow-xs shrink-0">
+                  {displayUser?.name ? displayUser.name.slice(0, 2).toUpperCase() : 'ME'}
+                </div>
+                <div className="text-left hidden sm:block max-w-[120px] lg:max-w-[150px] truncate">
+                  <div className="text-xs font-semibold text-white truncate leading-tight group-hover:text-cyan-300">
+                    {displayUser.name}
+                  </div>
+                  <div className="text-[9px] font-mono text-cyan-400/80 uppercase tracking-wider leading-none mt-0.5">
+                    {isLeaderAuthenticated ? 'GESTOR' : 'COLABORADOR'}
+                  </div>
+                </div>
               </button>
-
-              {/* Quick logout badge if authenticated */}
-              {(authProviderObj || activeProviderObj || isLeaderAuthenticated) && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (isLeaderAuthenticated) logoutLeader();
-                    logoutProvider();
-                  }}
-                  className="hidden group-hover:flex absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-rose-600 text-white items-center justify-center hover:bg-rose-500 cursor-pointer shadow-sm"
-                  title="Sair do perfil / Desconectar"
-                >
-                  <LogOut className="w-2.5 h-2.5 text-white" />
-                </button>
-              )}
-            </div>
+            ) : (
+              <button
+                type="button"
+                onClick={onOpenCollaboratorAuth}
+                className="h-8.5 px-3.5 rounded-2xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 hover:text-white border border-cyan-400/25 hover:border-cyan-400/40 backdrop-blur-md text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-xs active:scale-98 shrink-0"
+                title="Entrar no seu perfil de colaborador"
+              >
+                <UserIcon className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Entrar</span>
+              </button>
+            )}
           </div>
 
         </div>
