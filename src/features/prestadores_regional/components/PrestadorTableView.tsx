@@ -1,10 +1,18 @@
-import React, { useState } from 'react';
-import { Prestador } from '../types';
-import { Copy, Check, Edit2, Trash2, Star, ArrowUpDown, MapPin, Hash } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { AgendaRegiaoItem, Prestador, TechnicianQualitativeEvaluation } from '../types';
+import { Copy, Check, Edit2, Trash2, Star, ArrowUpDown, MapPin, Hash, RotateCw } from 'lucide-react';
 import { getRegionColor } from '../utils/search';
 import { Pagination } from './Pagination';
 import { WhatsAppIcon } from './WhatsAppIcon';
 import { getWhatsAppUrl, cleanPhoneNumber, openWhatsApp, WHATSAPP_TAB_NAME } from '../utils/whatsapp';
+import { Technician3DModal } from './Technician3DModal';
+import { DailyAgendaEntry, EncaixeRecord, OcorrenciaRecord } from '../../central_inteligencia/types';
+import { computeTechnicianMetrics, TODAY_ISO } from '../../central_inteligencia/data/mockCentralData';
+import {
+  computeTechnicianScore,
+  getEvaluationForPrestador,
+  getGradeVisualTokens,
+} from '../utils/scoring';
 
 interface PrestadorTableViewProps {
   prestadores: Prestador[];
@@ -13,6 +21,13 @@ interface PrestadorTableViewProps {
   onCopySuccess: (text: string) => void;
   favorites: string[];
   onToggleFavorite: (id: string) => void;
+  onRecordRecent?: (p: Prestador) => void;
+  encaixes?: EncaixeRecord[];
+  dailyAgendas?: DailyAgendaEntry[];
+  agendas?: AgendaRegiaoItem[];
+  ocorrencias?: OcorrenciaRecord[];
+  evaluationsMap?: Record<string, TechnicianQualitativeEvaluation>;
+  onEvaluationChange?: (next: TechnicianQualitativeEvaluation) => void;
 }
 
 export const PrestadorTableView: React.FC<PrestadorTableViewProps> = ({
@@ -22,11 +37,19 @@ export const PrestadorTableView: React.FC<PrestadorTableViewProps> = ({
   onCopySuccess,
   favorites,
   onToggleFavorite,
+  onRecordRecent,
+  encaixes = [],
+  dailyAgendas = [],
+  agendas,
+  ocorrencias = [],
+  evaluationsMap,
+  onEvaluationChange,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [sortField, setSortField] = useState<'codigo' | 'nome' | 'regiao'>('nome');
+  const [sortField, setSortField] = useState<'codigo' | 'nome' | 'regiao' | 'nota'>('nome');
   const [sortAsc, setSortAsc] = useState<boolean>(true);
+  const [modalPrestador, setModalPrestador] = useState<Prestador | null>(null);
   const itemsPerPage = 15;
 
   const handleCopy = (p: Prestador) => {
@@ -37,25 +60,47 @@ export const PrestadorTableView: React.FC<PrestadorTableViewProps> = ({
     setTimeout(() => setCopiedId(null), 1800);
   };
 
-  const sortedList = [...prestadores].sort((a, b) => {
-    const valA = a[sortField].toLowerCase();
-    const valB = b[sortField].toLowerCase();
-    if (valA < valB) return sortAsc ? -1 : 1;
-    if (valA > valB) return sortAsc ? 1 : -1;
-    return 0;
-  });
+  const scoreById = useMemo(() => {
+    const map = new Map<string, ReturnType<typeof computeTechnicianScore>>();
+    for (const p of prestadores) {
+      const todayAgenda = dailyAgendas.find(
+        (a) =>
+          a.date === TODAY_ISO &&
+          (a.technicianId === p.id || a.technicianName.toUpperCase() === p.nome.toUpperCase())
+      );
+      const metrics = computeTechnicianMetrics(p, encaixes, todayAgenda);
+      const evaluation = evaluationsMap?.[p.id] ?? getEvaluationForPrestador(p, evaluationsMap);
+      map.set(p.id, computeTechnicianScore(p, metrics, ocorrencias, evaluation));
+    }
+    return map;
+  }, [prestadores, dailyAgendas, encaixes, ocorrencias, evaluationsMap]);
+
+  const sortedList = useMemo(() => {
+    return [...prestadores].sort((a, b) => {
+      if (sortField === 'nota') {
+        const sA = scoreById.get(a.id)?.totalScore ?? 0;
+        const sB = scoreById.get(b.id)?.totalScore ?? 0;
+        return sortAsc ? sA - sB : sB - sA;
+      }
+      const valA = a[sortField].toLowerCase();
+      const valB = b[sortField].toLowerCase();
+      if (valA < valB) return sortAsc ? -1 : 1;
+      if (valA > valB) return sortAsc ? 1 : -1;
+      return 0;
+    });
+  }, [prestadores, sortField, sortAsc, scoreById]);
 
   const totalPages = Math.ceil(sortedList.length / itemsPerPage);
   const effectivePage = Math.min(currentPage, Math.max(1, totalPages));
   const startIndex = (effectivePage - 1) * itemsPerPage;
   const paginatedList = sortedList.slice(startIndex, startIndex + itemsPerPage);
 
-  const toggleSort = (field: 'codigo' | 'nome' | 'regiao') => {
+  const toggleSort = (field: 'codigo' | 'nome' | 'regiao' | 'nota') => {
     if (sortField === field) {
       setSortAsc(!sortAsc);
     } else {
       setSortField(field);
-      setSortAsc(true);
+      setSortAsc(field === 'nota' ? false : true);
     }
   };
 
@@ -106,6 +151,16 @@ export const PrestadorTableView: React.FC<PrestadorTableViewProps> = ({
                     <ArrowUpDown className="w-3 h-3 text-slate-500" />
                   </div>
                 </th>
+                <th
+                  scope="col"
+                  className="px-4 py-3 cursor-pointer hover:text-white transition-colors"
+                  onClick={() => toggleSort('nota')}
+                >
+                  <div className="flex items-center gap-1">
+                    <span>Nota</span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-500" />
+                  </div>
+                </th>
                 <th scope="col" className="px-4 py-3 text-right">Ação</th>
               </tr>
             </thead>
@@ -114,6 +169,8 @@ export const PrestadorTableView: React.FC<PrestadorTableViewProps> = ({
                 const isCopied = copiedId === p.id;
                 const isFav = favorites.includes(p.id);
                 const color = getRegionColor(p.regiao, p.cor);
+                const breakdown = scoreById.get(p.id);
+                const gradeTokens = breakdown ? getGradeVisualTokens(breakdown.grade) : null;
 
                 return (
                   <tr
@@ -141,7 +198,7 @@ export const PrestadorTableView: React.FC<PrestadorTableViewProps> = ({
                     </td>
 
                     <td className="px-4 py-2.5 font-medium text-slate-100 uppercase tracking-tight">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span>{p.nome}</span>
                         {p.telefone && (
                           <a
@@ -169,6 +226,23 @@ export const PrestadorTableView: React.FC<PrestadorTableViewProps> = ({
                         <MapPin className="w-3 h-3 opacity-70" />
                         {p.regiao}
                       </span>
+                    </td>
+
+                    <td className="px-4 py-2.5">
+                      {breakdown && gradeTokens && (
+                        <button
+                          type="button"
+                          onClick={() => setModalPrestador(p)}
+                          title={`Nota ${breakdown.grade} (${breakdown.totalScore}/100) · Abrir cartão 3D`}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-gradient-to-br border font-mono text-xs font-black transition-all hover:scale-105 cursor-pointer ${gradeTokens.crest}`}
+                        >
+                          <span>{breakdown.grade}</span>
+                          <span className="text-[10px] opacity-85 font-semibold tabular-nums">
+                            {breakdown.totalScore}
+                          </span>
+                          <RotateCw className="w-3 h-3 opacity-70" />
+                        </button>
+                      )}
                     </td>
 
                     <td className="px-4 py-2.5 text-right">
@@ -247,6 +321,24 @@ export const PrestadorTableView: React.FC<PrestadorTableViewProps> = ({
           setCurrentPage(page);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
+      />
+
+      {/* 3D Scorecard Modal from Table */}
+      <Technician3DModal
+        prestador={modalPrestador}
+        onClose={() => setModalPrestador(null)}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        onCopySuccess={onCopySuccess}
+        isFavorite={modalPrestador ? favorites.includes(modalPrestador.id) : false}
+        onToggleFavorite={onToggleFavorite}
+        onRecordRecent={onRecordRecent}
+        encaixes={encaixes}
+        dailyAgendas={dailyAgendas}
+        agendas={agendas}
+        ocorrencias={ocorrencias}
+        evaluation={modalPrestador ? evaluationsMap?.[modalPrestador.id] : undefined}
+        onEvaluationChange={onEvaluationChange}
       />
     </div>
   );

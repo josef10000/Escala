@@ -23,13 +23,14 @@ import {
   PontoFixoItem,
   AgendaRegiaoItem,
   RegraOperacionalItem,
+  TechnicianQualitativeEvaluation,
 } from '../types';
 import { UniversalSearchResults, getRegionColor } from '../utils/search';
 import { applyGreetingToText, getGreetingInfo } from '../utils/greeting';
 import { openWhatsApp } from '../utils/whatsapp';
 import { PontoFixoStatusBadge } from './PontoFixoStatusBadge';
 import { PrestadorCard } from './PrestadorCard';
-import { DailyAgendaEntry, EncaixeRecord } from '../../central_inteligencia/types';
+import { DailyAgendaEntry, EncaixeRecord, OcorrenciaRecord } from '../../central_inteligencia/types';
 
 interface SearchAccordionFeedProps {
   query: string;
@@ -43,6 +44,10 @@ interface SearchAccordionFeedProps {
   onRecordRecent?: (p: Prestador) => void;
   encaixes?: EncaixeRecord[];
   dailyAgendas?: DailyAgendaEntry[];
+  agendas?: AgendaRegiaoItem[];
+  ocorrencias?: OcorrenciaRecord[];
+  evaluationsMap?: Record<string, TechnicianQualitativeEvaluation>;
+  onEvaluationChange?: (next: TechnicianQualitativeEvaluation) => void;
 }
 
 const QUICK_SEARCH_CHIPS = [
@@ -68,6 +73,10 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
   onRecordRecent,
   encaixes,
   dailyAgendas,
+  agendas,
+  ocorrencias,
+  evaluationsMap,
+  onEvaluationChange,
 }) => {
   const greetingInfo = useMemo(() => getGreetingInfo('auto'), []);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -292,6 +301,10 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
                     onRecordRecent={onRecordRecent}
                     encaixes={encaixes}
                     dailyAgendas={dailyAgendas}
+                    agendas={agendas}
+                    ocorrencias={ocorrencias}
+                    evaluation={evaluationsMap?.[p.id]}
+                    onEvaluationChange={onEvaluationChange}
                   />
                 ))}
               </div>

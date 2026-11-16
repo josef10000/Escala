@@ -8,10 +8,14 @@ import {
   Download,
   Phone,
   PhoneOff,
+  Award,
+  ArrowUpDown,
 } from 'lucide-react';
 import { normalizeText } from '../utils/search';
 
 export type PhoneFilterType = 'all' | 'with' | 'without';
+export type GradeFilterType = 'all' | 'A' | 'B' | 'C' | 'D_E';
+export type ScoreSortType = 'default' | 'score_desc' | 'score_asc';
 
 interface UnifiedToolbarProps {
   selectedRegion: string | null;
@@ -23,6 +27,10 @@ interface UnifiedToolbarProps {
   onViewModeChange: (mode: ViewMode) => void;
   phoneFilter: PhoneFilterType;
   onPhoneFilterChange: (filter: PhoneFilterType) => void;
+  gradeFilter: GradeFilterType;
+  onGradeFilterChange: (grade: GradeFilterType) => void;
+  scoreSort: ScoreSortType;
+  onScoreSortChange: (sort: ScoreSortType) => void;
   pendingPhoneCount: number;
   cardDensity: 'spacious' | 'compact';
   onCardDensityChange: (density: 'spacious' | 'compact') => void;
@@ -38,6 +46,14 @@ const QUICK_MACRO_REGIONS = [
   { label: 'Campinas', val: 'CAMPINAS 1' },
   { label: 'Sorocaba', val: 'SOROCABA' },
   { label: 'ABC', val: 'ABC 1' },
+];
+
+const GRADE_OPTIONS: Array<{ id: GradeFilterType; label: string; activeTone: string }> = [
+  { id: 'all', label: 'Todas', activeTone: 'bg-white/15 text-white' },
+  { id: 'A', label: 'A', activeTone: 'bg-emerald-500/25 text-emerald-200 border border-emerald-400/40' },
+  { id: 'B', label: 'B', activeTone: 'bg-sky-500/25 text-sky-200 border border-sky-400/40' },
+  { id: 'C', label: 'C', activeTone: 'bg-amber-500/25 text-amber-200 border border-amber-400/40' },
+  { id: 'D_E', label: 'D/E', activeTone: 'bg-rose-500/25 text-rose-200 border border-rose-400/40' },
 ];
 
 const getIosMacroGlass = (label: string, isActive: boolean) => {
@@ -58,6 +74,10 @@ export const UnifiedToolbar: React.FC<UnifiedToolbarProps> = ({
   onSelectRegion,
   phoneFilter,
   onPhoneFilterChange,
+  gradeFilter,
+  onGradeFilterChange,
+  scoreSort,
+  onScoreSortChange,
   pendingPhoneCount,
   cardDensity,
   onCardDensityChange,
@@ -66,46 +86,100 @@ export const UnifiedToolbar: React.FC<UnifiedToolbarProps> = ({
   onViewModeChange,
 }) => {
   return (
-    <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800 rounded-2xl p-4 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 shadow-sm relative overflow-hidden">
-      {/* Region Chips in iOS Glass Style */}
-      <div className="flex flex-wrap items-center gap-2 relative z-10">
-        <span className="text-slate-400 font-medium text-xs flex items-center gap-1.5 mr-1">
-          <Filter className="w-3.5 h-3.5 text-cyan-400" />
-          <span>Região:</span>
-        </span>
+    <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800 rounded-2xl p-4 flex flex-col gap-3 shadow-sm relative overflow-hidden">
+      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+        {/* Region Chips in iOS Glass Style */}
+        <div className="flex flex-wrap items-center gap-2 relative z-10">
+          <span className="text-slate-400 font-medium text-xs flex items-center gap-1.5 mr-1">
+            <Filter className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Região:</span>
+          </span>
 
-        {QUICK_MACRO_REGIONS.map((chip) => {
-          const isActive =
-            (chip.val === null && !selectedRegion) ||
-            selectedRegion === chip.val;
-          const glassClass = getIosMacroGlass(chip.label, isActive);
+          {QUICK_MACRO_REGIONS.map((chip) => {
+            const isActive =
+              (chip.val === null && !selectedRegion) ||
+              selectedRegion === chip.val;
+            const glassClass = getIosMacroGlass(chip.label, isActive);
 
-          return (
+            return (
+              <button
+                key={chip.label}
+                type="button"
+                onClick={() => onSelectRegion(chip.val)}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border transition-all duration-200 cursor-pointer ${glassClass}`}
+              >
+                {chip.label}
+              </button>
+            );
+          })}
+
+          {selectedRegion && (
             <button
-              key={chip.label}
               type="button"
-              onClick={() => onSelectRegion(chip.val)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border transition-all duration-200 cursor-pointer ${glassClass}`}
+              onClick={() => onSelectRegion(null)}
+              className="text-xs text-cyan-400 hover:text-cyan-300 underline ml-1.5 transition-colors font-medium cursor-pointer"
             >
-              {chip.label}
+              Limpar
             </button>
-          );
-        })}
+          )}
+        </div>
 
-        {selectedRegion && (
+        {/* Grade Filter & Score Sort Strip */}
+        <div className="flex flex-wrap items-center gap-2 relative z-10 text-xs">
+          <div className="inline-flex items-center gap-1 p-1 bg-slate-950/80 border border-white/10 rounded-xl backdrop-blur-md">
+            <span className="text-slate-400 font-medium px-1.5 flex items-center gap-1">
+              <Award className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="hidden sm:inline">Nota:</span>
+            </span>
+            {GRADE_OPTIONS.map((opt) => (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => onGradeFilterChange(opt.id)}
+                className={`px-2 py-1 rounded-lg font-mono font-bold transition-all cursor-pointer ${
+                  gradeFilter === opt.id
+                    ? `${opt.activeTone} shadow-sm`
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+
           <button
             type="button"
-            onClick={() => onSelectRegion(null)}
-            className="text-xs text-cyan-400 hover:text-cyan-300 underline ml-1.5 transition-colors font-medium cursor-pointer"
+            onClick={() =>
+              onScoreSortChange(
+                scoreSort === 'default'
+                  ? 'score_desc'
+                  : scoreSort === 'score_desc'
+                  ? 'score_asc'
+                  : 'default'
+              )
+            }
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer ${
+              scoreSort !== 'default'
+                ? 'bg-cyan-500/20 border-cyan-400/40 text-cyan-200'
+                : 'bg-slate-950/80 border-white/10 text-slate-300 hover:text-white'
+            }`}
+            title="Alternar ordenação por nota operacional"
           >
-            Limpar
+            <ArrowUpDown className="w-3.5 h-3.5 text-cyan-400" />
+            <span>
+              {scoreSort === 'default'
+                ? 'Ordem Padrão'
+                : scoreSort === 'score_desc'
+                ? 'Maior Nota'
+                : 'Menor Nota'}
+            </span>
           </button>
-        )}
+        </div>
       </div>
 
-      {/* Right Controls: Filters, Density, CSV, View Modes */}
-      <div className="flex flex-wrap items-center gap-2.5 shrink-0 justify-between lg:justify-end relative z-10 text-xs">
-        {/* Phone Filter Toggle (iOS Segmented Control) */}
+      {/* Bottom Controls Row: Phone Filters, Density, View Modes, Export CSV */}
+      <div className="flex flex-wrap items-center gap-2.5 justify-between lg:justify-end relative z-10 text-xs pt-2.5 border-t border-white/[0.06]">
+        {/* Phone Filter Toggle */}
         <div className="inline-flex p-1 bg-slate-950/80 border border-white/10 rounded-xl text-xs backdrop-blur-md">
           <button
             type="button"

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Prestador } from '../types';
+import { AgendaRegiaoItem, Prestador, TechnicianQualitativeEvaluation } from '../types';
 import { MapPin } from 'lucide-react';
 import { Pagination } from './Pagination';
 import { PrestadorCard, getInitials } from './PrestadorCard';
-import { DailyAgendaEntry, EncaixeRecord } from '../../central_inteligencia/types';
+import { Technician3DModal } from './Technician3DModal';
+import { DailyAgendaEntry, EncaixeRecord, OcorrenciaRecord } from '../../central_inteligencia/types';
 
 export { getInitials };
 
@@ -18,6 +19,10 @@ interface PrestadorCardsViewProps {
   onRecordRecent?: (p: Prestador) => void;
   encaixes?: EncaixeRecord[];
   dailyAgendas?: DailyAgendaEntry[];
+  agendas?: AgendaRegiaoItem[];
+  ocorrencias?: OcorrenciaRecord[];
+  evaluationsMap?: Record<string, TechnicianQualitativeEvaluation>;
+  onEvaluationChange?: (next: TechnicianQualitativeEvaluation) => void;
 }
 
 export const PrestadorCardsView: React.FC<PrestadorCardsViewProps> = ({
@@ -31,11 +36,15 @@ export const PrestadorCardsView: React.FC<PrestadorCardsViewProps> = ({
   onRecordRecent,
   encaixes,
   dailyAgendas,
+  agendas,
+  ocorrencias,
+  evaluationsMap,
+  onEvaluationChange,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [modalPrestador, setModalPrestador] = useState<Prestador | null>(null);
   const itemsPerPage = density === 'compact' ? 24 : 12;
 
-  // Reset to page 1 if prestadores count changes and current page is out of bounds
   const totalPages = Math.ceil(prestadores.length / itemsPerPage);
   const effectivePage = Math.min(currentPage, Math.max(1, totalPages));
 
@@ -81,6 +90,11 @@ export const PrestadorCardsView: React.FC<PrestadorCardsViewProps> = ({
             onRecordRecent={onRecordRecent}
             encaixes={encaixes}
             dailyAgendas={dailyAgendas}
+            agendas={agendas}
+            ocorrencias={ocorrencias}
+            evaluation={evaluationsMap?.[p.id]}
+            onEvaluationChange={onEvaluationChange}
+            onOpen3DModal={(target) => setModalPrestador(target)}
           />
         ))}
       </div>
@@ -92,7 +106,24 @@ export const PrestadorCardsView: React.FC<PrestadorCardsViewProps> = ({
         itemsPerPage={itemsPerPage}
         onPageChange={handlePageChange}
       />
+
+      {/* 3D Scorecard Modal for Compact Cards */}
+      <Technician3DModal
+        prestador={modalPrestador}
+        onClose={() => setModalPrestador(null)}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        onCopySuccess={onCopySuccess}
+        isFavorite={modalPrestador ? favorites.includes(modalPrestador.id) : false}
+        onToggleFavorite={onToggleFavorite}
+        onRecordRecent={onRecordRecent}
+        encaixes={encaixes}
+        dailyAgendas={dailyAgendas}
+        agendas={agendas}
+        ocorrencias={ocorrencias}
+        evaluation={modalPrestador ? evaluationsMap?.[modalPrestador.id] : undefined}
+        onEvaluationChange={onEvaluationChange}
+      />
     </div>
   );
 };
-

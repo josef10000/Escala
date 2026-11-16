@@ -1,3 +1,44 @@
+export type TechnicianGrade = 'A' | 'B' | 'C' | 'D' | 'E';
+
+export interface TechnicianQualitativeCriteria {
+  pontualidade: number; // 1..5
+  postura: number; // 1..5
+  comunicacao: number; // 1..5
+  qualidadeTecnica: number; // 1..5
+}
+
+export interface TechnicianQualitativeEvaluation extends TechnicianQualitativeCriteria {
+  prestadorId: string;
+  notaGestor?: string;
+  updatedAt?: string;
+  updatedBy?: string;
+  isCustom?: boolean;
+}
+
+export interface TechnicianScoreBreakdown {
+  grade: TechnicianGrade;
+  totalScore: number; // 0..100
+  operationalScore: number; // 0..100
+  qualitativeScore: number; // 0..100
+  operationalWeight: number; // percentage e.g. 60, 35, or 0
+  qualitativeWeight: number; // percentage e.g. 40, 65, or 100
+  isProvisionalSample: boolean;
+  gradeLabel: string;
+  operationalItems: Array<{
+    label: string;
+    valueText: string;
+    points: number;
+    maxPoints: number;
+  }>;
+  qualitativeItems: Array<{
+    key: keyof TechnicianQualitativeCriteria;
+    label: string;
+    hint: string;
+    score: number;
+  }>;
+  evaluation: TechnicianQualitativeEvaluation;
+}
+
 export interface Prestador {
   id: string;
   codigo: string;

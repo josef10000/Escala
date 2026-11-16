@@ -13,6 +13,7 @@ import {
   PontoFixoItem,
   AgendaRegiaoItem,
   RegraOperacionalItem,
+  TechnicianQualitativeEvaluation,
 } from './types';
 import { INITIAL_PRESTADORES } from './data/defaultPrestadores';
 import {
@@ -36,7 +37,7 @@ import { filterPrestadores, searchUniversalAll, getRegionColor } from './utils/s
 import { exportPrestadoresToCSV } from './utils/csvExport';
 import { getPontoFixoStatus } from './utils/pontoFixoSchedule';
 
-import { UnifiedToolbar, PhoneFilterType } from './components/UnifiedToolbar';
+import { UnifiedToolbar, PhoneFilterType, GradeFilterType, ScoreSortType } from './components/UnifiedToolbar';
 import { PrestadorTerminalView } from './components/PrestadorTerminalView';
 import { PrestadorCardsView } from './components/PrestadorCardsView';
 import { PrestadorTableView } from './components/PrestadorTableView';
@@ -52,8 +53,19 @@ import { RegrasAgendasView } from './components/RegrasAgendasView';
 import { UniversalOmniModal } from './components/UniversalOmniModal';
 import { PontoFixoModal } from './components/PontoFixoModal';
 import { SearchAccordionFeed } from './components/SearchAccordionFeed';
-import { DailyAgendaEntry, EncaixeRecord } from '../central_inteligencia/types';
-import { getStoredDailyAgendas, getStoredEncaixes } from '../central_inteligencia/data/mockCentralData';
+import { DailyAgendaEntry, EncaixeRecord, OcorrenciaRecord } from '../central_inteligencia/types';
+import {
+  buildInitialOcorrencias,
+  computeTechnicianMetrics,
+  getStoredDailyAgendas,
+  getStoredEncaixes,
+  TODAY_ISO,
+} from '../central_inteligencia/data/mockCentralData';
+import {
+  computeTechnicianScore,
+  getEvaluationForPrestador,
+  getStoredEvaluations,
+} from './utils/scoring';
 
 export interface PrestadoresRegionalModuleProps {
   initialTab?: MainTab;
@@ -93,19 +105,40 @@ export function PrestadoresRegionalModule({
   const [centralDailyAgendas, setCentralDailyAgendas] = useState<DailyAgendaEntry[]>(() =>
     getStoredDailyAgendas(getStoredPrestadores())
   );
+  const [centralOcorrencias, setCentralOcorrencias] = useState<OcorrenciaRecord[]>(() =>
+    buildInitialOcorrencias(getStoredPrestadores())
+  );
+  const [evaluationsMap, setEvaluationsMap] = useState<Record<string, TechnicianQualitativeEvaluation>>(() =>
+    getStoredEvaluations()
+  );
 
   useEffect(() => {
     const syncCentral = () => {
       const current = getStoredPrestadores();
       setCentralEncaixes(getStoredEncaixes(current));
       setCentralDailyAgendas(getStoredDailyAgendas(current));
+      setCentralOcorrencias(buildInitialOcorrencias(current));
+    };
+    const syncEvaluations = () => {
+      setEvaluationsMap(getStoredEvaluations());
     };
     window.addEventListener('central-metrics-updated', syncCentral);
+    window.addEventListener('prestadores-evaluations-updated', syncEvaluations);
     window.addEventListener('storage', syncCentral);
+    window.addEventListener('storage', syncEvaluations);
     return () => {
       window.removeEventListener('central-metrics-updated', syncCentral);
+      window.removeEventListener('prestadores-evaluations-updated', syncEvaluations);
       window.removeEventListener('storage', syncCentral);
+      window.removeEventListener('storage', syncEvaluations);
     };
+  }, []);
+
+  const handleEvaluationChange = useCallback((next: TechnicianQualitativeEvaluation) => {
+    setEvaluationsMap((prev) => ({
+      ...prev,
+      [next.prestadorId]: next,
+    }));
   }, []);
 
   // Search & Filtering
@@ -113,6 +146,8 @@ export function PrestadoresRegionalModule({
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [phoneFilter, setPhoneFilter] = useState<PhoneFilterType>('all');
+  const [gradeFilter, setGradeFilter] = useState<GradeFilterType>('all');
+  const [scoreSort, setScoreSort] = useState<ScoreSortType>('default');
   const [cardDensity, setCardDensity] = useState<'spacious' | 'compact'>(() => {
     try {
       return (localStorage.getItem('prestadores_card_density') as 'spacious' | 'compact') || 'spacious';
@@ -383,8 +418,56 @@ export function PrestadoresRegionalModule({
         return itemColor === selectedColor.toLowerCase();
       });
     }
-    return filterPrestadores(base, searchQuery, selectedRegion);
-  }, [prestadores, searchQuery, selectedRegion, showFavoritesOnly, favorites, phoneFilter, selectedColor]);
+    let result = filterPrestadores(base, searchQuery, selectedRegion);
+
+    if (gradeFilter !== 'all' || scoreSort !== 'default') {
+      const scored = result.map((p) => {
+        const todayAgenda = centralDailyAgendas.find(
+          (a) =>
+            a.date === TODAY_ISO &&
+            (a.technicianId === p.id || a.technicianName.toUpperCase() === p.nome.toUpperCase())
+        );
+        const metrics = computeTechnicianMetrics(p, centralEncaixes, todayAgenda);
+        const evaluation = evaluationsMap[p.id] ?? getEvaluationForPrestador(p, evaluationsMap);
+        const breakdown = computeTechnicianScore(p, metrics, centralOcorrencias, evaluation);
+        return { prestador: p, breakdown };
+      });
+
+      const filteredByGrade =
+        gradeFilter === 'all'
+          ? scored
+          : scored.filter(({ breakdown }) => {
+              if (gradeFilter === 'D_E') {
+                return breakdown.grade === 'D' || breakdown.grade === 'E';
+              }
+              return breakdown.grade === gradeFilter;
+            });
+
+      if (scoreSort === 'score_desc') {
+        filteredByGrade.sort((a, b) => b.breakdown.totalScore - a.breakdown.totalScore);
+      } else if (scoreSort === 'score_asc') {
+        filteredByGrade.sort((a, b) => a.breakdown.totalScore - b.breakdown.totalScore);
+      }
+
+      result = filteredByGrade.map((entry) => entry.prestador);
+    }
+
+    return result;
+  }, [
+    prestadores,
+    searchQuery,
+    selectedRegion,
+    showFavoritesOnly,
+    favorites,
+    phoneFilter,
+    selectedColor,
+    gradeFilter,
+    scoreSort,
+    centralDailyAgendas,
+    centralEncaixes,
+    centralOcorrencias,
+    evaluationsMap,
+  ]);
 
   const handleExportCSV = () => {
     if (filteredPrestadores.length === 0) {
@@ -585,6 +668,10 @@ export function PrestadoresRegionalModule({
             onRecordRecent={handleRecordRecent}
             encaixes={centralEncaixes}
             dailyAgendas={centralDailyAgendas}
+            agendas={agendas}
+            ocorrencias={centralOcorrencias}
+            evaluationsMap={evaluationsMap}
+            onEvaluationChange={handleEvaluationChange}
           />
         ) : (
           <>
@@ -638,6 +725,10 @@ export function PrestadoresRegionalModule({
                   onViewModeChange={setViewMode}
                   phoneFilter={phoneFilter}
                   onPhoneFilterChange={setPhoneFilter}
+                  gradeFilter={gradeFilter}
+                  onGradeFilterChange={setGradeFilter}
+                  scoreSort={scoreSort}
+                  onScoreSortChange={setScoreSort}
                   pendingPhoneCount={pendingPhoneCount}
                   cardDensity={cardDensity}
                   onCardDensityChange={handleCardDensityChange}
@@ -675,6 +766,10 @@ export function PrestadoresRegionalModule({
                     onRecordRecent={handleRecordRecent}
                     encaixes={centralEncaixes}
                     dailyAgendas={centralDailyAgendas}
+                    agendas={agendas}
+                    ocorrencias={centralOcorrencias}
+                    evaluationsMap={evaluationsMap}
+                    onEvaluationChange={handleEvaluationChange}
                   />
                 )}
 
@@ -689,6 +784,13 @@ export function PrestadoresRegionalModule({
                     onCopySuccess={showToast}
                     favorites={favorites}
                     onToggleFavorite={handleToggleFavorite}
+                    onRecordRecent={handleRecordRecent}
+                    encaixes={centralEncaixes}
+                    dailyAgendas={centralDailyAgendas}
+                    agendas={agendas}
+                    ocorrencias={centralOcorrencias}
+                    evaluationsMap={evaluationsMap}
+                    onEvaluationChange={handleEvaluationChange}
                   />
                 )}
               </div>

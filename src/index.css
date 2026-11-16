@@ -57,6 +57,80 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Realistic 3D Card Flip Physics & Specular Glare */
+.card-3d-stage {
+  perspective: 1400px;
+  -webkit-perspective: 1400px;
+}
+
+.card-3d-rotator {
+  display: grid;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  transition: transform 0.78s cubic-bezier(0.22, 1.14, 0.36, 1);
+  will-change: transform;
+}
+
+.card-3d-rotator.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.card-3d-face {
+  grid-area: 1 / 1;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+
+.card-3d-face-front {
+  transform: rotateY(0deg) translateZ(1px);
+}
+
+.card-3d-face-back {
+  transform: rotateY(180deg) translateZ(1px);
+}
+
+@keyframes card-glare-sweep {
+  0% {
+    transform: translateX(-140%) skewX(-22deg);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.55;
+  }
+  75% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: translateX(220%) skewX(-22deg);
+    opacity: 0;
+  }
+}
+
+.card-3d-glare {
+  position: absolute;
+  inset: 0;
+  width: 55%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 35%,
+    rgba(255, 255, 255, 0.22) 50%,
+    rgba(255, 255, 255, 0.08) 65%,
+    transparent 100%
+  );
+  pointer-events: none;
+  opacity: 0;
+}
+
+.card-3d-rotator.is-flipped .card-3d-face-back .card-3d-glare {
+  animation: card-glare-sweep 0.85s ease-out 0.12s 1;
+}
+
+.card-3d-rotator:not(.is-flipped) .card-3d-face-front .card-3d-glare-return {
+  animation: card-glare-sweep 0.75s ease-out 0.1s 1;
+}
+
 @media print {
   @page {
     size: landscape;
