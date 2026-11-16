@@ -3,6 +3,7 @@ import { Prestador } from '../types';
 import { MapPin } from 'lucide-react';
 import { Pagination } from './Pagination';
 import { PrestadorCard, getInitials } from './PrestadorCard';
+import { DailyAgendaEntry, EncaixeRecord } from '../../central_inteligencia/types';
 
 export { getInitials };
 
@@ -15,6 +16,8 @@ interface PrestadorCardsViewProps {
   onToggleFavorite: (id: string) => void;
   density?: 'spacious' | 'compact';
   onRecordRecent?: (p: Prestador) => void;
+  encaixes?: EncaixeRecord[];
+  dailyAgendas?: DailyAgendaEntry[];
 }
 
 export const PrestadorCardsView: React.FC<PrestadorCardsViewProps> = ({
@@ -26,6 +29,8 @@ export const PrestadorCardsView: React.FC<PrestadorCardsViewProps> = ({
   onToggleFavorite,
   density = 'spacious',
   onRecordRecent,
+  encaixes,
+  dailyAgendas,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = density === 'compact' ? 24 : 12;
@@ -74,6 +79,8 @@ export const PrestadorCardsView: React.FC<PrestadorCardsViewProps> = ({
             onToggleFavorite={onToggleFavorite}
             density={density}
             onRecordRecent={onRecordRecent}
+            encaixes={encaixes}
+            dailyAgendas={dailyAgendas}
           />
         ))}
       </div>

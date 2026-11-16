@@ -36,6 +36,27 @@
   }
 }
 
+.central-shell {
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  letter-spacing: 0.005em;
+  -webkit-font-smoothing: antialiased;
+}
+
+.central-shell h1,
+.central-shell h2,
+.central-shell h3,
+.central-shell h4 {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+.central-shell .font-mono,
+.central-shell .tabular-nums {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
 @media print {
   @page {
     size: landscape;

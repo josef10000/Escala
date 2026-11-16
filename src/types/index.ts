@@ -157,5 +157,5 @@ export interface TeamFeedback {
 
 export type ViewMode = 'escala' | 'personal-calendar' | 'calendar' | 'matrix' | 'week' | 'agenda' | 'my-schedule';
 export type UserRole = 'supervisor' | 'provider';
-export type ActiveModule = 'escala' | 'prestadores_regional' | 'pontos_fixos' | 'gestor_feedbacks';
+export type ActiveModule = 'escala' | 'prestadores_regional' | 'pontos_fixos' | 'gestor_feedbacks' | 'central_inteligencia';
 

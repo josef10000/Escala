@@ -52,6 +52,8 @@ import { RegrasAgendasView } from './components/RegrasAgendasView';
 import { UniversalOmniModal } from './components/UniversalOmniModal';
 import { PontoFixoModal } from './components/PontoFixoModal';
 import { SearchAccordionFeed } from './components/SearchAccordionFeed';
+import { DailyAgendaEntry, EncaixeRecord } from '../central_inteligencia/types';
+import { getStoredDailyAgendas, getStoredEncaixes } from '../central_inteligencia/data/mockCentralData';
 
 export interface PrestadoresRegionalModuleProps {
   initialTab?: MainTab;
@@ -85,6 +87,26 @@ export function PrestadoresRegionalModule({
   const [pontosFixos, setPontosFixos] = useState<PontoFixoItem[]>(() => getStoredPontosFixos());
   const [agendas, setAgendas] = useState<AgendaRegiaoItem[]>(() => getStoredAgendas());
   const [regras, setRegras] = useState<RegraOperacionalItem[]>(() => getStoredRegras());
+  const [centralEncaixes, setCentralEncaixes] = useState<EncaixeRecord[]>(() =>
+    getStoredEncaixes(getStoredPrestadores())
+  );
+  const [centralDailyAgendas, setCentralDailyAgendas] = useState<DailyAgendaEntry[]>(() =>
+    getStoredDailyAgendas(getStoredPrestadores())
+  );
+
+  useEffect(() => {
+    const syncCentral = () => {
+      const current = getStoredPrestadores();
+      setCentralEncaixes(getStoredEncaixes(current));
+      setCentralDailyAgendas(getStoredDailyAgendas(current));
+    };
+    window.addEventListener('central-metrics-updated', syncCentral);
+    window.addEventListener('storage', syncCentral);
+    return () => {
+      window.removeEventListener('central-metrics-updated', syncCentral);
+      window.removeEventListener('storage', syncCentral);
+    };
+  }, []);
 
   // Search & Filtering
   const [searchQuery, setSearchQuery] = useState('');
@@ -561,6 +583,8 @@ export function PrestadoresRegionalModule({
             }}
             onDelete={handleDeletePrestador}
             onRecordRecent={handleRecordRecent}
+            encaixes={centralEncaixes}
+            dailyAgendas={centralDailyAgendas}
           />
         ) : (
           <>
@@ -649,6 +673,8 @@ export function PrestadoresRegionalModule({
                     onToggleFavorite={handleToggleFavorite}
                     density={cardDensity}
                     onRecordRecent={handleRecordRecent}
+                    encaixes={centralEncaixes}
+                    dailyAgendas={centralDailyAgendas}
                   />
                 )}
 

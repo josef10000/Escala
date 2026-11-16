@@ -1,3 +1,4 @@
+import path from 'path';
 import express from 'express';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
@@ -10,7 +11,6 @@ const app = express();
 app.use(express.json({ limit: '20mb' }));
 
 const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY || '';
-const ai = new GoogleGenAI({ apiKey });
 const aiRequestWindows = new Map<string, number[]>();
 
 app.post('/api/ai/parse-schedule', async (req, res) => {
@@ -110,6 +110,7 @@ Retorne JSON válido exatamente nesta estrutura:
       contents.push({ inlineData: { mimeType, data: cleanBase64 } });
     }
 
+    const ai = new GoogleGenAI({ apiKey });
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents,
@@ -137,12 +138,15 @@ Retorne JSON válido exatamente nesta estrutura:
 
 if (process.env.NODE_ENV !== 'production') {
   const vite = await createViteServer({
-    server: { middlewareMode: true, host: true, port: 3000 },
+    server: { middlewareMode: true, host: '0.0.0.0', port: 3000, allowedHosts: true },
     appType: 'spa',
   });
   app.use(vite.middlewares);
 } else {
   app.use(express.static('dist'));
+  app.get('*', (_req, res) => {
+    res.sendFile(path.resolve('dist', 'index.html'));
+  });
 }
 
 const PORT = 3000;

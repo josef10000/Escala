@@ -1,10 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Prestador } from '../types';
-import { Copy, Check, Edit2, Trash2, Phone, Star, MapPin, ChevronDown, MessageSquare } from 'lucide-react';
+import { Copy, Check, Edit2, Trash2, Phone, Star, ChevronDown, MessageSquare } from 'lucide-react';
 import { normalizeText } from '../utils/search';
 import { WhatsAppIcon } from './WhatsAppIcon';
 import { getWhatsAppUrl, cleanPhoneNumber, openWhatsApp, WHATSAPP_TAB_NAME } from '../utils/whatsapp';
 import { useSchedule } from '../../../context/ScheduleContext';
+import { DailyAgendaEntry, EncaixeRecord } from '../../central_inteligencia/types';
+import { computeTechnicianMetrics, TODAY_ISO } from '../../central_inteligencia/data/mockCentralData';
 
 export function getInitials(name: string) {
   const parts = name.trim().split(/\s+/);
@@ -74,7 +76,20 @@ export interface PrestadorCardProps {
   onToggleFavorite: (id: string) => void;
   density?: 'spacious' | 'compact';
   onRecordRecent?: (p: Prestador) => void;
+  encaixes?: EncaixeRecord[];
+  dailyAgendas?: DailyAgendaEntry[];
 }
+
+const AGENDA_STATUS_META: Record<
+  DailyAgendaEntry['status'],
+  { label: string; tone: string }
+> = {
+  normal: { label: 'Normal', tone: 'text-emerald-300 bg-emerald-500/10 border-emerald-400/20' },
+  mudanca: { label: 'Mudança hoje', tone: 'text-cyan-300 bg-cyan-500/10 border-cyan-400/25' },
+  reduzida: { label: 'Reduzida', tone: 'text-amber-300 bg-amber-500/10 border-amber-400/25' },
+  fechada: { label: 'Agenda fechada', tone: 'text-rose-300 bg-rose-500/10 border-rose-400/25' },
+  sem_servico: { label: 'Sem serviço', tone: 'text-slate-300 bg-white/[0.06] border-white/15' },
+};
 
 export const PrestadorCard: React.FC<PrestadorCardProps> = ({
   prestador: p,
@@ -85,6 +100,8 @@ export const PrestadorCard: React.FC<PrestadorCardProps> = ({
   onToggleFavorite,
   density = 'spacious',
   onRecordRecent,
+  encaixes = [],
+  dailyAgendas = [],
 }) => {
   const { isLeaderAuthenticated, authenticatedProviderId, activeProviderId } = useSchedule();
   const loggedInProvId = authenticatedProviderId || activeProviderId;
@@ -92,10 +109,26 @@ export const PrestadorCard: React.FC<PrestadorCardProps> = ({
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isQuickMsgOpen, setIsQuickMsgOpen] = useState(false);
+  const [showMetricsDetails, setShowMetricsDetails] = useState(false);
   const quickMsgRef = useRef<HTMLDivElement>(null);
 
   const initials = getInitials(p.nome);
   const regStyle = getRegionStyle(p.regiao);
+
+  const todayAgenda = useMemo(
+    () =>
+      dailyAgendas.find(
+        (a) =>
+          a.date === TODAY_ISO &&
+          (a.technicianId === p.id || a.technicianName.toUpperCase() === p.nome.toUpperCase())
+      ),
+    [dailyAgendas, p.id, p.nome]
+  );
+
+  const metrics = useMemo(
+    () => computeTechnicianMetrics(p, encaixes, todayAgenda),
+    [p, encaixes, todayAgenda]
+  );
 
   // Close quick message dropdown on outside click
   useEffect(() => {
@@ -212,12 +245,24 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
               </span>
             </div>
 
-            {p.telefone && (
-              <div className="text-[11px] text-white/60 font-mono mt-0.5 flex items-center gap-1">
-                <Phone className="w-3 h-3 text-white/40" />
-                <span>{p.telefone}</span>
-              </div>
-            )}
+            <div className="flex items-center gap-2.5 flex-wrap mt-0.5 text-[11px] font-mono tabular-nums">
+              {p.telefone && (
+                <span className="text-white/60 flex items-center gap-1">
+                  <Phone className="w-3 h-3 text-white/40" />
+                  <span>{p.telefone}</span>
+                </span>
+              )}
+              {metrics.finalizedCount > 0 && (
+                <span className="text-cyan-300/90">
+                  {metrics.acceptanceRate}% aceite · {metrics.avgResponseMinutes !== null ? `${metrics.avgResponseMinutes}m` : '—'} · est. {metrics.estimatedAcceptProbability !== null ? `~${metrics.estimatedAcceptProbability}%` : 'insuf.'}
+                </span>
+              )}
+              {todayAgenda && todayAgenda.status !== 'normal' && (
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-md border ${AGENDA_STATUS_META[todayAgenda.status].tone}`}>
+                  {AGENDA_STATUS_META[todayAgenda.status].label}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -451,6 +496,134 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
               </div>
             )}
           </div>
+        </div>
+
+        {/* Cobertura Diária (se houver mudança/aviso na data atual) */}
+        {todayAgenda && todayAgenda.status !== 'normal' && (
+          <div className="mt-3.5 pt-3 border-t border-white/[0.07] flex items-center justify-between gap-2 text-xs">
+            <span className="text-white/75 truncate" title={todayAgenda.dailyCoverage}>
+              Agenda hoje: {todayAgenda.dailyCoverage}
+            </span>
+            <span
+              className={`font-medium shrink-0 ${
+                todayAgenda.status === 'fechada'
+                  ? 'text-rose-300'
+                  : todayAgenda.status === 'reduzida'
+                  ? 'text-amber-300'
+                  : todayAgenda.status === 'mudanca'
+                  ? 'text-cyan-300'
+                  : 'text-slate-400'
+              }`}
+            >
+              {AGENDA_STATUS_META[todayAgenda.status].label}
+            </span>
+          </div>
+        )}
+
+        {/* Métricas Operacionais de Encaixes (separação limpa por linha sutil) */}
+        <div className="mt-3.5 pt-3 border-t border-white/[0.08]">
+          {metrics.totalReceived > 0 ? (
+            <>
+              <div className="flex items-center justify-between gap-2 mb-2.5">
+                <span className="text-xs font-medium text-white/60">
+                  Encaixes ({metrics.totalReceived})
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowMetricsDetails((prev) => !prev)}
+                  className="inline-flex items-center gap-1 text-xs text-cyan-300/90 hover:text-cyan-200 transition-colors cursor-pointer"
+                  title="Expandir detalhamento de encaixes"
+                >
+                  <span>{showMetricsDetails ? 'Ocultar' : 'Detalhes'}</span>
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                      showMetricsDetails ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-4 gap-2 font-mono tabular-nums">
+                <div>
+                  <div className="text-[11px] font-sans text-white/45">Aceite</div>
+                  <div className="text-sm font-semibold text-emerald-300 leading-tight mt-0.5">
+                    {metrics.acceptanceRate !== null ? `${metrics.acceptanceRate}%` : '—'}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-[11px] font-sans text-white/45">Resposta</div>
+                  <div className="text-sm font-semibold text-cyan-300 leading-tight mt-0.5">
+                    {metrics.responseRate !== null ? `${metrics.responseRate}%` : '—'}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-[11px] font-sans text-white/45">T. médio</div>
+                  <div className="text-sm font-semibold text-white leading-tight mt-0.5">
+                    {metrics.avgResponseMinutes !== null ? `${metrics.avgResponseMinutes}m` : '—'}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-[11px] font-sans text-white/45">Estimativa</div>
+                  <div
+                    className={`text-sm font-semibold leading-tight mt-0.5 ${
+                      metrics.estimatedAcceptProbability !== null
+                        ? metrics.estimatedAcceptProbability === 0
+                          ? 'text-rose-300'
+                          : 'text-sky-300'
+                        : 'text-amber-300/80'
+                    }`}
+                  >
+                    {metrics.estimatedAcceptProbability !== null
+                      ? `~${metrics.estimatedAcceptProbability}%`
+                      : 'Insuf.'}
+                  </div>
+                </div>
+              </div>
+
+              {showMetricsDetails && (
+                <div className="pt-2.5 mt-2.5 border-t border-white/[0.06] space-y-1.5 text-xs animate-in fade-in duration-150">
+                  <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono tabular-nums text-white/70">
+                    <span>
+                      {metrics.acceptedCount}/{metrics.finalizedCount} aceites
+                    </span>
+                    <span aria-hidden="true" className="text-white/25">·</span>
+                    <span>{metrics.refusedCount} recusas</span>
+                    <span aria-hidden="true" className="text-white/25">·</span>
+                    <span>{metrics.noResponseCount} sem resp.</span>
+                    {metrics.pendingCount > 0 && (
+                      <>
+                        <span aria-hidden="true" className="text-white/25">·</span>
+                        <span>{metrics.pendingCount} pendentes</span>
+                      </>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-white/50 leading-relaxed">
+                    {metrics.probabilityBasis}
+                  </p>
+
+                  {(metrics.byRegion.length > 0 || metrics.byPeriod.length > 0) && (
+                    <div className="text-xs font-mono tabular-nums text-white/65 leading-relaxed">
+                      {[
+                        ...metrics.byRegion.map((r) => `${r.region}: ${r.accepted}/${r.total}`),
+                        ...metrics.byPeriod.map((per) => `${per.period}: ${per.accepted}/${per.total}`),
+                      ].join(' · ')}
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="flex items-center justify-between gap-2 text-xs text-white/45">
+              <span>Sem encaixes registrados</span>
+              <span className="text-amber-300/70" title={metrics.probabilityBasis}>
+                Est. insuficiente
+              </span>
+            </div>
+          )}
         </div>
       </div>
 

@@ -18,6 +18,7 @@ import {
   KeyRound,
   ShieldCheck,
   CheckCircle2,
+  Activity,
 } from 'lucide-react';
 import { useSchedule } from '../context/ScheduleContext';
 
@@ -176,6 +177,20 @@ export const Navbar: React.FC<NavbarProps> = ({
               <MapPin className="w-3.5 h-3.5 text-emerald-400" />
               <span className="hidden sm:inline">Pontos Fixos & Agendas</span>
               <span className="sm:hidden">Pontos Fixos</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveModule('central_inteligencia')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium whitespace-nowrap ${
+                activeModule === 'central_inteligencia'
+                  ? 'bg-gradient-to-r from-cyan-500/25 to-sky-500/25 text-white font-semibold border border-cyan-400/40 shadow-sm'
+                  : 'text-white/60 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Activity className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="hidden sm:inline">Central Operacional</span>
+              <span className="sm:hidden">Central</span>
             </button>
           </nav>
 

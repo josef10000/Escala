@@ -355,6 +355,17 @@ export const MobileScheduleView: React.FC<MobileScheduleViewProps> = ({
         >
           📍 Postos
         </button>
+        <button
+          type="button"
+          onClick={() => setActiveModule('central_inteligencia')}
+          className={`py-1.5 px-1 rounded-lg text-[11px] font-semibold text-center transition-all cursor-pointer ${
+            activeModule === 'central_inteligencia'
+              ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-xs'
+              : 'bg-slate-800/60 text-slate-300 hover:bg-slate-700 border border-transparent'
+          }`}
+        >
+          ⚡ Central
+        </button>
       </div>
 
       {/* 🔔 TOMORROW SHIFT REMINDER BANNER */}

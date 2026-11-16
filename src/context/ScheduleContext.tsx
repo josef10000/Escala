@@ -263,7 +263,7 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [activeModule, setActiveModuleState] = useState<ActiveModule>(() => {
     try {
       const saved = localStorage.getItem('escalapro_active_module');
-      if (saved && ['escala', 'prestadores_regional', 'pontos_fixos', 'templates_whatsapp'].includes(saved)) {
+      if (saved && ['escala', 'prestadores_regional', 'pontos_fixos', 'templates_whatsapp', 'central_inteligencia'].includes(saved)) {
         return saved as ActiveModule;
       }
     } catch (_) {}

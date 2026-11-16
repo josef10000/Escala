@@ -29,6 +29,7 @@ import { applyGreetingToText, getGreetingInfo } from '../utils/greeting';
 import { openWhatsApp } from '../utils/whatsapp';
 import { PontoFixoStatusBadge } from './PontoFixoStatusBadge';
 import { PrestadorCard } from './PrestadorCard';
+import { DailyAgendaEntry, EncaixeRecord } from '../../central_inteligencia/types';
 
 interface SearchAccordionFeedProps {
   query: string;
@@ -40,6 +41,8 @@ interface SearchAccordionFeedProps {
   onEdit?: (p: Prestador) => void;
   onDelete?: (id: string) => void;
   onRecordRecent?: (p: Prestador) => void;
+  encaixes?: EncaixeRecord[];
+  dailyAgendas?: DailyAgendaEntry[];
 }
 
 const QUICK_SEARCH_CHIPS = [
@@ -63,6 +66,8 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
   onEdit,
   onDelete,
   onRecordRecent,
+  encaixes,
+  dailyAgendas,
 }) => {
   const greetingInfo = useMemo(() => getGreetingInfo('auto'), []);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -285,6 +290,8 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
                     isFavorite={favorites.includes(p.id)}
                     onToggleFavorite={onToggleFavorite || (() => {})}
                     onRecordRecent={onRecordRecent}
+                    encaixes={encaixes}
+                    dailyAgendas={dailyAgendas}
                   />
                 ))}
               </div>

@@ -31,6 +31,7 @@ import { WeekendDutyModal } from './components/modals/WeekendDutyModal';
 import { GestorFeedbacksPage } from './components/views/GestorFeedbacksPage';
 import { MobileScheduleView } from './components/views/MobileScheduleView';
 import { PrestadoresRegionalModule } from './features/prestadores_regional/PrestadoresRegionalModule';
+import { CentralInteligenciaModule } from './features/central_inteligencia/CentralInteligenciaModule';
 import { Provider, ShiftAssignment } from './types';
 import { Calendar, Clock, CheckCircle2, AlertCircle, Plus, CalendarDays } from 'lucide-react';
 import { formatFriendlyDate } from './utils/dateUtils';
@@ -122,7 +123,11 @@ function ScheduleAppContent() {
 
   if (activeModule !== 'escala') {
     return (
-      <div className="min-h-screen bg-[#090A0F] text-[#e3e1e9] flex flex-col font-sans selection:bg-[#00d2d3] selection:text-[#003731]">
+      <div
+        className={`${
+          activeModule === 'central_inteligencia' ? 'h-screen overflow-hidden' : 'min-h-screen'
+        } bg-[#090A0F] text-[#e3e1e9] flex flex-col font-sans selection:bg-[#00d2d3] selection:text-[#003731]`}
+      >
         <Navbar
           onOpenLeaderAuth={() => setLeaderAuthModalOpen(true)}
           onOpenRequestsCenter={() => setRequestsCenterModalOpen(true)}
@@ -142,9 +147,11 @@ function ScheduleAppContent() {
           onOpenWeekendDutyModal={() => setWeekendDutyModalOpen(true)}
           onOpenExecutiveReportModal={() => setExecutiveReportModalOpen(true)}
         />
-        <div className="pt-16 flex-1 flex flex-col overflow-hidden">
+        <div className="pt-16 flex-1 flex flex-col min-h-0 overflow-hidden">
           {activeModule === 'gestor_feedbacks' ? (
             <GestorFeedbacksPage />
+          ) : activeModule === 'central_inteligencia' ? (
+            <CentralInteligenciaModule />
           ) : (
             <PrestadoresRegionalModule
               initialTab={
