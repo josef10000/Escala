@@ -565,7 +565,7 @@ export const CentralInteligenciaModule: React.FC = () => {
       </div>
 
       {mobileMenuOpen && (
-        <div className="lg:hidden shrink-0 bg-[#0c0d12] border-b border-white/[0.08] px-4 py-3 space-y-1">
+        <div className="lg:hidden absolute top-[57px] inset-x-0 z-40 bg-[#0c0d12]/98 backdrop-blur-xl border-b border-white/[0.1] px-4 py-3 space-y-1 shadow-2xl max-h-[calc(100vh-160px)] overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -599,6 +599,31 @@ export const CentralInteligenciaModule: React.FC = () => {
               </button>
             );
           })}
+
+          <div className="pt-2 mt-2 border-t border-white/[0.07]">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('conexao');
+                setMobileMenuOpen(false);
+              }}
+              className="w-full flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-xl border border-white/[0.07] hover:border-white/[0.14] text-left cursor-pointer transition-colors"
+            >
+              <span className="flex items-center gap-2.5 min-w-0">
+                {connectionStatus === 'connected' ? (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                ) : (
+                  <WifiOff className="w-4 h-4 text-amber-400 shrink-0" />
+                )}
+                <span className="text-[13px] font-medium text-white truncate">
+                  {connectionStatus === 'connected' ? 'WhatsApp conectado' : 'Conectar WhatsApp'}
+                </span>
+              </span>
+              <span className="text-xs text-slate-400 shrink-0">
+                {connectionStatus === 'connected' ? 'Ativo' : 'QR Code'}
+              </span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -673,7 +698,7 @@ export const CentralInteligenciaModule: React.FC = () => {
       {/* Main Content Area (único scroll da tela) */}
       <main
         ref={mainScrollRef}
-        className="flex-1 min-h-0 overflow-y-auto px-5 py-6 sm:px-8 sm:py-8"
+        className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-3.5 py-4 sm:px-8 sm:py-8"
       >
         <div className="max-w-6xl mx-auto">
           {activeTab === 'overview' && (
@@ -791,9 +816,9 @@ export const CentralInteligenciaModule: React.FC = () => {
 
       {/* Toast discreto de confirmação */}
       {toastMessage && (
-        <div className="fixed bottom-5 right-5 z-50 bg-[#141822] border border-[#00d2d3]/35 text-white px-4 py-2.5 rounded-xl shadow-xl text-[13px] font-medium flex items-center gap-2">
+        <div className="fixed bottom-4 left-3.5 right-3.5 sm:left-auto sm:right-5 sm:bottom-5 z-50 bg-[#141822] border border-[#00d2d3]/35 text-white px-4 py-2.5 rounded-xl shadow-xl text-[13px] font-medium flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 text-[#00d2d3] shrink-0" />
-          <span>{toastMessage}</span>
+          <span className="truncate">{toastMessage}</span>
         </div>
       )}
     </div>

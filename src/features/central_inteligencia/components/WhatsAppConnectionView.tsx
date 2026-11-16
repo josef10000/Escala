@@ -154,7 +154,7 @@ export const WhatsAppConnectionView: React.FC<WhatsAppConnectionViewProps> = ({
       {/* QR Code + Grupos */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
         {/* Instância & QR Code */}
-        <section className="xl:col-span-5 bg-[#0e1016] border border-white/[0.08] rounded-2xl p-6 flex flex-col justify-between gap-6">
+        <section className="xl:col-span-5 bg-[#0e1016] border border-white/[0.08] rounded-2xl p-4 sm:p-6 flex flex-col justify-between gap-6">
           <div className="space-y-5">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -350,7 +350,7 @@ export const WhatsAppConnectionView: React.FC<WhatsAppConnectionViewProps> = ({
         </section>
 
         {/* Grupos Autorizados e Log */}
-        <section className="xl:col-span-7 bg-[#0e1016] border border-white/[0.08] rounded-2xl p-6 flex flex-col justify-between gap-5">
+        <section className="xl:col-span-7 bg-[#0e1016] border border-white/[0.08] rounded-2xl p-4 sm:p-6 flex flex-col justify-between gap-5">
           <div className="space-y-5">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -409,7 +409,7 @@ export const WhatsAppConnectionView: React.FC<WhatsAppConnectionViewProps> = ({
                 <span className="text-[13px] font-medium text-slate-300">
                   Mensagens recentes recebidas
                 </span>
-                <div className="flex items-center gap-1 bg-[#090A0F] p-1 rounded-lg border border-white/[0.07]">
+                <div className="flex items-center gap-1 bg-[#090A0F] p-1 rounded-lg border border-white/[0.07] overflow-x-auto max-w-full">
                   <button
                     type="button"
                     onClick={() => setGroupFilter('all')}
@@ -490,7 +490,7 @@ export const WhatsAppConnectionView: React.FC<WhatsAppConnectionViewProps> = ({
       </div>
 
       {/* Parâmetros Operacionais e LGPD */}
-      <section className="bg-[#0e1016] border border-white/[0.08] rounded-2xl p-6 space-y-4">
+      <section className="bg-[#0e1016] border border-white/[0.08] rounded-2xl p-4 sm:p-6 space-y-4">
         <h3 className="text-base font-semibold text-white">Parâmetros e LGPD</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 text-[13px]">

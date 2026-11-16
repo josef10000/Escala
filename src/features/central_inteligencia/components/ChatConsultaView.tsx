@@ -272,7 +272,7 @@ export const ChatConsultaView: React.FC<ChatConsultaViewProps> = ({
   };
 
   return (
-    <div className="space-y-4 flex flex-col h-[calc(100vh-145px)] min-h-[460px]">
+    <div className="space-y-3 sm:space-y-4 flex flex-col h-[calc(100dvh-230px)] lg:h-[calc(100vh-145px)] min-h-[380px]">
       <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-white/[0.08] pb-4 shrink-0">
         <div>
           <h2 className="text-2xl font-semibold text-white">Consulta Operacional</h2>
@@ -302,7 +302,7 @@ export const ChatConsultaView: React.FC<ChatConsultaViewProps> = ({
       </div>
 
       {/* Área de Conversa com auto-scroll */}
-      <div className="flex-1 min-h-0 overflow-y-auto bg-[#0e1016] border border-white/[0.08] rounded-2xl p-6 space-y-6">
+      <div className="flex-1 min-h-0 overflow-y-auto bg-[#0e1016] border border-white/[0.08] rounded-2xl p-3.5 sm:p-6 space-y-5 sm:space-y-6">
         {messages.map((msg) => {
           const isUser = msg.role === 'user';
           const isExpanded = !!expandedEvidences[msg.id];
@@ -446,21 +446,21 @@ export const ChatConsultaView: React.FC<ChatConsultaViewProps> = ({
           e.preventDefault();
           handleSend();
         }}
-        className="flex items-center gap-3 shrink-0"
+        className="flex items-center gap-2 sm:gap-3 shrink-0"
       >
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Pergunte sobre placa, técnico, região ou pendências..."
-          className="flex-1 px-4 py-3 rounded-xl bg-[#0e1016] border border-white/[0.08] text-sm text-white placeholder-slate-500 focus:border-[#00d2d3] focus:outline-none"
+          className="flex-1 min-w-0 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-[#0e1016] border border-white/[0.08] text-sm text-white placeholder-slate-500 focus:border-[#00d2d3] focus:outline-none"
         />
         <button
           type="submit"
-          className="px-5 py-3 rounded-xl bg-[#00d2d3] hover:bg-[#00e2e3] text-[#003731] text-[13px] font-semibold flex items-center gap-2 cursor-pointer shrink-0 transition-colors"
+          className="px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-[#00d2d3] hover:bg-[#00e2e3] text-[#003731] text-[13px] font-semibold flex items-center gap-2 cursor-pointer shrink-0 transition-colors"
         >
           <Send className="w-4 h-4" />
-          <span>Consultar</span>
+          <span className="hidden sm:inline">Consultar</span>
         </button>
       </form>
     </div>

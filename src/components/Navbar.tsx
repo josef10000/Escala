@@ -104,11 +104,11 @@ export const Navbar: React.FC<NavbarProps> = ({
   }, [isGestorDrawerOpen]);
 
   return (
-    <header className="fixed top-0 inset-x-0 z-50 bg-[#0d0e13]/95 backdrop-blur-2xl border-b border-white/[0.08] text-[#e3e2e7] h-16">
-      <div className="h-16 w-full px-3 sm:px-6 flex items-center justify-between gap-3 overflow-visible relative">
+    <header className="fixed top-0 inset-x-0 z-50 bg-[#0d0e13]/95 backdrop-blur-2xl border-b border-white/[0.08] text-[#e3e2e7]">
+      <div className="h-14 md:h-16 w-full px-3 sm:px-6 flex items-center justify-between gap-2 overflow-visible relative">
         
         {/* Left: Brand + Navigation Segmented Tabs */}
-        <div className="flex items-center gap-3 md:gap-5 shrink-0">
+        <div className="flex items-center gap-3 md:gap-5 min-w-0">
           
           {/* Brand Identity */}
           <button
@@ -131,14 +131,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                   PRO
                 </span>
               </span>
-              <span className="text-[9px] text-[#78958c] font-medium tracking-wider uppercase -mt-0.5">
+              <span className="hidden sm:block text-[9px] text-[#78958c] font-medium tracking-wider uppercase -mt-0.5">
                 Escala & Produtividade
               </span>
             </div>
           </button>
 
-          {/* Module Switcher Tabs (Segmented Glass) */}
-          <nav className="flex items-center gap-1 p-1 bg-white/[0.04] rounded-xl border border-white/[0.06] backdrop-blur-md">
+          {/* Module Switcher Tabs (Desktop >= md) */}
+          <nav className="hidden md:flex items-center gap-1 p-1 bg-white/[0.04] rounded-xl border border-white/[0.06] backdrop-blur-md">
             <button
               type="button"
               onClick={() => setActiveModule('escala')}
@@ -175,8 +175,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <MapPin className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="hidden sm:inline">Pontos Fixos & Agendas</span>
-              <span className="sm:hidden">Pontos Fixos</span>
+              <span>Pontos Fixos & Agendas</span>
             </button>
 
             <button
@@ -189,8 +188,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <Activity className="w-3.5 h-3.5 text-cyan-400" />
-              <span className="hidden sm:inline">Central Operacional</span>
-              <span className="sm:hidden">Central</span>
+              <span>Central Operacional</span>
             </button>
           </nav>
 
@@ -237,14 +235,14 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Right Tools, Gestor Command Drawer & User Profile */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           
           {/* Venda & Repasse de Plantões PJ */}
           {onOpenMarketplace && (
             <button
               type="button"
               onClick={onOpenMarketplace}
-              className="h-8 px-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs font-medium border border-amber-500/25 flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+              className="h-8 px-2 sm:px-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs font-medium border border-amber-500/25 flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
               title="Mural de venda e compra de plantões remunerados PJ"
             >
               <Coins className="w-3.5 h-3.5 text-amber-400" />
@@ -262,7 +260,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={onOpenShareModal}
-              className="h-8 w-8 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-white/70 hover:text-white border border-white/[0.08] flex items-center justify-center transition-colors cursor-pointer shrink-0"
+              className="hidden sm:flex h-8 w-8 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-white/70 hover:text-white border border-white/[0.08] items-center justify-center transition-colors cursor-pointer shrink-0"
               title="Compartilhar Escala com a equipe"
             >
               <Share2 className="w-3.5 h-3.5" />
@@ -296,7 +294,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
               {/* SLIDE-DOWN COMMAND DRAWER (Apple Frosted Glass) */}
               {isGestorDrawerOpen && (
-                <div className="absolute top-full right-0 mt-2 w-[92vw] sm:w-[480px] bg-slate-950/95 backdrop-blur-3xl border border-white/15 rounded-3xl p-5 shadow-[0_25px_70px_rgba(0,0,0,0.85)] z-50 animate-in fade-in slide-in-from-top-3 duration-200 space-y-4">
+                <div className="fixed md:absolute top-[102px] md:top-full right-3 md:right-0 left-3 md:left-auto md:mt-2 md:w-[480px] max-h-[calc(100vh-7rem)] overflow-y-auto bg-slate-950/95 backdrop-blur-3xl border border-white/15 rounded-3xl p-4 sm:p-5 shadow-[0_25px_70px_rgba(0,0,0,0.85)] z-50 animate-in fade-in slide-in-from-top-3 duration-200 space-y-4">
                   {/* Sheen line on top */}
                   <div className="absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent pointer-events-none rounded-t-3xl" />
 
@@ -542,7 +540,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 type="button"
                 onClick={onOpenCollaboratorAuth}
-                className="h-8.5 px-3.5 rounded-2xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 hover:text-white border border-cyan-400/25 hover:border-cyan-400/40 backdrop-blur-md text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-xs active:scale-98 shrink-0"
+                className="h-8.5 px-2.5 sm:px-3.5 rounded-2xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 hover:text-white border border-cyan-400/25 hover:border-cyan-400/40 backdrop-blur-md text-xs font-semibold flex items-center gap-1.5 sm:gap-2 transition-all cursor-pointer shadow-xs active:scale-98 shrink-0"
                 title="Entrar no seu perfil de colaborador"
               >
                 <UserIcon className="w-3.5 h-3.5 text-cyan-400" />
@@ -554,6 +552,58 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
       </div>
+
+      {/* Mobile Module Switcher Bar (< md) */}
+      <nav className="md:hidden grid grid-cols-4 gap-1 px-2.5 py-1.5 border-t border-white/[0.06] bg-[#0a0b10]">
+        <button
+          type="button"
+          onClick={() => setActiveModule('escala')}
+          className={`flex items-center justify-center gap-1 py-1.5 px-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
+            activeModule === 'escala'
+              ? 'bg-white/[0.12] text-white border border-white/10'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <Calendar className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+          <span className="truncate">Escala</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveModule('prestadores_regional')}
+          className={`flex items-center justify-center gap-1 py-1.5 px-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
+            activeModule === 'prestadores_regional'
+              ? 'bg-cyan-500/20 text-white border border-cyan-400/40'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <Users className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+          <span className="truncate">Técnicos</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveModule('pontos_fixos')}
+          className={`flex items-center justify-center gap-1 py-1.5 px-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
+            activeModule === 'pontos_fixos'
+              ? 'bg-emerald-500/20 text-white border border-emerald-400/40'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          <span className="truncate">Pontos</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveModule('central_inteligencia')}
+          className={`flex items-center justify-center gap-1 py-1.5 px-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
+            activeModule === 'central_inteligencia'
+              ? 'bg-cyan-500/20 text-white border border-cyan-400/40'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <Activity className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+          <span className="truncate">Central</span>
+        </button>
+      </nav>
     </header>
   );
 };

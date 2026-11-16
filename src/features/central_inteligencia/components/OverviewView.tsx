@@ -163,7 +163,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
           <button
             type="button"
             onClick={() => onOpenEncaixesFiltered({ status: 'all', onlyReview: false })}
-            className="p-5 text-left hover:bg-white/[0.03] transition-colors cursor-pointer group"
+            className="p-3.5 sm:p-5 text-left hover:bg-white/[0.03] transition-colors cursor-pointer group"
           >
             <div className="flex items-center justify-between text-xs text-slate-400">
               <span>Encaixes hoje</span>
@@ -178,7 +178,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
           <button
             type="button"
             onClick={() => onOpenEncaixesFiltered({ status: 'aceito', onlyReview: false })}
-            className="p-5 text-left hover:bg-white/[0.03] transition-colors cursor-pointer group"
+            className="p-3.5 sm:p-5 text-left hover:bg-white/[0.03] transition-colors cursor-pointer group"
           >
             <div className="flex items-center justify-between text-xs text-slate-400">
               <span>Aceites</span>
@@ -193,7 +193,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
           <button
             type="button"
             onClick={() => onOpenEncaixesFiltered({ status: 'recusado', onlyReview: false })}
-            className="p-5 text-left hover:bg-white/[0.03] transition-colors cursor-pointer group"
+            className="p-3.5 sm:p-5 text-left hover:bg-white/[0.03] transition-colors cursor-pointer group"
           >
             <div className="flex items-center justify-between text-xs text-slate-400">
               <span>Recusas</span>
@@ -208,7 +208,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
           <button
             type="button"
             onClick={() => onOpenEncaixesFiltered({ status: 'sem_resposta', onlyReview: false })}
-            className="p-5 text-left hover:bg-white/[0.03] transition-colors cursor-pointer group"
+            className="p-3.5 sm:p-5 text-left hover:bg-white/[0.03] transition-colors cursor-pointer group"
           >
             <div className="flex items-center justify-between text-xs text-slate-400">
               <span>Sem resposta</span>
@@ -223,7 +223,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
           <button
             type="button"
             onClick={() => onOpenOcorrenciasFiltered({ state: 'all', onlyReview: false })}
-            className="p-5 text-left hover:bg-white/[0.03] transition-colors cursor-pointer group"
+            className="p-3.5 sm:p-5 text-left hover:bg-white/[0.03] transition-colors cursor-pointer group"
           >
             <div className="flex items-center justify-between text-xs text-slate-400">
               <span>Ocorrências</span>
@@ -238,7 +238,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
           <button
             type="button"
             onClick={handleOpenReviewSummary}
-            className="p-5 text-left hover:bg-white/[0.03] transition-colors cursor-pointer group"
+            className="p-3.5 sm:p-5 text-left hover:bg-white/[0.03] transition-colors cursor-pointer group"
           >
             <div className="flex items-center justify-between text-xs text-slate-400">
               <span>Para revisão</span>
@@ -255,7 +255,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
       {/* Grade Principal: Aguardando Resposta e Revisão / Agendas */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Coluna Esquerda: Aguardando Retorno */}
-        <section className="lg:col-span-6 bg-[#0e1016] border border-white/[0.08] rounded-2xl p-6 space-y-4">
+        <section className="lg:col-span-6 bg-[#0e1016] border border-white/[0.08] rounded-2xl p-4 sm:p-6 space-y-4">
           <div className="flex items-center justify-between gap-2">
             <h3 className="text-base font-semibold text-white">
               Aguardando Retorno ({aguardando.length})
@@ -317,7 +317,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
 
         {/* Coluna Direita: Revisão Humana + Agendas de Hoje */}
         <section className="lg:col-span-6 space-y-6">
-          <div className="bg-[#0e1016] border border-white/[0.08] rounded-2xl p-6 space-y-4">
+          <div className="bg-[#0e1016] border border-white/[0.08] rounded-2xl p-4 sm:p-6 space-y-4">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-base font-semibold text-white">
                 Itens para Revisão Humana
@@ -406,7 +406,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
             )}
           </div>
 
-          <div className="bg-[#0e1016] border border-white/[0.08] rounded-2xl p-6 space-y-4">
+          <div className="bg-[#0e1016] border border-white/[0.08] rounded-2xl p-4 sm:p-6 space-y-4">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-base font-semibold text-white">Agendas de Hoje</h3>
               <button
@@ -466,7 +466,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
       </div>
 
       {/* Ocorrências Recentes */}
-      <section className="bg-[#0e1016] border border-white/[0.08] rounded-2xl p-6 space-y-4">
+      <section className="bg-[#0e1016] border border-white/[0.08] rounded-2xl p-4 sm:p-6 space-y-4">
         <div className="flex items-center justify-between gap-2">
           <h3 className="text-base font-semibold text-white">Ocorrências Recentes</h3>
           <button

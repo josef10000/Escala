@@ -543,7 +543,7 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
                 </button>
               </div>
 
-              <div className="grid grid-cols-4 gap-2 font-mono tabular-nums">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-2 font-mono tabular-nums">
                 <div>
                   <div className="text-[11px] font-sans text-white/45">Aceite</div>
                   <div className="text-sm font-semibold text-emerald-300 leading-tight mt-0.5">
@@ -684,7 +684,7 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
 
             {/* Quick Message Popover Menu (Apple Glass Sheet) */}
             {isQuickMsgOpen && (
-              <div className="absolute right-0 bottom-full mb-2 w-72 bg-slate-950/90 backdrop-blur-3xl border border-white/[0.15] rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] p-2 z-50 animate-in fade-in duration-150 space-y-1">
+              <div className="absolute right-0 bottom-full mb-2 w-72 max-w-[calc(100vw-3rem)] bg-slate-950/90 backdrop-blur-3xl border border-white/[0.15] rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] p-2 z-50 animate-in fade-in duration-150 space-y-1">
                 <div className="px-3 py-2 border-b border-white/[0.08] flex items-center justify-between">
                   <span className="text-[11px] font-semibold text-white/60 uppercase tracking-wider flex items-center gap-1.5">
                     <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />

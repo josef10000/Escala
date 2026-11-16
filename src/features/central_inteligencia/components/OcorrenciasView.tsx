@@ -201,7 +201,7 @@ export const OcorrenciasView: React.FC<OcorrenciasViewProps> = ({
             onChange={(e) =>
               setCategoryFilter(e.target.value as 'all' | OcorrenciaCategory)
             }
-            className="px-3.5 py-2.5 rounded-xl bg-[#0e1016] border border-white/[0.08] text-[13px] text-slate-200 focus:border-[#00d2d3] focus:outline-none cursor-pointer"
+            className="w-full sm:w-auto px-3.5 py-2.5 rounded-xl bg-[#0e1016] border border-white/[0.08] text-[13px] text-slate-200 focus:border-[#00d2d3] focus:outline-none cursor-pointer"
           >
             <option value="all">Todas categorias</option>
             {availableCategories.map((cat) => (
@@ -214,7 +214,7 @@ export const OcorrenciasView: React.FC<OcorrenciasViewProps> = ({
           <select
             value={stateFilter}
             onChange={(e) => onStateFilterChange(e.target.value as 'all' | OcorrenciaState)}
-            className="px-3.5 py-2.5 rounded-xl bg-[#0e1016] border border-white/[0.08] text-[13px] text-slate-200 focus:border-[#00d2d3] focus:outline-none cursor-pointer"
+            className="w-full sm:w-auto px-3.5 py-2.5 rounded-xl bg-[#0e1016] border border-white/[0.08] text-[13px] text-slate-200 focus:border-[#00d2d3] focus:outline-none cursor-pointer"
           >
             <option value="all">Todos os estados ({ocorrencias.length})</option>
             {Object.entries(STATE_LABELS).map(([k, label]) => (
@@ -268,7 +268,7 @@ export const OcorrenciasView: React.FC<OcorrenciasViewProps> = ({
             return (
               <article
                 key={item.id}
-                className={`p-6 space-y-3.5 transition-colors ${
+                className={`p-4 sm:p-6 space-y-3.5 transition-colors ${
                   isHighlighted ? 'bg-cyan-500/[0.05]' : ''
                 }`}
               >

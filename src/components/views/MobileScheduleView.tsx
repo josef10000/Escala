@@ -28,7 +28,10 @@ import {
   X,
   FileCheck,
   ShieldCheck,
-  Check
+  Check,
+  Lock,
+  Coins,
+  Notebook
 } from 'lucide-react';
 import { Provider, ShiftAssignment } from '../../types';
 
@@ -38,6 +41,9 @@ interface MobileScheduleViewProps {
   onOpenRequestsCenter?: () => void;
   onSwitchToDesktopGrid?: () => void;
   onOpenCollaboratorAuth?: (provider?: Provider) => void;
+  onOpenLeaderAuth?: () => void;
+  onOpenMarketplace?: () => void;
+  onOpenFeedbacks?: () => void;
 }
 
 export const MobileScheduleView: React.FC<MobileScheduleViewProps> = ({
@@ -45,6 +51,9 @@ export const MobileScheduleView: React.FC<MobileScheduleViewProps> = ({
   onNotifyAbsence,
   onOpenRequestsCenter,
   onOpenCollaboratorAuth,
+  onOpenLeaderAuth,
+  onOpenMarketplace,
+  onOpenFeedbacks,
 }) => {
   const {
     currentYear,
@@ -56,11 +65,14 @@ export const MobileScheduleView: React.FC<MobileScheduleViewProps> = ({
     activeRegime,
     shiftTypes,
     role,
+    isLeaderAuthenticated,
     acknowledgeAllMonthlyShifts,
     isMonthPublished,
     activeModule,
     setActiveModule,
   } = useSchedule();
+
+  const [mobileNotice, setMobileNotice] = useState<string | null>(null);
 
   // Bottom Navigation Tab: 'escala' | 'equipe' | 'trocas' (NO 'perfil' tab as requested)
   const [activeTab, setActiveTab] = useState<'escala' | 'equipe' | 'trocas'>('escala');
@@ -178,7 +190,8 @@ export const MobileScheduleView: React.FC<MobileScheduleViewProps> = ({
   // Export to Google Calendar / .ICS file
   const handleExportToICS = () => {
     if (myMonthlyShifts.length === 0) {
-      alert('Nenhum plantão agendado para este mês.');
+      setMobileNotice('Nenhum plantão agendado para este mês.');
+      window.setTimeout(() => setMobileNotice(null), 3000);
       return;
     }
 
@@ -220,7 +233,7 @@ export const MobileScheduleView: React.FC<MobileScheduleViewProps> = ({
   };
 
   return (
-    <div className="w-full max-w-md mx-auto min-h-screen pb-24 text-slate-100 bg-[#0c121c] flex flex-col antialiased">
+    <div className="w-full max-w-md mx-auto min-h-screen pb-24 text-slate-100 bg-[#0c121c] flex flex-col antialiased overflow-x-hidden">
       
       {/* 1. TOP HEADER (Avatar, Name, Date, Notification Bell) */}
       <div className="pt-3 pb-2.5 px-4 flex items-center justify-between sticky top-0 bg-[#0c121c]/95 backdrop-blur-md z-30 border-b border-[#1e2a3a] shadow-sm">
@@ -297,12 +310,38 @@ export const MobileScheduleView: React.FC<MobileScheduleViewProps> = ({
           )}
         </div>
 
-        {/* Action icons (WhatsApp Share + Notification Bell) */}
-        <div className="flex items-center gap-2">
+        {/* Action icons (Gestor, Marketplace, WhatsApp Share, Notification Bell) */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {onOpenMarketplace && (
+            <button
+              type="button"
+              onClick={onOpenMarketplace}
+              className="w-9 h-9 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-300 hover:bg-amber-500/20 transition-colors cursor-pointer shadow-sm"
+              title="Venda & Repasse de Plantões"
+            >
+              <Coins className="w-4 h-4" />
+            </button>
+          )}
+
+          {onOpenLeaderAuth && (
+            <button
+              type="button"
+              onClick={onOpenLeaderAuth}
+              className={`w-9 h-9 rounded-full border flex items-center justify-center transition-colors cursor-pointer shadow-sm ${
+                isLeaderAuthenticated
+                  ? 'bg-cyan-500/20 border-cyan-400/50 text-cyan-300'
+                  : 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white'
+              }`}
+              title={isLeaderAuthenticated ? 'Gestor Autenticado' : 'Acesso Gestor'}
+            >
+              {isLeaderAuthenticated ? <ShieldCheck className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+            </button>
+          )}
+
           <button
             type="button"
             onClick={handleShareMyScheduleWhatsApp}
-            className="w-10 h-10 rounded-full bg-cyan-950/70 border border-cyan-800/80 flex items-center justify-center text-cyan-300 hover:bg-cyan-900/80 transition-colors cursor-pointer shadow-sm"
+            className="w-9 h-9 rounded-full bg-cyan-950/70 border border-cyan-800/80 flex items-center justify-center text-cyan-300 hover:bg-cyan-900/80 transition-colors cursor-pointer shadow-sm"
             title="Compartilhar minha escala no WhatsApp"
           >
             <Share2 className="w-4 h-4" />
@@ -311,14 +350,20 @@ export const MobileScheduleView: React.FC<MobileScheduleViewProps> = ({
           <button
             type="button"
             onClick={onOpenRequestsCenter}
-            className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-700 transition-colors relative cursor-pointer shadow-sm"
+            className="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-700 transition-colors relative cursor-pointer shadow-sm"
             title="Notificações e Solicitações"
           >
             <Bell className="w-4 h-4" />
-            <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-cyan-400 ring-2 ring-[#0c121c]" />
+            <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-cyan-400 ring-2 ring-[#0c121c]" />
           </button>
         </div>
       </div>
+
+      {mobileNotice && (
+        <div className="mx-4 mt-2 px-3.5 py-2 bg-amber-950/70 border border-amber-700/60 rounded-xl text-xs text-amber-200 text-center">
+          {mobileNotice}
+        </div>
+      )}
 
       {/* Quick Module Switcher on Mobile (Clean 4-column grid bar, zero scrollbars) */}
       <div className="px-3 py-2 bg-[#0d1420] border-b border-[#1e2a3a] grid grid-cols-4 gap-1">
@@ -472,14 +517,14 @@ export const MobileScheduleView: React.FC<MobileScheduleViewProps> = ({
                   {teammatesOnDutyToday.slice(0, 3).map(tm => (
                     <div
                       key={tm.id}
-                      className="inline-block h-6 w-6 rounded-full ring-2 ring-white/60 bg-slate-800 text-cyan-400 text-xs font-black flex items-center justify-center shadow-xs"
+                      className="h-6 w-6 rounded-full ring-2 ring-white/60 bg-slate-800 text-cyan-400 text-xs font-black flex items-center justify-center shadow-xs"
                       title={tm.name}
                     >
                       {getInitials(tm.name)}
                     </div>
                   ))}
                   {teammatesOnDutyToday.length > 3 && (
-                    <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white/60 bg-white/30 text-white text-xs font-black flex items-center justify-center">
+                    <div className="h-6 w-6 rounded-full ring-2 ring-white/60 bg-white/30 text-white text-xs font-black flex items-center justify-center">
                       +{teammatesOnDutyToday.length - 3}
                     </div>
                   )}
@@ -724,6 +769,17 @@ export const MobileScheduleView: React.FC<MobileScheduleViewProps> = ({
               <Calendar className="w-4 h-4 text-cyan-400" />
               <span>Sincronizar com Google Agenda (.ics)</span>
             </button>
+
+            {isLeaderAuthenticated && onOpenFeedbacks && (
+              <button
+                type="button"
+                onClick={onOpenFeedbacks}
+                className="w-full py-3 px-4 rounded-2xl bg-purple-950/40 hover:bg-purple-900/50 active:scale-98 border border-purple-700/50 flex items-center justify-center gap-2 text-xs font-bold text-purple-200 transition-all cursor-pointer shadow-md"
+              >
+                <Notebook className="w-4 h-4 text-purple-300" />
+                <span>Abrir Diário de Feedbacks (Gestor)</span>
+              </button>
+            )}
           </div>
 
         </div>

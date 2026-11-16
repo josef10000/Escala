@@ -147,7 +147,7 @@ export const AgendasGeografiaView: React.FC<AgendasGeografiaViewProps> = ({
       {subTab === 'agendas' ? (
         <div className="space-y-6">
           {/* Simulador de Agenda Diária + Navegação rápida de datas */}
-          <section className="bg-[#0e1016] border border-white/[0.08] rounded-2xl p-6 space-y-4">
+          <section className="bg-[#0e1016] border border-white/[0.08] rounded-2xl p-4 sm:p-6 space-y-4">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
               <div>
                 <h3 className="text-base font-semibold text-white">
@@ -259,7 +259,7 @@ export const AgendasGeografiaView: React.FC<AgendasGeografiaViewProps> = ({
               agendasForDate.map((entry) => (
                 <article
                   key={entry.id}
-                  className="bg-[#0e1016] border border-white/[0.08] rounded-2xl p-6 space-y-4"
+                  className="bg-[#0e1016] border border-white/[0.08] rounded-2xl p-4 sm:p-6 space-y-4"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -352,7 +352,10 @@ export const AgendasGeografiaView: React.FC<AgendasGeografiaViewProps> = ({
       ) : (
         <div className="space-y-6">
           {/* Testador Determinístico de CEP com cruzamento de agenda do dia */}
-          <section className="bg-[#0e1016] border border-white/[0.08] rounded-2xl p-6 space-y-4">
+          <section
+            id="cep-lookup-card"
+            className="bg-[#0e1016] border border-white/[0.08] rounded-2xl p-4 sm:p-6 space-y-4 scroll-mt-4"
+          >
             <div>
               <h3 className="text-base font-semibold text-white">
                 Classificador Geográfico por CEP ou Bairro
@@ -458,9 +461,38 @@ export const AgendasGeografiaView: React.FC<AgendasGeografiaViewProps> = ({
             )}
           </section>
 
-          {/* Tabela da Hierarquia Geográfica */}
+          {/* Lista/Tabela da Hierarquia Geográfica */}
           <section className="bg-[#0e1016] border border-white/[0.08] rounded-2xl overflow-hidden">
-            <div className="overflow-x-auto">
+            {/* Cards Mobile (< md) */}
+            <div className="md:hidden divide-y divide-white/[0.06]">
+              {geoHierarchy.map((g) => (
+                <button
+                  key={g.id}
+                  type="button"
+                  onClick={() => {
+                    setGeoQuery(g.cepPrefixes[0] || g.subRegion);
+                    document
+                      .getElementById('cep-lookup-card')
+                      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  className="w-full text-left p-4 space-y-1.5 hover:bg-white/[0.025] cursor-pointer transition-colors"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium text-sm text-white">{g.macroRegion}</span>
+                    <span className="font-mono text-xs text-cyan-300 shrink-0">{g.subRegion}</span>
+                  </div>
+                  <div className="text-xs text-slate-300">
+                    Setores: {g.sectors.join(' · ')} · CEP {g.cepPrefixes.join(', ')}
+                  </div>
+                  <div className="text-xs text-slate-400 leading-relaxed">
+                    {g.neighborhoods.join(', ')} ({g.cities.join(', ')})
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* Tabela Desktop (>= md) */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-white/[0.08] text-xs text-slate-400">

@@ -481,7 +481,7 @@ export function PrestadoresRegionalModule({
   };
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 bg-[#090A0F] text-[#e3e1e9] font-sans relative overflow-y-auto px-4 sm:px-6 py-5 space-y-4">
+    <div className="flex-1 flex flex-col min-w-0 bg-[#090A0F] text-[#e3e1e9] font-sans relative overflow-y-auto overflow-x-hidden px-3.5 sm:px-6 py-4 sm:py-5 space-y-4">
       {/* Ambient Aurora Glow Background for True Glassmorphism */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 select-none">
         {/* Soft Escala Cyan Aurora Blob Top-Left */}
@@ -529,7 +529,7 @@ export function PrestadoresRegionalModule({
         </div>
 
         {/* Search Input + Action Button */}
-        <div className="flex items-center gap-2.5 flex-1 max-w-xl md:justify-end">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 flex-1 max-w-xl md:justify-end">
           <div className="relative flex-1">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
               <Search className="w-4 h-4 text-[#00d2d3]" />
@@ -540,7 +540,7 @@ export function PrestadoresRegionalModule({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Busca universal (técnico, código, cidade, ponto fixo)..."
-              className="w-full pl-9 pr-16 py-2 bg-[#13151c] text-[#e3e1e9] placeholder-slate-400 text-xs sm:text-sm rounded-xl border border-[#1e2029] focus:border-[#00d2d3] focus:outline-none transition-all shadow-inner font-sans"
+              className="w-full pl-9 pr-10 sm:pr-16 py-2 bg-[#13151c] text-[#e3e1e9] placeholder-slate-400 text-xs sm:text-sm rounded-xl border border-[#1e2029] focus:border-[#00d2d3] focus:outline-none transition-all shadow-inner font-sans"
             />
             {searchQuery ? (
               <button
@@ -551,7 +551,7 @@ export function PrestadoresRegionalModule({
                 <X className="w-3.5 h-3.5" />
               </button>
             ) : (
-              <span className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-[10px] font-mono text-slate-500">
+              <span className="hidden sm:flex absolute inset-y-0 right-0 pr-2.5 items-center text-[10px] font-mono text-slate-500">
                 Ctrl+K
               </span>
             )}
@@ -560,7 +560,7 @@ export function PrestadoresRegionalModule({
           <button
             type="button"
             onClick={handlePrimaryCTA}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#00d2d3] hover:bg-[#00e2e3] active:scale-[0.98] text-[#003731] font-black text-xs shadow-md border border-[#00d2d3] transition-all cursor-pointer whitespace-nowrap shrink-0"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#00d2d3] hover:bg-[#00e2e3] active:scale-[0.98] text-[#003731] font-black text-xs shadow-md border border-[#00d2d3] transition-all cursor-pointer whitespace-nowrap shrink-0"
           >
             <Plus className="w-4 h-4" />
             <span>{mainTab === 'prestadores' ? 'Novo Prestador' : 'Novo Ponto Fixo'}</span>

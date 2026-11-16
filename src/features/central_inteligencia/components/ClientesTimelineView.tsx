@@ -6,6 +6,7 @@ import {
   AlertCircle,
   Copy,
   X,
+  ArrowUp,
 } from 'lucide-react';
 import { ClienteChamadoRecord } from '../types';
 
@@ -82,7 +83,10 @@ export const ClientesTimelineView: React.FC<ClientesTimelineViewProps> = ({
       {/* Layout Split */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
         {/* Lista de Clientes */}
-        <div className="xl:col-span-4 bg-[#0e1016] border border-white/[0.08] rounded-2xl overflow-hidden divide-y divide-white/[0.06]">
+        <div
+          id="clientes-list"
+          className="xl:col-span-4 bg-[#0e1016] border border-white/[0.08] rounded-2xl overflow-hidden divide-y divide-white/[0.06] scroll-mt-4"
+        >
           {filtered.length === 0 ? (
             <div className="p-10 text-center text-sm text-slate-400">
               Nenhum cliente ou chamado encontrado.
@@ -94,8 +98,17 @@ export const ClientesTimelineView: React.FC<ClientesTimelineViewProps> = ({
                 <button
                   key={cli.id}
                   type="button"
-                  onClick={() => setSelectedId(cli.id)}
-                  className={`w-full text-left px-5 py-4 space-y-1 cursor-pointer transition-colors ${
+                  onClick={() => {
+                    setSelectedId(cli.id);
+                    if (window.innerWidth < 1280) {
+                      window.setTimeout(() => {
+                        document
+                          .getElementById('cliente-timeline-detail')
+                          ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }, 40);
+                    }
+                  }}
+                  className={`w-full text-left px-4 sm:px-5 py-3.5 sm:py-4 space-y-1 cursor-pointer transition-colors ${
                     isSelected ? 'bg-cyan-500/[0.08]' : 'hover:bg-white/[0.025]'
                   }`}
                 >
@@ -124,10 +137,28 @@ export const ClientesTimelineView: React.FC<ClientesTimelineViewProps> = ({
         </div>
 
         {/* Linha do Tempo */}
-        <div className="xl:col-span-8 bg-[#0e1016] border border-white/[0.08] rounded-2xl p-6 space-y-5">
+        <div
+          id="cliente-timeline-detail"
+          className="xl:col-span-8 bg-[#0e1016] border border-white/[0.08] rounded-2xl p-4 sm:p-6 space-y-5 scroll-mt-4"
+        >
+          <div className="xl:hidden flex items-center justify-between border-b border-white/[0.06] pb-3">
+            <span className="text-xs font-medium text-slate-400">Linha do Tempo</span>
+            <button
+              type="button"
+              onClick={() =>
+                document
+                  .getElementById('clientes-list')
+                  ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }
+              className="text-xs font-medium text-cyan-300 hover:text-cyan-200 flex items-center gap-1 cursor-pointer"
+            >
+              <ArrowUp className="w-3.5 h-3.5" />
+              <span>Voltar aos clientes</span>
+            </button>
+          </div>
           {!activeClient ? (
             <div className="py-14 text-center text-sm text-slate-400">
-              Selecione um cliente à esquerda para visualizar a linha do tempo.
+              Selecione um cliente para visualizar a linha do tempo.
             </div>
           ) : (
             <>
@@ -215,7 +246,7 @@ export const ClientesTimelineView: React.FC<ClientesTimelineViewProps> = ({
                       </div>
                     </div>
 
-                    <div className="space-y-2 pl-6">
+                    <div className="space-y-2 pl-0 sm:pl-6">
                       <p className="text-sm text-slate-200 leading-relaxed border-l border-white/15 pl-3.5">
                         {ev.originalText}
                       </p>

@@ -394,7 +394,7 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shrink-0">
                         <button
                           type="button"
                           onClick={() => {
@@ -753,7 +753,7 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shrink-0">
                         <button
                           type="button"
                           onClick={() => {
@@ -885,7 +885,7 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
                         <p className="text-xs text-slate-400 mt-0.5">{regra.subtitulo}</p>
                       </div>
 
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shrink-0">
                         <button
                           type="button"
                           onClick={() => {

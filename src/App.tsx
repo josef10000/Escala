@@ -147,7 +147,7 @@ function ScheduleAppContent() {
           onOpenWeekendDutyModal={() => setWeekendDutyModalOpen(true)}
           onOpenExecutiveReportModal={() => setExecutiveReportModalOpen(true)}
         />
-        <div className="pt-16 flex-1 flex flex-col min-h-0 overflow-hidden">
+        <div className="pt-[98px] md:pt-16 flex-1 flex flex-col min-h-0 overflow-hidden">
           {activeModule === 'gestor_feedbacks' ? (
             <GestorFeedbacksPage />
           ) : activeModule === 'central_inteligencia' ? (
@@ -168,14 +168,46 @@ function ScheduleAppContent() {
           )}
         </div>
 
-        {/* Global Modals for Navbar */}
+        {/* Global Modals for Navbar across all modules */}
         <LeaderAuthModal
           isOpen={leaderAuthModalOpen}
           onClose={() => setLeaderAuthModalOpen(false)}
         />
+        <LeaderRequestsCenterModal
+          isOpen={requestsCenterModalOpen}
+          onClose={() => setRequestsCenterModalOpen(false)}
+        />
+        <WhatsAppExportModal
+          isOpen={whatsAppModalOpen}
+          onClose={() => setWhatsAppModalOpen(false)}
+        />
+        <AuditLogModal
+          isOpen={auditLogOpen}
+          onClose={() => setAuditLogOpen(false)}
+        />
+        <WeekendDutyModal
+          isOpen={weekendDutyModalOpen}
+          onClose={() => setWeekendDutyModalOpen(false)}
+        />
+        <ShiftMarketplaceModal
+          isOpen={marketplaceModalOpen}
+          onClose={() => setMarketplaceModalOpen(false)}
+          onOpenSellModal={() => setShiftSaleModalOpen(true)}
+        />
+        <ShiftSaleModal
+          isOpen={shiftSaleModalOpen}
+          onClose={() => setShiftSaleModalOpen(false)}
+          defaultDate={saleModalDefaultDate}
+          defaultProviderId={saleModalDefaultProviderId}
+          onOfferCreated={() => {
+            setShiftSaleModalOpen(false);
+            setMarketplaceModalOpen(true);
+          }}
+        />
         <CollaboratorProfileModal
           isOpen={profileModalOpen}
           onClose={() => setProfileModalOpen(false)}
+          onOpenCollaboratorAuth={() => setCollaboratorAuthOpen(true)}
         />
         <CollaboratorAuthModal
           isOpen={collaboratorAuthOpen}
@@ -184,6 +216,10 @@ function ScheduleAppContent() {
             setAuthModalProvider(null);
           }}
           targetProvider={authModalProvider}
+          onOpenLeaderAuth={() => {
+            setCollaboratorAuthOpen(false);
+            setLeaderAuthModalOpen(true);
+          }}
         />
       </div>
     );
@@ -202,6 +238,9 @@ function ScheduleAppContent() {
             setAuthModalProvider(prov || null);
             setCollaboratorAuthOpen(true);
           }}
+          onOpenLeaderAuth={() => setLeaderAuthModalOpen(true)}
+          onOpenMarketplace={() => setMarketplaceModalOpen(true)}
+          onOpenFeedbacks={() => setActiveModule('gestor_feedbacks')}
         />
       </div>
 

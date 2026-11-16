@@ -11,6 +11,7 @@ import {
   History,
   UserCheck,
   RotateCcw,
+  ArrowUp,
 } from 'lucide-react';
 import { Prestador } from '../../prestadores_regional/types';
 import { EncaixeRecord, EncaixeStatus } from '../types';
@@ -207,7 +208,7 @@ export const EncaixesView: React.FC<EncaixesViewProps> = ({
           <select
             value={statusFilter}
             onChange={(e) => onStatusFilterChange(e.target.value as 'all' | EncaixeStatus)}
-            className="px-3.5 py-2.5 rounded-xl bg-[#0e1016] border border-white/[0.08] text-[13px] text-slate-200 focus:border-[#00d2d3] focus:outline-none cursor-pointer"
+            className="w-full sm:w-auto px-3.5 py-2.5 rounded-xl bg-[#0e1016] border border-white/[0.08] text-[13px] text-slate-200 focus:border-[#00d2d3] focus:outline-none cursor-pointer"
           >
             <option value="all">Todos os estados ({encaixes.length})</option>
             {Object.entries(STATUS_LABELS).map(([k, label]) => (
@@ -249,12 +250,78 @@ export const EncaixesView: React.FC<EncaixesViewProps> = ({
       {/* Layout Split com Inspetor Sticky */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
         {/* Lista de Encaixes */}
-        <div className="xl:col-span-7 bg-[#0e1016] border border-white/[0.08] rounded-2xl overflow-hidden">
-          <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between text-xs text-slate-400">
+        <div
+          id="encaixes-list"
+          className="xl:col-span-7 bg-[#0e1016] border border-white/[0.08] rounded-2xl overflow-hidden scroll-mt-4"
+        >
+          <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between gap-2 text-xs text-slate-400">
             <span>Exibindo {filtered.length} de {encaixes.length} registros</span>
-            <span>Clique em uma linha para inspecionar</span>
+            <span className="hidden sm:inline">Clique em uma linha para inspecionar</span>
+            <span className="sm:hidden">Toque para inspecionar</span>
           </div>
-          <div className="overflow-x-auto">
+
+          {/* Lista Mobile em Cards (< md) */}
+          <div className="md:hidden divide-y divide-white/[0.06]">
+            {filtered.length === 0 ? (
+              <div className="py-10 px-4 text-center text-sm text-slate-400">
+                Nenhum encaixe encontrado para os filtros aplicados.
+              </div>
+            ) : (
+              filtered.map((item) => {
+                const isSelected = activeEncaixe?.id === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => {
+                      onSelectEncaixe(item.id);
+                      if (window.innerWidth < 1280) {
+                        window.setTimeout(() => {
+                          document
+                            .getElementById('encaixe-inspector')
+                            ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 40);
+                      }
+                    }}
+                    className={`w-full text-left p-4 space-y-2 transition-colors cursor-pointer ${
+                      isSelected ? 'bg-cyan-500/[0.09]' : 'hover:bg-white/[0.025]'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="font-medium text-sm text-white flex items-center gap-1.5">
+                          <span className="truncate">{item.clientName}</span>
+                          {item.needsReview && (
+                            <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                          )}
+                        </div>
+                        <div className="text-xs text-slate-400 font-mono tabular-nums mt-0.5">
+                          {item.plate || 'Sem placa'} · NSU {item.nsu || 'N/I'}
+                        </div>
+                      </div>
+                      <span
+                        className={`text-xs font-medium shrink-0 ${statusTextClass(item.status)}`}
+                      >
+                        {STATUS_LABELS[item.status]}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2 text-xs text-slate-300">
+                      <span className="truncate">
+                        {item.subRegion} ({item.sector}) · {item.technicianName || 'Não definido'}
+                      </span>
+                      <span className="font-mono text-slate-400 tabular-nums shrink-0">
+                        {item.responseMinutes !== undefined ? `${item.responseMinutes}m` : '—'}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })
+            )}
+          </div>
+
+          {/* Tabela Desktop (>= md) */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-white/[0.08] text-xs text-slate-400">
@@ -278,7 +345,16 @@ export const EncaixesView: React.FC<EncaixesViewProps> = ({
                     return (
                       <tr
                         key={item.id}
-                        onClick={() => onSelectEncaixe(item.id)}
+                        onClick={() => {
+                          onSelectEncaixe(item.id);
+                          if (window.innerWidth < 1280) {
+                            window.setTimeout(() => {
+                              document
+                                .getElementById('encaixe-inspector')
+                                ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }, 40);
+                          }
+                        }}
                         className={`cursor-pointer transition-colors ${
                           isSelected ? 'bg-cyan-500/[0.09]' : 'hover:bg-white/[0.025]'
                         }`}
@@ -319,10 +395,28 @@ export const EncaixesView: React.FC<EncaixesViewProps> = ({
         </div>
 
         {/* Inspetor Sticky à direita */}
-        <div className="xl:col-span-5 xl:sticky xl:top-2 bg-[#0e1016] border border-white/[0.08] rounded-2xl p-6 space-y-5">
+        <div
+          id="encaixe-inspector"
+          className="xl:col-span-5 xl:sticky xl:top-2 bg-[#0e1016] border border-white/[0.08] rounded-2xl p-4 sm:p-6 space-y-5 scroll-mt-4"
+        >
+          <div className="xl:hidden flex items-center justify-between border-b border-white/[0.06] pb-3">
+            <span className="text-xs font-medium text-slate-400">Detalhes do Encaixe</span>
+            <button
+              type="button"
+              onClick={() =>
+                document
+                  .getElementById('encaixes-list')
+                  ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }
+              className="text-xs font-medium text-cyan-300 hover:text-cyan-200 flex items-center gap-1 cursor-pointer"
+            >
+              <ArrowUp className="w-3.5 h-3.5" />
+              <span>Voltar à lista</span>
+            </button>
+          </div>
           {!activeEncaixe ? (
             <div className="py-14 text-center text-sm text-slate-400">
-              Selecione um encaixe à esquerda para consultar os detalhes.
+              Selecione um encaixe para consultar os detalhes.
             </div>
           ) : (
             <>
@@ -598,7 +692,7 @@ export const EncaixesView: React.FC<EncaixesViewProps> = ({
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
           <form
             onSubmit={handleConfirmSimulation}
-            className="w-full max-w-lg bg-[#0e1016] border border-white/15 rounded-2xl p-6 space-y-5 shadow-2xl"
+            className="w-full max-w-lg bg-[#0e1016] border border-white/15 rounded-2xl p-4 sm:p-6 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto"
           >
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-3.5">
               <h3 className="text-base font-semibold text-white">Simular Mensagem de Encaixe</h3>
