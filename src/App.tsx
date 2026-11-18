@@ -288,7 +288,7 @@ function ScheduleAppContent() {
                     <ScheduleToolbar
                       onOpenLeaderAuth={() => setLeaderAuthModalOpen(true)}
                       onOpenAutoScheduleModal={() => setAutoScheduleModalOpen(true)}
-                      onOpenProviderModal={() => setProviderModalOpen(true)}
+                      onOpenProviderModal={() => setProfileModalOpen(true)}
                       onOpenCloneModal={() => setCloneModalOpen(true)}
                       onOpenWhatsAppModal={() => setWhatsAppModalOpen(true)}
                       onOpenQuickSwapModal={() => setQuickSwapModalOpen(true)}
@@ -514,6 +514,11 @@ function ScheduleAppContent() {
             isOpen={profileModalOpen}
             onClose={() => setProfileModalOpen(false)}
             onOpenCollaboratorAuth={() => setCollaboratorAuthOpen(true)}
+            onOpenLeaderAuth={() => setLeaderAuthModalOpen(true)}
+            onOpenAdvancedTeamModal={() => {
+              setProfileModalOpen(false);
+              setProviderModalOpen(true);
+            }}
           />
         )}
 

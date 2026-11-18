@@ -155,6 +155,14 @@ export interface TeamFeedback {
   createdAt: string;
 }
 
+export interface LeaderAccount {
+  id: string;
+  name: string;
+  pin: string;
+  whatsapp?: string;
+  createdAt: string;
+}
+
 export type ViewMode = 'escala' | 'personal-calendar' | 'calendar' | 'matrix' | 'week' | 'agenda' | 'my-schedule';
 export type UserRole = 'supervisor' | 'provider';
 export type ActiveModule = 'escala' | 'prestadores_regional' | 'pontos_fixos' | 'gestor_feedbacks' | 'central_inteligencia';

@@ -812,7 +812,7 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                 const isSelected = provider.id === spotlightProvider?.id;
                 const loggedInProvId = authenticatedProviderId || activeProviderId;
                 const isSelf = loggedInProvId ? provider.id === loggedInProvId : false;
-                const canManageThisProvider = isLeaderAuthenticated || isSelf;
+                const canManageThisProvider = isLeaderAuthenticated;
 
                 const provShifts = assignments.filter(a => {
                   const [y, m] = a.date.split('-').map(Number);

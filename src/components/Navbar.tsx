@@ -76,17 +76,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   const totalPending = pendingSwapsCount + pendingRequestsCount;
   const availableSalesCount = shiftSaleOffers.filter(s => s.status === 'available').length;
 
-  // Active or authenticated collaborator / leader profile
+  // Active or authenticated collaborator / leader profile (Leaders NEVER appear in `providers`)
   const authProviderObj = authenticatedProviderId ? providers.find(p => p.id === authenticatedProviderId) : null;
   const activeProviderObj = activeProviderId ? providers.find(p => p.id === activeProviderId) : null;
-  const leaderProviderObj = leaderName ? providers.find(p => p.name.toLowerCase() === leaderName.toLowerCase()) : null;
 
-  const displayUser =
-    authProviderObj ||
-    leaderProviderObj ||
-    (isLeaderAuthenticated && leaderName ? { id: 'leader-temp', name: leaderName, role: 'GESTOR DA ESCALA' } : null) ||
-    activeProviderObj ||
-    null;
+  const displayUser = isLeaderAuthenticated
+    ? { id: 'leader-profile', name: leaderName || 'Gestor da Escala', role: 'GESTOR DA ESCALA' }
+    : authProviderObj || activeProviderObj || null;
 
   // Close Gestor Drawer on click outside
   useEffect(() => {
@@ -430,7 +426,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </button>
                     )}
 
-                    {/* 5. Meu Perfil de Colaborador */}
+                    {/* 5. Meu Perfil de Líder & Cadastro de Atendentes */}
                     {onOpenProfileModal && (
                       <button
                         type="button"
@@ -438,16 +434,19 @@ export const Navbar: React.FC<NavbarProps> = ({
                           setIsGestorDrawerOpen(false);
                           onOpenProfileModal();
                         }}
-                        className="p-3 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/20 text-left transition-all group cursor-pointer"
+                        className="p-3 rounded-2xl bg-[#00d2d3]/10 hover:bg-[#00d2d3]/20 border border-[#00d2d3]/25 hover:border-[#00d2d3]/45 text-left transition-all group cursor-pointer"
                       >
                         <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-xs font-bold text-white group-hover:text-cyan-300 flex items-center gap-2">
-                            <UserIcon className="w-4 h-4 text-cyan-400" />
-                            <span>Meu Perfil Gestor</span>
+                          <span className="text-xs font-bold text-white group-hover:text-[#00d2d3] flex items-center gap-2">
+                            <UserIcon className="w-4 h-4 text-[#00d2d3]" />
+                            <span>Meu Perfil de Líder</span>
+                          </span>
+                          <span className="text-[10px] text-[#00d2d3] font-mono font-bold bg-[#00d2d3]/15 px-1.5 py-0.5 rounded-md border border-[#00d2d3]/30">
+                            + Atendente
                           </span>
                         </div>
-                        <p className="text-[11px] text-white/50 group-hover:text-white/70 line-clamp-2">
-                          Ver seus dados, telefone, PIX e calendário individual.
+                        <p className="text-[11px] text-white/60 group-hover:text-white/80 line-clamp-2">
+                          Seus dados de líder (fora da escala) e cadastro de novos atendentes.
                         </p>
                       </button>
                     )}

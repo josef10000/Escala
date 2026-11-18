@@ -19,6 +19,7 @@ import {
   WeekendColumn,
   ActiveModule,
   TeamFeedback,
+  LeaderAccount,
 } from '../types';
 import {
   INITIAL_DEPARTMENTS,
@@ -88,12 +89,14 @@ interface ScheduleContextType {
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
   resetFilters: () => void;
 
-  // Leader PIN & Auth
+  // Leader PIN & Auth (Leaders NEVER enter the schedule providers list)
   isLeaderAuthenticated: boolean;
   leaderPin: string;
   leaderName: string | null;
+  leaderAccounts: LeaderAccount[];
   authenticateLeader: (name: string, pin: string) => boolean;
   registerLeader: (name: string, pin: string) => Promise<boolean>;
+  updateLeaderProfile: (updates: { name?: string; whatsapp?: string; pin?: string }) => Promise<boolean>;
   logoutLeader: () => void;
   changeLeaderPin: (newPin: string) => Promise<boolean>;
 
@@ -250,7 +253,34 @@ const STORAGE_KEYS = {
   WEEKEND_COLUMNS: 'escalapro_weekend_columns_v1',
   WEEKEND_ASSIGNMENTS: 'escalapro_weekend_assignments_v1',
   TEAM_FEEDBACKS: 'escalapro_team_feedbacks_v1',
+  LEADER_ACCOUNTS: 'escalapro_leader_accounts_v1',
 };
+
+/**
+ * Purges 'Macos' and any leader-created schedule profiles (`prov-gestor-*` / `Gestor da Escala`)
+ * so leaders never appear as rows in the shift schedule.
+ */
+function sanitizeAttendantProviders(list: Provider[]): {
+  cleaned: Provider[];
+  removedIds: Set<string>;
+} {
+  const removedIds = new Set<string>();
+  const cleaned = list.filter((p) => {
+    if (!p || typeof p.name !== 'string') return false;
+    const normName = p.name.trim().toLowerCase();
+    const normRole = (p.role || '').trim().toLowerCase();
+    const isRemovedTarget =
+      normName === 'macos' ||
+      (typeof p.id === 'string' && p.id.startsWith('prov-gestor-')) ||
+      normRole === 'gestor da escala';
+    if (isRemovedTarget) {
+      if (p.id) removedIds.add(p.id);
+      return false;
+    }
+    return true;
+  });
+  return { cleaned, removedIds };
+}
 
 export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const today = new Date();
@@ -327,6 +357,16 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Role: supervisor or provider
   const [role, setRoleState] = useState<UserRole>('provider');
   const [isLeaderAuthenticated, setIsLeaderAuthenticated] = useState<boolean>(() => {
+    const savedLeader =
+      sessionStorage.getItem(STORAGE_KEYS.LEADER_NAME) ||
+      localStorage.getItem(STORAGE_KEYS.LEADER_NAME) ||
+      '';
+    if (savedLeader.trim().toLowerCase() === 'macos') {
+      sessionStorage.removeItem(STORAGE_KEYS.LEADER_AUTH);
+      sessionStorage.removeItem(STORAGE_KEYS.LEADER_NAME);
+      localStorage.removeItem(STORAGE_KEYS.LEADER_NAME);
+      return false;
+    }
     return sessionStorage.getItem(STORAGE_KEYS.LEADER_AUTH) === 'true';
   });
 
@@ -335,16 +375,52 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   });
 
   const [leaderName, setLeaderName] = useState<string | null>(() => {
-    return sessionStorage.getItem(STORAGE_KEYS.LEADER_NAME) || localStorage.getItem(STORAGE_KEYS.LEADER_NAME) || null;
+    const saved =
+      sessionStorage.getItem(STORAGE_KEYS.LEADER_NAME) ||
+      localStorage.getItem(STORAGE_KEYS.LEADER_NAME) ||
+      null;
+    if (saved && saved.trim().toLowerCase() === 'macos') {
+      sessionStorage.removeItem(STORAGE_KEYS.LEADER_NAME);
+      localStorage.removeItem(STORAGE_KEYS.LEADER_NAME);
+      return null;
+    }
+    return saved;
+  });
+
+  const [leaderAccounts, setLeaderAccounts] = useState<LeaderAccount[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.LEADER_ACCOUNTS);
+      const parsed: LeaderAccount[] = saved ? JSON.parse(saved) : [];
+      return parsed.filter((acc) => acc.name?.trim().toLowerCase() !== 'macos');
+    } catch {
+      return [];
+    }
   });
 
   // Authenticated collaborator session (if not leader) - persistent in localStorage
   const [authenticatedProviderId, setAuthenticatedProviderId] = useState<string | null>(() => {
-    return localStorage.getItem(STORAGE_KEYS.AUTH_PROVIDER) || sessionStorage.getItem(STORAGE_KEYS.AUTH_PROVIDER) || null;
+    const saved =
+      localStorage.getItem(STORAGE_KEYS.AUTH_PROVIDER) ||
+      sessionStorage.getItem(STORAGE_KEYS.AUTH_PROVIDER) ||
+      null;
+    if (saved && saved.startsWith('prov-gestor-')) {
+      localStorage.removeItem(STORAGE_KEYS.AUTH_PROVIDER);
+      sessionStorage.removeItem(STORAGE_KEYS.AUTH_PROVIDER);
+      return null;
+    }
+    return saved;
   });
 
   const [activeProviderId, setActiveProviderIdState] = useState<string | null>(() => {
-    return localStorage.getItem(STORAGE_KEYS.AUTH_PROVIDER) || localStorage.getItem(STORAGE_KEYS.ACTIVE_PROVIDER) || null;
+    const saved =
+      localStorage.getItem(STORAGE_KEYS.AUTH_PROVIDER) ||
+      localStorage.getItem(STORAGE_KEYS.ACTIVE_PROVIDER) ||
+      null;
+    if (saved && saved.startsWith('prov-gestor-')) {
+      localStorage.removeItem(STORAGE_KEYS.ACTIVE_PROVIDER);
+      return null;
+    }
+    return saved;
   });
   const [isPublished, setIsPublishedState] = useState<boolean>(true);
   const [publishedMonths, setPublishedMonths] = useState<Record<string, boolean>>(() => {
@@ -374,7 +450,12 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [providers, setProviders] = useState<Provider[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.PROVIDERS);
-      return saved ? JSON.parse(saved) : INITIAL_PROVIDERS;
+      const parsed: Provider[] = saved ? JSON.parse(saved) : INITIAL_PROVIDERS;
+      const { cleaned, removedIds } = sanitizeAttendantProviders(parsed);
+      if (removedIds.size > 0) {
+        localStorage.setItem(STORAGE_KEYS.PROVIDERS, JSON.stringify(cleaned));
+      }
+      return cleaned;
     } catch {
       return INITIAL_PROVIDERS;
     }
@@ -750,12 +831,29 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setIsSyncing(false);
         if (docSnap.exists()) {
           const data = docSnap.data();
+          let purgedProviderIds = new Set<string>();
           if (data.providers && Array.isArray(data.providers)) {
-            setProviders(data.providers);
-            localStorage.setItem(STORAGE_KEYS.PROVIDERS, JSON.stringify(data.providers));
+            const { cleaned, removedIds } = sanitizeAttendantProviders(data.providers);
+            purgedProviderIds = removedIds;
+            setProviders(cleaned);
+            localStorage.setItem(STORAGE_KEYS.PROVIDERS, JSON.stringify(cleaned));
+
+            if (removedIds.size > 0) {
+              // Clear active/auth provider pointer if it was pointing to a purged leader/Macos profile
+              setAuthenticatedProviderId((curr) => (curr && removedIds.has(curr) ? null : curr));
+              setActiveProviderIdState((curr) => (curr && removedIds.has(curr) ? null : curr));
+              // Permanently write cleaned providers back to Firestore so 'Macos' / 'prov-gestor-*' never return
+              void syncToFirebase({ providers: cleaned });
+            }
           }
           if (data.assignments && Array.isArray(data.assignments)) {
-            let loadedAssignments = data.assignments.filter((a: any) => a.date && !a.date.startsWith('2026-09-') && !a.date.startsWith('2026-11-'));
+            let loadedAssignments = data.assignments.filter(
+              (a: any) =>
+                a.date &&
+                !a.date.startsWith('2026-09-') &&
+                !a.date.startsWith('2026-11-') &&
+                !purgedProviderIds.has(a.providerId)
+            );
             const seedAssignments = generateInitialAssignments();
             const novSeed = seedAssignments.filter(a => a.date && a.date.startsWith('2026-11-'));
             const hasOctober = loadedAssignments.some((a: any) => a.date && a.date.startsWith('2026-10-'));
@@ -765,6 +863,15 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             
             setAssignments(loadedAssignments);
             localStorage.setItem(STORAGE_KEYS.ASSIGNMENTS, JSON.stringify(loadedAssignments));
+          }
+          if (data.leaderAccounts && Array.isArray(data.leaderAccounts)) {
+            const cleanedLeaders = (data.leaderAccounts as LeaderAccount[]).filter(
+              (acc) => acc && acc.name?.trim().toLowerCase() !== 'macos'
+            );
+            setLeaderAccounts(cleanedLeaders);
+            try {
+              localStorage.setItem(STORAGE_KEYS.LEADER_ACCOUNTS, JSON.stringify(cleanedLeaders));
+            } catch (_) {}
           }
           if (data.swapRequests && Array.isArray(data.swapRequests)) {
             setSwapRequests(data.swapRequests);
@@ -897,6 +1004,7 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     attendanceIncidents?: AttendanceIncident[];
     shiftSaleOffers?: ShiftSaleOffer[];
     leaderPin?: string;
+    leaderAccounts?: LeaderAccount[];
     publishedMonths?: Record<string, boolean>;
     weekendColumns?: WeekendColumn[];
     weekendAssignments?: Record<string, Record<string, string>>;
@@ -963,112 +1071,55 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     localStorage.setItem(STORAGE_KEYS.SHIFT_SALES, JSON.stringify(shiftSaleOffers));
   }, [shiftSaleOffers]);
 
-  // Leader Authentication Methods (Strict Security & Auto-Profile)
+  // Leader Authentication Methods (Leaders NEVER enter the schedule `providers` list)
   const authenticateLeader = (name: string, pin: string): boolean => {
     const cleanPin = pin.trim();
     const cleanName = name.trim();
     if (!cleanPin || !cleanName) return false;
 
-    // Check localStorage fallbacks to avoid React asynchronous state closures
     const currentStoredPin = localStorage.getItem(STORAGE_KEYS.LEADER_PIN) || leaderPin || '';
     const currentStoredName = localStorage.getItem(STORAGE_KEYS.LEADER_NAME) || leaderName || '';
 
-    // 1. Find if matching provider exists in the base
-    const matchingProv = providers.find(
-      p => p.name.toLowerCase() === cleanName.toLowerCase() ||
-           p.name.toLowerCase() === cleanName.toLowerCase().trim()
+    const matchingLeaderAccount = leaderAccounts.find(
+      (acc) => acc.name.trim().toLowerCase() === cleanName.toLowerCase()
     );
 
-    const isMatchingProvPin = matchingProv && matchingProv.pin && matchingProv.pin.trim() === cleanPin;
+    const isMatchingAccountPin = Boolean(
+      matchingLeaderAccount && matchingLeaderAccount.pin.trim() === cleanPin
+    );
     const isMasterPin = cleanPin === currentStoredPin.trim() || cleanPin === leaderPin.trim();
     const isConfiguredLeaderName = Boolean(
       (currentStoredName && currentStoredName.toLowerCase() === cleanName.toLowerCase()) ||
       (leaderName && leaderName.toLowerCase() === cleanName.toLowerCase())
     );
-    const isLeaderRole = matchingProv && (
-      matchingProv.role.toLowerCase().includes('gestor') ||
-      matchingProv.role.toLowerCase().includes('lider') ||
-      matchingProv.role.toLowerCase().includes('supervisor')
-    );
 
-    // Strict Authorization Check:
-    // Only allow login if:
-    // a) Recognized supervisor/gestor provider with matching personal PIN or master PIN; OR
-    // b) Matches the registered leader name and the PIN is correct; OR
-    // c) Initial setup before any leader is configured.
     const isAuthorized = Boolean(
-      (matchingProv && isLeaderRole && (isMatchingProvPin || isMasterPin)) ||
-      (isConfiguredLeaderName && (isMatchingProvPin || isMasterPin)) ||
-      (!currentStoredName && isMasterPin)
+      isMatchingAccountPin ||
+      (isConfiguredLeaderName && isMasterPin) ||
+      (!currentStoredName && leaderAccounts.length === 0 && isMasterPin)
     );
 
     if (!isAuthorized) {
       return false;
     }
 
-    // Set authenticated leader state
+    const finalLeaderName = (matchingLeaderAccount?.name || cleanName).toUpperCase();
     setIsLeaderAuthenticated(true);
     setRoleState('supervisor');
-    setLeaderName(cleanName.toUpperCase());
+    setLeaderName(finalLeaderName);
 
-    // Ensure a full Collaborator Profile exists for this Gestor ("como todos tem")
-    let targetProvId = '';
-    if (matchingProv) {
-      targetProvId = matchingProv.id;
-      const updatedProviders = providers.map(p => {
-        if (p.id === matchingProv.id) {
-          return {
-            ...p,
-            role: p.role.toLowerCase().includes('gestor') ? p.role : 'Gestor da Escala',
-            pin: cleanPin,
-          };
-        }
-        return p;
-      });
-      setProviders(updatedProviders);
-      localStorage.setItem(STORAGE_KEYS.PROVIDERS, JSON.stringify(updatedProviders));
-      syncToFirebase({ providers: updatedProviders });
-    } else {
-      const newLeaderProv: Provider = {
-        id: `prov-gestor-${Date.now()}`,
-        name: cleanName.toUpperCase(),
-        role: 'Gestor da Escala',
-        regime: '5x2',
-        teamGroup: 'none',
-        entryTime: '08h00',
-        exitTime: '17h00',
-        email: `${cleanName.toLowerCase().replace(/[^a-z0-9]/g, '.')}@escala.com`,
-        phone: '',
-        whatsapp: '',
-        color: 'cyan',
-        pin: cleanPin,
-        maxMonthlyHours: 160,
-        status: 'active',
-      };
-      targetProvId = newLeaderProv.id;
-      const updatedProviders = [...providers, newLeaderProv];
-      setProviders(updatedProviders);
-      localStorage.setItem(STORAGE_KEYS.PROVIDERS, JSON.stringify(updatedProviders));
-      syncToFirebase({ providers: updatedProviders });
-    }
-
-    setAuthenticatedProviderId(targetProvId);
-    setActiveProviderIdState(targetProvId);
-    localStorage.setItem(STORAGE_KEYS.AUTH_PROVIDER, targetProvId);
-    sessionStorage.setItem(STORAGE_KEYS.AUTH_PROVIDER, targetProvId);
     sessionStorage.setItem(STORAGE_KEYS.LEADER_AUTH, 'true');
-    sessionStorage.setItem(STORAGE_KEYS.LEADER_NAME, cleanName.toUpperCase());
-    localStorage.setItem(STORAGE_KEYS.LEADER_NAME, cleanName.toUpperCase());
+    sessionStorage.setItem(STORAGE_KEYS.LEADER_NAME, finalLeaderName);
+    localStorage.setItem(STORAGE_KEYS.LEADER_NAME, finalLeaderName);
     return true;
   };
 
-  // Register or create Leader Profile & PIN (First Access)
+  // Register Leader Account & PIN (First Access — NEVER creates a row in `providers` / schedule!)
   const registerLeader = async (name: string, pin: string): Promise<boolean> => {
     const cleanPin = pin.trim();
     const cleanName = name.trim().toUpperCase();
     if (!cleanPin || !cleanName || cleanPin.length !== 4) return false;
 
-    // 1. Update Leader state & storage
     setLeaderPin(cleanPin);
     setLeaderName(cleanName);
     setIsLeaderAuthenticated(true);
@@ -1079,53 +1130,90 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     sessionStorage.setItem(STORAGE_KEYS.LEADER_AUTH, 'true');
     sessionStorage.setItem(STORAGE_KEYS.LEADER_NAME, cleanName);
 
-    // 2. Ensure Provider profile exists or is upgraded
-    let targetProvId = '';
-    const existing = providers.find(p => p.name.toUpperCase() === cleanName);
-    if (existing) {
-      targetProvId = existing.id;
-      const updatedProviders = providers.map(p => {
-        if (p.id === existing.id) {
-          return {
-            ...p,
-            role: 'Gestor da Escala',
-            pin: cleanPin,
-          };
-        }
-        return p;
-      });
-      setProviders(updatedProviders);
-      localStorage.setItem(STORAGE_KEYS.PROVIDERS, JSON.stringify(updatedProviders));
-      syncToFirebase({ providers: updatedProviders, leaderPin: cleanPin });
+    const existingIdx = leaderAccounts.findIndex(
+      (acc) => acc.name.trim().toUpperCase() === cleanName
+    );
+    let updatedAccounts: LeaderAccount[];
+    if (existingIdx >= 0) {
+      updatedAccounts = leaderAccounts.map((acc, i) =>
+        i === existingIdx ? { ...acc, name: cleanName, pin: cleanPin } : acc
+      );
     } else {
-      const newLeaderProv: Provider = {
-        id: `prov-gestor-${Date.now()}`,
-        name: cleanName,
-        role: 'Gestor da Escala',
-        regime: '5x2',
-        teamGroup: 'none',
-        entryTime: '08h00',
-        exitTime: '17h00',
-        email: `${cleanName.toLowerCase().replace(/[^a-z0-9]/g, '.')}@escala.com`,
-        phone: '',
-        whatsapp: '',
-        color: 'cyan',
-        pin: cleanPin,
-        maxMonthlyHours: 160,
-        status: 'active',
-      };
-      targetProvId = newLeaderProv.id;
-      const updatedProviders = [...providers, newLeaderProv];
-      setProviders(updatedProviders);
-      localStorage.setItem(STORAGE_KEYS.PROVIDERS, JSON.stringify(updatedProviders));
-      syncToFirebase({ providers: updatedProviders, leaderPin: cleanPin });
+      updatedAccounts = [
+        ...leaderAccounts,
+        {
+          id: `leader-${Date.now()}`,
+          name: cleanName,
+          pin: cleanPin,
+          createdAt: new Date().toISOString(),
+        },
+      ];
     }
 
-    setAuthenticatedProviderId(targetProvId);
-    setActiveProviderIdState(targetProvId);
-    localStorage.setItem(STORAGE_KEYS.AUTH_PROVIDER, targetProvId);
-    sessionStorage.setItem(STORAGE_KEYS.AUTH_PROVIDER, targetProvId);
+    setLeaderAccounts(updatedAccounts);
+    try {
+      localStorage.setItem(STORAGE_KEYS.LEADER_ACCOUNTS, JSON.stringify(updatedAccounts));
+    } catch (_) {}
 
+    await syncToFirebase({ leaderPin: cleanPin, leaderAccounts: updatedAccounts });
+    return true;
+  };
+
+  const updateLeaderProfile = async (updates: {
+    name?: string;
+    whatsapp?: string;
+    pin?: string;
+  }): Promise<boolean> => {
+    if (!isLeaderAuthenticated) return false;
+
+    const currentNameUpper = (leaderName || 'GESTOR').trim().toUpperCase();
+    const nextName = updates.name ? updates.name.trim().toUpperCase() : currentNameUpper;
+    const nextPin = updates.pin && /^\d{4}$/.test(updates.pin.trim()) ? updates.pin.trim() : leaderPin;
+
+    if (updates.name) {
+      setLeaderName(nextName);
+      sessionStorage.setItem(STORAGE_KEYS.LEADER_NAME, nextName);
+      localStorage.setItem(STORAGE_KEYS.LEADER_NAME, nextName);
+    }
+    if (updates.pin && /^\d{4}$/.test(updates.pin.trim())) {
+      setLeaderPin(nextPin);
+      localStorage.setItem(STORAGE_KEYS.LEADER_PIN, nextPin);
+    }
+
+    const existingIdx = leaderAccounts.findIndex(
+      (acc) => acc.name.trim().toUpperCase() === currentNameUpper
+    );
+    let updatedAccounts: LeaderAccount[];
+    if (existingIdx >= 0) {
+      updatedAccounts = leaderAccounts.map((acc, i) =>
+        i === existingIdx
+          ? {
+              ...acc,
+              name: nextName,
+              pin: nextPin,
+              ...(updates.whatsapp !== undefined ? { whatsapp: updates.whatsapp.trim() } : {}),
+            }
+          : acc
+      );
+    } else {
+      updatedAccounts = [
+        ...leaderAccounts,
+        {
+          id: `leader-${Date.now()}`,
+          name: nextName,
+          pin: nextPin,
+          whatsapp: updates.whatsapp?.trim(),
+          createdAt: new Date().toISOString(),
+        },
+      ];
+    }
+
+    setLeaderAccounts(updatedAccounts);
+    try {
+      localStorage.setItem(STORAGE_KEYS.LEADER_ACCOUNTS, JSON.stringify(updatedAccounts));
+    } catch (_) {}
+
+    await syncToFirebase({ leaderPin: nextPin, leaderAccounts: updatedAccounts });
     return true;
   };
 
@@ -1140,16 +1228,7 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
 
   const changeLeaderPin = async (newPin: string): Promise<boolean> => {
     if (!newPin || newPin.trim().length < 4) return false;
-    const cleanPin = newPin.trim();
-    setLeaderPin(cleanPin);
-    localStorage.setItem(STORAGE_KEYS.LEADER_PIN, cleanPin);
-    try {
-      const ok = await syncToFirebase({ leaderPin: cleanPin });
-      return ok;
-    } catch (e) {
-      console.error('Error changing leader pin:', e);
-      return false;
-    }
+    return updateLeaderProfile({ pin: newPin.trim() });
   };
 
   // Collaborator Authentication & PIN Methods (Hybrid Model)
@@ -1451,12 +1530,22 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     syncToFirebase({ assignments: updated });
   };
 
-  // Add Provider
+  // Add Provider (Strictly restricted to authenticated Leader!)
   const addProvider = (data: Omit<Provider, 'id'>) => {
+    if (!isLeaderAuthenticated) return;
+    const cleanName = data.name.trim().toUpperCase();
+    if (!cleanName || cleanName.toLowerCase() === 'macos') return;
+
     const id = `prov-${Date.now()}`;
+    const safeRole =
+      !data.role || data.role.trim().toLowerCase() === 'gestor da escala'
+        ? 'Atendente'
+        : data.role.trim();
     const newProvider: Provider = {
-      regime: activeRegime,
+      regime: activeRegime === 'weekend' ? '12x36' : activeRegime,
       ...data,
+      name: cleanName,
+      role: safeRole,
       id,
     };
     const updated = [...providers, newProvider];
@@ -1466,18 +1555,20 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
 
   // Update Provider
   const updateProvider = (id: string, updates: Partial<Provider>) => {
+    const canEdit =
+      isLeaderAuthenticated ||
+      id === authenticatedProviderId ||
+      id === activeProviderId;
+    if (!canEdit) return;
+
     const updated = providers.map(p => (p.id === id ? { ...p, ...updates } : p));
     setProviders(updated);
-    if (updates.name && (id === authenticatedProviderId || id === activeProviderId || isLeaderAuthenticated)) {
-      setLeaderName(updates.name);
-      sessionStorage.setItem(STORAGE_KEYS.LEADER_NAME, updates.name);
-      localStorage.setItem(STORAGE_KEYS.LEADER_NAME, updates.name);
-    }
     syncToFirebase({ providers: updated });
   };
 
-  // Delete Provider
+  // Delete Provider (Strictly restricted to authenticated Leader!)
   const deleteProvider = (id: string) => {
+    if (!isLeaderAuthenticated) return;
     const updatedProviders = providers.filter(p => p.id !== id);
     const updatedAssignments = assignments.filter(a => a.providerId !== id);
     setProviders(updatedProviders);
@@ -2199,21 +2290,29 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     return daysCount;
   };
 
-  // Batch Add Providers (Colar Lista)
+  // Batch Add Providers (Colar Lista — Strictly restricted to authenticated Leader!)
   const batchAddProviders = (providersList: Array<Omit<Provider, 'id'>>): number => {
-    if (!providersList.length) return 0;
+    if (!isLeaderAuthenticated || !providersList.length) return 0;
 
-    const newItems: Provider[] = providersList.map((p, idx) => ({
-      ...p,
-      id: `prov-${Date.now()}-${idx + 1}`,
-      regime: p.regime || activeRegime,
-      teamGroup: p.teamGroup || (idx % 2 === 0 ? 'turma_a' : 'turma_b'),
-      entryTime: p.entryTime || (activeRegime === '5x2' ? '08h00' : '07h00'),
-      exitTime: p.exitTime || (activeRegime === '5x2' ? '17h00' : '19h00'),
-      status: 'active',
-      maxMonthlyHours: p.maxMonthlyHours || 180,
-    }));
+    const newItems: Provider[] = providersList
+      .filter((p) => p.name && p.name.trim().toLowerCase() !== 'macos')
+      .map((p, idx) => ({
+        ...p,
+        name: p.name.trim().toUpperCase(),
+        role:
+          !p.role || p.role.trim().toLowerCase() === 'gestor da escala'
+            ? 'Atendente'
+            : p.role.trim(),
+        id: `prov-${Date.now()}-${idx + 1}`,
+        regime: p.regime || (activeRegime === 'weekend' ? '12x36' : activeRegime),
+        teamGroup: p.teamGroup || (idx % 2 === 0 ? 'turma_a' : 'turma_b'),
+        entryTime: p.entryTime || (activeRegime === '5x2' ? '08h00' : '07h00'),
+        exitTime: p.exitTime || (activeRegime === '5x2' ? '17h00' : '19h00'),
+        status: 'active',
+        maxMonthlyHours: p.maxMonthlyHours || 180,
+      }));
 
+    if (newItems.length === 0) return 0;
     const updated = [...providers, ...newItems];
     setProviders(updated);
     syncToFirebase({ providers: updated });
@@ -2267,8 +2366,10 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
         isLeaderAuthenticated,
         leaderPin,
         leaderName,
+        leaderAccounts,
         authenticateLeader,
         registerLeader,
+        updateLeaderProfile,
         logoutLeader,
         changeLeaderPin,
 

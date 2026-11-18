@@ -50,7 +50,7 @@ export const ScheduleToolbar: React.FC<ScheduleToolbarProps> = ({
     resetFilters,
     providers,
     assignments,
-    role,
+    isLeaderAuthenticated,
     isMonthPublished,
     toggleMonthPublishStatus,
     activeRegime,
@@ -166,7 +166,7 @@ export const ScheduleToolbar: React.FC<ScheduleToolbarProps> = ({
           </div>
 
           {/* Publication status badge */}
-          {role === 'supervisor' ? (
+          {isLeaderAuthenticated ? (
             <button
               onClick={() => toggleMonthPublishStatus(currentYear, currentMonthIndex)}
               className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
@@ -225,8 +225,8 @@ export const ScheduleToolbar: React.FC<ScheduleToolbarProps> = ({
 
         {/* Right: Imprimir, Buscar, and Tools */}
         <div className="flex items-center gap-2 flex-wrap text-xs">
-          {/* Supervisor Tools */}
-          {role === 'supervisor' && (
+          {/* Supervisor / Leader Tools (strictly restricted to authenticated Leaders) */}
+          {isLeaderAuthenticated && (
             <div className="flex items-center gap-1.5 pr-2 border-r border-white/[0.08]">
               {onOpenExecutiveReportModal && (
                 <button

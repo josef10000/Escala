@@ -45,7 +45,7 @@ export const ProviderManagementModal: React.FC<ProviderManagementModalProps> = (
   } = useSchedule();
 
   const loggedInProvId = authenticatedProviderId || activeProviderId;
-  const canManageProvider = (pId: string) => isLeaderAuthenticated || (loggedInProvId ? pId === loggedInProvId : false);
+  const canManageProvider = (_pId: string) => isLeaderAuthenticated;
 
   const [activeTab, setActiveTab] = useState<'list' | 'batch_import'>('list');
   const [isAdding, setIsAdding] = useState(false);
@@ -79,6 +79,36 @@ export const ProviderManagementModal: React.FC<ProviderManagementModalProps> = (
   const [batchErrorMsg, setBatchErrorMsg] = useState('');
 
   if (!isOpen) return null;
+
+  if (!isLeaderAuthenticated) {
+    return (
+      <div
+        onClick={onClose}
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150 cursor-pointer"
+      >
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="bg-[#0e1017] text-zinc-100 rounded-3xl shadow-2xl w-full max-w-md p-6 border border-white/10 text-center space-y-4 cursor-default"
+        >
+          <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-300 mx-auto">
+            <ShieldCheck className="w-6 h-6" />
+          </div>
+          <div className="space-y-1">
+            <h3 className="font-bold text-base text-white">Acesso Exclusivo do Líder</h3>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Somente o Líder pode cadastrar ou gerenciar atendentes da escala, diretamente pelo seu Perfil de Líder.
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-xl text-xs font-bold bg-[#00d2d3] hover:bg-[#57f1db] text-[#003731] transition-colors cursor-pointer"
+          >
+            Entendi
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const resetForm = () => {
     setEditingId(null);
@@ -234,32 +264,32 @@ export const ProviderManagementModal: React.FC<ProviderManagementModalProps> = (
     >
       <div
         onClick={e => e.stopPropagation()}
-        className="bg-[#141c28] text-slate-100 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden border border-[#1e2a3a] cursor-default"
+        className="bg-[#0e1017] text-zinc-100 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden border border-white/10 cursor-default"
       >
         
         {/* Header */}
-        <div className="p-5 border-b border-[#1e2a3a] flex items-center justify-between shrink-0">
+        <div className="p-5 border-b border-white/10 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-blue-950/70 border border-blue-800/80 flex items-center justify-center text-cyan-400 shadow-sm">
+            <div className="w-10 h-10 rounded-2xl bg-[#00d2d3]/15 border border-[#00d2d3]/30 flex items-center justify-center text-[#00d2d3] shadow-sm">
               <Users className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-extrabold text-base text-white">Gerenciar Equipe, Bônus & Descontos no Bônus</h3>
-              <p className="text-xs text-slate-400 font-medium">
-                Descontos aplicados exclusivamente sobre o bônus (valor fixo ou porcentagem por atraso/falta)
+              <h3 className="font-extrabold text-base text-white">Regras de Bônus, Descontos & Importação em Lote</h3>
+              <p className="text-xs text-zinc-400 font-medium">
+                Gestão avançada de atendentes da escala (exclusivo para o Líder)
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors cursor-pointer"
+            className="p-1.5 text-zinc-400 hover:text-white rounded-xl hover:bg-white/10 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tab switch */}
-        <div className="px-5 pt-3 flex gap-2 border-b border-[#1e2a3a] bg-[#0c121c]">
+        <div className="px-5 pt-3 flex gap-2 border-b border-white/10 bg-[#090A0F]">
           <button
             onClick={() => {
               setActiveTab('list');

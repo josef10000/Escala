@@ -15,8 +15,6 @@ export const LeaderAuthModal: React.FC<LeaderAuthModalProps> = ({ isOpen, onClos
     logoutLeader,
     changeLeaderPin,
     leaderName,
-    providers,
-    setupProviderPin,
   } = useSchedule();
 
   const [authTab, setAuthTab] = useState<'login' | 'first_access'>('login');
@@ -335,10 +333,10 @@ export const LeaderAuthModal: React.FC<LeaderAuthModalProps> = ({ isOpen, onClos
                 <div className="p-3 bg-[#00d2d3]/10 border border-[#00d2d3]/20 rounded-xl text-xs text-zinc-200 space-y-1">
                   <div className="font-bold text-[#00d2d3] flex items-center gap-1.5">
                     <ShieldCheck className="w-4 h-4" />
-                    <span>Primeiro Acesso do Gestor</span>
+                    <span>Primeiro Acesso do Líder (Fora da Escala)</span>
                   </div>
-                  <p className="text-[11px] text-zinc-300">
-                    Cadastre o seu nome e crie uma senha/PIN de 4 dígitos para gerenciar a escala e relatórios com segurança.
+                  <p className="text-[11px] text-zinc-300 leading-relaxed">
+                    Contas de Líder/Gestor <strong>não entram na escala de plantões</strong>. Após criar seu acesso, cadastre novos atendentes diretamente pelo seu <strong>Perfil de Líder</strong>.
                   </p>
                 </div>
 
