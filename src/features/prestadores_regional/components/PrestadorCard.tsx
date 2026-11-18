@@ -486,8 +486,8 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
             setIsFlipped(true);
           }}
           className={`card-3d-face card-3d-face-front relative rounded-3xl p-4 sm:p-5 flex flex-col justify-between transition-shadow duration-300
-            bg-gradient-to-b from-white/[0.07] via-white/[0.03] to-[#0a0d16]/90
-            hover:from-white/[0.11] hover:via-white/[0.05] hover:to-[#0c101b]/95
+            bg-gradient-to-b from-white/[0.07] via-white/[0.03] to-[#0c0e14]/95
+            hover:from-white/[0.11] hover:via-white/[0.05] hover:to-[#0f1118]/98
             backdrop-blur-2xl
             border border-white/[0.12] ${gradeTokens.borderAccent}
             shadow-[0_12px_40px_0_rgba(0,0,0,0.45)]
@@ -971,7 +971,7 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
         {/* ===================================================== */}
         <div
           className={`card-3d-face card-3d-face-back relative rounded-3xl p-4 sm:p-5 flex flex-col justify-between
-            bg-gradient-to-br from-[#0b101b] via-[#0d121f] to-[#06080f]
+            bg-gradient-to-br from-[#0e1016] via-[#11131a] to-[#090A0F]
             backdrop-blur-2xl
             border border-white/[0.16]
             shadow-[0_24px_60px_rgba(0,0,0,0.75)]

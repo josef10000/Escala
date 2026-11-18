@@ -74,13 +74,13 @@ export const GestorFeedbacksPage: React.FC = () => {
   // If not authenticated as Leader, show security notice
   if (!isLeaderAuthenticated) {
     return (
-      <div className="flex-1 flex items-center justify-center p-6 bg-[#090a0f]">
-        <div className="max-w-md w-full p-8 rounded-3xl bg-slate-900 border border-slate-800 text-center space-y-4 shadow-2xl backdrop-blur-xl">
+      <div className="flex-1 flex items-center justify-center p-6 bg-[#090A0F]">
+        <div className="max-w-md w-full p-8 rounded-3xl bg-[#0e1016] border border-white/[0.08] text-center space-y-4 shadow-2xl">
           <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto shadow-inner">
             <LockKey size={32} weight="duotone" />
           </div>
           <h2 className="text-lg font-bold text-white tracking-tight">Área Restrita da Liderança</h2>
-          <p className="text-xs text-slate-400 leading-relaxed">
+          <p className="text-xs text-zinc-400 leading-relaxed">
             O Diário de Feedbacks e Registros é de acesso exclusivo para Gestores e Líderes autenticados.
             Por favor, utilize o botão <strong>"Acesso Gestor"</strong> na barra superior para entrar.
           </p>
@@ -178,13 +178,13 @@ export const GestorFeedbacksPage: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 bg-[#090a0f] text-slate-100 flex flex-col overflow-y-auto overflow-x-hidden">
-      {/* Top Banner Header with iOS Frosted Glass Depth */}
-      <div className="border-b border-white/10 bg-slate-900/60 backdrop-blur-xl px-4 py-4 sm:px-6 sm:py-6 sticky top-0 z-20">
+    <div className="flex-1 bg-[#090A0F] text-[#e3e1e9] flex flex-col overflow-y-auto overflow-x-hidden">
+      {/* Top Banner Header with Unified Obsidian Glass Depth */}
+      <div className="border-b border-white/[0.08] bg-[#0e1016]/95 backdrop-blur-xl px-4 py-4 sm:px-6 sm:py-6 sticky top-0 z-20">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-start sm:items-center gap-3.5">
             {/* Apple/Linear Glass Dock Icon */}
-            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-b from-cyan-500/20 to-cyan-500/5 border border-cyan-400/30 flex items-center justify-center text-cyan-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)] shrink-0">
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-[#00d2d3]/12 border border-[#00d2d3]/30 flex items-center justify-center text-[#00d2d3] shrink-0">
               <Notebook size={24} weight="duotone" />
             </div>
             <div className="min-w-0">
@@ -192,11 +192,11 @@ export const GestorFeedbacksPage: React.FC = () => {
                 <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">
                   Diário do Gestor & Feedbacks
                 </h1>
-                <span className="px-2.5 py-0.5 text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 rounded-full font-mono">
+                <span className="px-2.5 py-0.5 text-[10px] font-bold bg-[#00d2d3]/15 text-[#00d2d3] border border-[#00d2d3]/30 rounded-full font-mono">
                   100% Confidencial
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-zinc-400 mt-0.5">
                 Espaço exclusivo da liderança para documentar desempenho, elogios, alinhamentos e observações da equipe.
               </p>
             </div>
@@ -206,7 +206,7 @@ export const GestorFeedbacksPage: React.FC = () => {
           <button
             type="button"
             onClick={handleOpenCreate}
-            className="px-4 py-2.5 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-cyan-500/20 transition-all active:scale-95 shrink-0"
+            className="px-4 py-2.5 rounded-2xl bg-[#00d2d3] hover:bg-[#57f1db] text-[#003731] font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-sm transition-all active:scale-95 shrink-0"
           >
             <Plus size={16} weight="bold" />
             <span>Novo Registro de Feedback</span>
@@ -216,28 +216,28 @@ export const GestorFeedbacksPage: React.FC = () => {
 
       <div className="max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
         
-        {/* Filters Toolbar (iOS Frosted Glass) */}
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shadow-sm">
+        {/* Filters Toolbar (Obsidian Dark) */}
+        <div className="bg-[#0e1016] border border-white/[0.08] rounded-2xl p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shadow-sm">
           
           {/* Search Bar */}
           <div className="relative flex-1">
-            <MagnifyingGlass size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <MagnifyingGlass size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Buscar por colaborador, palavra-chave ou contexto..."
-              className="w-full bg-slate-950/80 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+              className="w-full bg-[#090A0F] border border-white/[0.08] rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#00d2d3]"
             />
           </div>
 
           {/* Filter by Provider Dropdown */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2">
-            <span className="text-xs text-slate-400 shrink-0">Colaborador:</span>
+            <span className="text-xs text-zinc-400 shrink-0">Colaborador:</span>
             <select
               value={selectedProviderId}
               onChange={e => setSelectedProviderId(e.target.value)}
-              className="w-full md:w-auto bg-slate-950/80 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400 font-medium"
+              className="w-full md:w-auto bg-[#090A0F] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00d2d3] font-medium"
             >
               <option value="all">Todos os Colaboradores</option>
               {providers.map(p => (
@@ -248,11 +248,11 @@ export const GestorFeedbacksPage: React.FC = () => {
 
           {/* Filter by Type Dropdown */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2">
-            <span className="text-xs text-slate-400 shrink-0">Categoria:</span>
+            <span className="text-xs text-zinc-400 shrink-0">Categoria:</span>
             <select
               value={selectedType}
               onChange={e => setSelectedType(e.target.value)}
-              className="w-full md:w-auto bg-slate-950/80 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400 font-medium"
+              className="w-full md:w-auto bg-[#090A0F] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00d2d3] font-medium"
             >
               <option value="all">Todas as Categorias</option>
               <option value="elogio">Ponto Forte / Elogio</option>
@@ -267,17 +267,17 @@ export const GestorFeedbacksPage: React.FC = () => {
         {isCreating && (
           <form
             onSubmit={handleSubmitForm}
-            className="p-6 rounded-3xl bg-slate-900 border border-cyan-500/40 shadow-2xl space-y-4 animate-in fade-in duration-200"
+            className="p-6 rounded-3xl bg-[#0e1016] border border-[#00d2d3]/40 shadow-2xl space-y-4 animate-in fade-in duration-200"
           >
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
               <span className="text-sm font-bold text-white flex items-center gap-2">
-                <Notebook size={18} weight="duotone" className="text-cyan-400" />
+                <Notebook size={18} weight="duotone" className="text-[#00d2d3]" />
                 <span>{editingId ? 'Editar Registro de Feedback' : 'Novo Registro de Feedback'}</span>
               </span>
               <button
                 type="button"
                 onClick={() => setIsCreating(false)}
-                className="text-xs text-slate-400 hover:text-white cursor-pointer"
+                className="text-xs text-zinc-400 hover:text-white cursor-pointer"
               >
                 Cancelar
               </button>
@@ -286,11 +286,11 @@ export const GestorFeedbacksPage: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {/* Colaborador */}
               <div className="space-y-1">
-                <label className="text-[11px] font-semibold text-slate-300">Colaborador:</label>
+                <label className="text-[11px] font-semibold text-zinc-300">Colaborador:</label>
                 <select
                   value={formProviderId}
                   onChange={e => setFormProviderId(e.target.value)}
-                  className="w-full bg-slate-950/80 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400"
+                  className="w-full bg-[#090A0F] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00d2d3]"
                 >
                   {providers.map(p => (
                     <option key={p.id} value={p.id}>{p.name}</option>
@@ -300,22 +300,22 @@ export const GestorFeedbacksPage: React.FC = () => {
 
               {/* Data do Ocorrido */}
               <div className="space-y-1">
-                <label className="text-[11px] font-semibold text-slate-300">Data:</label>
+                <label className="text-[11px] font-semibold text-zinc-300">Data:</label>
                 <input
                   type="date"
                   value={formDate}
                   onChange={e => setFormDate(e.target.value)}
-                  className="w-full bg-slate-950/80 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400"
+                  className="w-full bg-[#090A0F] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00d2d3]"
                 />
               </div>
 
               {/* Categoria */}
               <div className="space-y-1">
-                <label className="text-[11px] font-semibold text-slate-300">Categoria:</label>
+                <label className="text-[11px] font-semibold text-zinc-300">Categoria:</label>
                 <select
                   value={formType}
                   onChange={e => setFormType(e.target.value as any)}
-                  className="w-full bg-slate-950/80 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400"
+                  className="w-full bg-[#090A0F] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00d2d3]"
                 >
                   <option value="elogio">🟢 Ponto Forte / Elogio</option>
                   <option value="atencao">🟡 Ponto de Atenção</option>
@@ -327,39 +327,39 @@ export const GestorFeedbacksPage: React.FC = () => {
 
             {/* Contexto / Turno */}
             <div className="space-y-1">
-              <label className="text-[11px] font-semibold text-slate-300">Contexto / Fila (Opcional):</label>
+              <label className="text-[11px] font-semibold text-zinc-300">Contexto / Fila (Opcional):</label>
               <input
                 type="text"
                 value={formContext}
                 onChange={e => setFormContext(e.target.value)}
                 placeholder="Ex: Plantão FDS Home, Fila OPA encaixes, Semana Presencial..."
-                className="w-full bg-slate-950/80 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400"
+                className="w-full bg-[#090A0F] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00d2d3]"
               />
             </div>
 
             {/* Título / Resumo */}
             <div className="space-y-1">
-              <label className="text-[11px] font-semibold text-slate-300">Título / Assunto:</label>
+              <label className="text-[11px] font-semibold text-zinc-300">Título / Assunto:</label>
               <input
                 type="text"
                 required
                 value={formTitle}
                 onChange={e => setFormTitle(e.target.value)}
                 placeholder="Ex: Ótima proatividade na resolução de encaixes no sábado..."
-                className="w-full bg-slate-950/80 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400 font-semibold"
+                className="w-full bg-[#090A0F] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00d2d3] font-semibold"
               />
             </div>
 
             {/* Detalhes do Registro */}
             <div className="space-y-1">
-              <label className="text-[11px] font-semibold text-slate-300">Observações Detalhadas (Confidencial):</label>
+              <label className="text-[11px] font-semibold text-zinc-300">Observações Detalhadas (Confidencial):</label>
               <textarea
                 required
                 rows={3}
                 value={formNotes}
                 onChange={e => setFormNotes(e.target.value)}
                 placeholder="Descreva detalhadamente o ocorrido, combinados e apontamentos que você quer guardar..."
-                className="w-full bg-slate-950/80 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-cyan-400 leading-relaxed"
+                className="w-full bg-[#090A0F] border border-white/[0.08] rounded-xl p-3 text-xs text-white focus:outline-none focus:border-[#00d2d3] leading-relaxed"
               />
             </div>
 
@@ -367,13 +367,13 @@ export const GestorFeedbacksPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsCreating(false)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white bg-white/5 border border-white/10 cursor-pointer"
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white bg-white/[0.04] border border-white/[0.08] cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 rounded-xl text-xs font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 cursor-pointer shadow-md shadow-cyan-500/20"
+                className="px-5 py-2 rounded-xl text-xs font-bold bg-[#00d2d3] hover:bg-[#57f1db] text-[#003731] cursor-pointer shadow-sm"
               >
                 {editingId ? 'Salvar Alterações' : 'Registrar Feedback'}
               </button>
@@ -384,10 +384,10 @@ export const GestorFeedbacksPage: React.FC = () => {
         {/* FEEDBACKS LIST */}
         <div className="space-y-3">
           {filteredFeedbacks.length === 0 ? (
-            <div className="p-12 text-center rounded-3xl bg-slate-900/40 border border-slate-800 space-y-3">
-              <Notebook size={32} weight="duotone" className="text-slate-600 mx-auto" />
+            <div className="p-12 text-center rounded-3xl bg-[#0e1016] border border-white/[0.08] space-y-3">
+              <Notebook size={32} weight="duotone" className="text-zinc-600 mx-auto" />
               <h3 className="text-sm font-semibold text-white">Nenhum registro encontrado</h3>
-              <p className="text-xs text-slate-400 max-w-sm mx-auto">
+              <p className="text-xs text-zinc-400 max-w-sm mx-auto">
                 Utilize o botão acima para cadastrar observações, pontos fortes ou de atenção sobre os colaboradores.
               </p>
             </div>
@@ -397,12 +397,12 @@ export const GestorFeedbacksPage: React.FC = () => {
               return (
                 <div
                   key={fb.id}
-                  className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-slate-700 transition-all shadow-sm space-y-3 group"
+                  className="p-5 rounded-2xl bg-[#0e1016] border border-white/[0.08] hover:border-white/[0.16] transition-all shadow-sm space-y-3 group"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div className="flex items-center gap-2.5 flex-wrap">
                       <span className="font-bold text-sm text-white flex items-center gap-2">
-                        <User size={16} weight="duotone" className="text-cyan-400" />
+                        <User size={16} weight="duotone" className="text-[#00d2d3]" />
                         <span>{fb.providerName}</span>
                       </span>
 
@@ -412,20 +412,20 @@ export const GestorFeedbacksPage: React.FC = () => {
                       </span>
 
                       {fb.shiftContext && (
-                        <span className="text-[11px] font-medium text-slate-400 bg-slate-950 px-2 py-0.5 rounded-md border border-slate-800">
+                        <span className="text-[11px] font-medium text-zinc-400 bg-[#090A0F] px-2 py-0.5 rounded-md border border-white/[0.08]">
                           {fb.shiftContext}
                         </span>
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2 text-xs text-slate-400">
+                    <div className="flex items-center gap-2 text-xs text-zinc-400">
                       <span className="font-mono text-[11px]">{fb.date.split('-').reverse().join('/')}</span>
                       
                       <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
                         <button
                           type="button"
                           onClick={() => handleOpenEdit(fb)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer transition-colors"
+                          className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] cursor-pointer transition-colors"
                           title="Editar registro"
                         >
                           <PencilSimple size={15} />
@@ -437,7 +437,7 @@ export const GestorFeedbacksPage: React.FC = () => {
                               deleteTeamFeedback(fb.id);
                             }
                           }}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 cursor-pointer transition-colors"
+                          className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 cursor-pointer transition-colors"
                           title="Excluir registro"
                         >
                           <Trash size={15} />
@@ -447,10 +447,10 @@ export const GestorFeedbacksPage: React.FC = () => {
                   </div>
 
                   <div>
-                    <h4 className="text-xs font-bold text-slate-200 tracking-tight">
+                    <h4 className="text-xs font-bold text-zinc-200 tracking-tight">
                       {fb.title}
                     </h4>
-                    <p className="text-xs text-slate-400 mt-1.5 leading-relaxed whitespace-pre-wrap bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
+                    <p className="text-xs text-zinc-400 mt-1.5 leading-relaxed whitespace-pre-wrap bg-[#090A0F] p-3 rounded-xl border border-white/[0.06]">
                       {fb.notes}
                     </p>
                   </div>

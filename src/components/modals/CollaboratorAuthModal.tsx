@@ -157,7 +157,7 @@ export const CollaboratorAuthModal: React.FC<CollaboratorAuthModalProps> = ({
     >
       <div
         onClick={e => e.stopPropagation()}
-        className="relative w-full max-w-md bg-slate-900/95 border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh] cursor-default backdrop-blur-xl"
+        className="relative w-full max-w-md bg-[#0e1017] border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh] cursor-default backdrop-blur-xl"
       >
         {/* Header - Glass Style */}
         <div className="px-6 py-5 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
@@ -211,7 +211,7 @@ export const CollaboratorAuthModal: React.FC<CollaboratorAuthModalProps> = ({
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder="Pesquisar por nome ou regime..."
-                  className="w-full bg-slate-950/70 border border-white/10 rounded-2xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                  className="w-full bg-[#090A0F] border border-white/10 rounded-2xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#00d2d3]"
                 />
               </div>
 
@@ -224,7 +224,7 @@ export const CollaboratorAuthModal: React.FC<CollaboratorAuthModalProps> = ({
                     className="w-full p-2.5 rounded-2xl bg-white/[0.02] hover:bg-white/[0.06] border border-white/5 hover:border-white/15 flex items-center justify-between transition-all group cursor-pointer text-left"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-xl bg-slate-800 border border-slate-700/80 flex items-center justify-center font-bold text-xs text-slate-200 shrink-0">
+                      <div className="w-8 h-8 rounded-xl bg-[#141720] border border-white/[0.08] flex items-center justify-center font-bold text-xs text-zinc-200 shrink-0">
                         {getInitials(prov.name)}
                       </div>
                       <div className="min-w-0">
@@ -286,7 +286,7 @@ export const CollaboratorAuthModal: React.FC<CollaboratorAuthModalProps> = ({
                         value={pin}
                         onChange={e => setPin(e.target.value.replace(/\D/g, ''))}
                         placeholder="••••"
-                        className="w-full bg-slate-950/70 border border-white/10 rounded-xl px-3 py-2 text-white text-sm font-mono tracking-widest text-center font-bold focus:outline-none focus:border-cyan-400"
+                        className="w-full bg-[#090A0F] border border-white/10 rounded-xl px-3 py-2 text-white text-sm font-mono tracking-widest text-center font-bold focus:outline-none focus:border-[#00d2d3]"
                       />
                     </div>
                     <div className="space-y-1">
@@ -298,7 +298,7 @@ export const CollaboratorAuthModal: React.FC<CollaboratorAuthModalProps> = ({
                         value={confirmPin}
                         onChange={e => setConfirmPin(e.target.value.replace(/\D/g, ''))}
                         placeholder="••••"
-                        className="w-full bg-slate-950/70 border border-white/10 rounded-xl px-3 py-2 text-white text-sm font-mono tracking-widest text-center font-bold focus:outline-none focus:border-cyan-400"
+                        className="w-full bg-[#090A0F] border border-white/10 rounded-xl px-3 py-2 text-white text-sm font-mono tracking-widest text-center font-bold focus:outline-none focus:border-[#00d2d3]"
                       />
                     </div>
                   </div>
@@ -318,7 +318,7 @@ export const CollaboratorAuthModal: React.FC<CollaboratorAuthModalProps> = ({
                     value={pin}
                     onChange={e => setPin(e.target.value.replace(/\D/g, ''))}
                     placeholder="••••"
-                    className="w-full bg-slate-950/70 border border-white/10 rounded-2xl px-4 py-3 text-white text-base font-mono tracking-widest text-center font-bold focus:outline-none focus:border-cyan-400"
+                    className="w-full bg-[#090A0F] border border-white/10 rounded-2xl px-4 py-3 text-white text-base font-mono tracking-widest text-center font-bold focus:outline-none focus:border-[#00d2d3]"
                   />
                 </div>
               )}

@@ -233,708 +233,652 @@ export const MobileScheduleView: React.FC<MobileScheduleViewProps> = ({
   };
 
   return (
-    <div className="w-full max-w-md mx-auto min-h-screen pb-24 text-slate-100 bg-[#0c121c] flex flex-col antialiased overflow-x-hidden">
-      
-      {/* 1. TOP HEADER (Avatar, Name, Date, Notification Bell) */}
-      <div className="pt-3 pb-2.5 px-4 flex items-center justify-between sticky top-0 bg-[#0c121c]/95 backdrop-blur-md z-30 border-b border-[#1e2a3a] shadow-sm">
-        <div className="flex items-center gap-3 relative">
-          {/* Avatar button */}
-          <button
-            type="button"
-            onClick={() => setShowUserPicker(!showUserPicker)}
-            className="w-11 h-11 rounded-2xl bg-slate-800 border-2 border-cyan-500/40 active:scale-95 text-cyan-400 font-black text-sm flex items-center justify-center shadow-sm transition-all cursor-pointer ring-2 ring-cyan-500/20 shrink-0"
-          >
-            {getInitials(currentProvider.name)}
-          </button>
-
-          <div>
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => setShowUserPicker(!showUserPicker)}
-                className="font-extrabold text-sm text-white hover:text-cyan-400 flex items-center gap-1 transition-colors text-left"
-              >
-                <span className="truncate max-w-[150px]">{currentProvider.name.split(' ').slice(0, 2).join(' ')}</span>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-              </button>
-              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-cyan-950/70 text-cyan-300 border border-cyan-800/80">
-                {currentProvider.regime || activeRegime}
-              </span>
-            </div>
-            <p className="text-xs font-medium text-slate-400 capitalize">
-              {todayDayOfWeekName}, {String(todayDayNum).padStart(2, '0')} de {todayMonthName}
-            </p>
-          </div>
-
-          {/* User Picker Dropdown Modal */}
-          {showUserPicker && (
-            <div className="absolute top-12 left-0 w-64 bg-[#141c28] border border-[#1e2a3a] rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95">
-              <div className="text-xs font-bold uppercase text-slate-400 px-2 py-1">
-                Trocar Colaborador:
-              </div>
-              <div className="max-h-56 overflow-y-auto space-y-1">
-                {providers.map(p => (
-                  <button
-                    key={p.id}
-                    onClick={() => {
-                      setActiveProviderId(p.id);
-                      setShowUserPicker(false);
-                    }}
-                    className={`w-full text-left px-3 py-1.5 rounded-xl text-xs flex items-center justify-between transition-colors ${
-                      p.id === currentProvider.id
-                        ? 'bg-cyan-950/70 text-cyan-300 font-bold border border-cyan-800'
-                        : 'text-slate-300 hover:bg-slate-800'
-                    }`}
-                  >
-                    <span className="truncate">{p.name}</span>
-                    <span className="text-xs text-slate-400">{p.regime || '12x36'}</span>
-                  </button>
-                ))}
-              </div>
-
-              {onOpenCollaboratorAuth && (
-                <div className="pt-2 border-t border-[#1e2a3a] mt-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowUserPicker(false);
-                      onOpenCollaboratorAuth();
-                    }}
-                    className="w-full text-center px-2 py-1.5 bg-cyan-950/70 hover:bg-cyan-900 border border-cyan-800/80 rounded-xl text-xs font-bold text-cyan-300 transition-colors cursor-pointer"
-                  >
-                    🔍 Lista Completa & Gerenciar PIN
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Action icons (Gestor, Marketplace, WhatsApp Share, Notification Bell) */}
-        <div className="flex items-center gap-1.5 shrink-0">
-          {onOpenMarketplace && (
+    <div className="w-full flex-1 pb-24 text-[#e3e1e9] bg-[#090A0F] flex flex-col antialiased overflow-x-hidden">
+      <div className="w-full max-w-2xl mx-auto flex-1 flex flex-col">
+        {/* 1. COLLABORATOR CONTEXT BAR (Unified Obsidian Dark, below global OminiHub Navbar) */}
+        <div className="mx-3.5 mt-3 p-3 rounded-2xl bg-[#0e1016] border border-white/[0.08] flex items-center justify-between gap-2.5 relative z-30">
+          <div className="flex items-center gap-2.5 relative min-w-0">
+            {/* Avatar button */}
             <button
               type="button"
-              onClick={onOpenMarketplace}
-              className="w-9 h-9 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-300 hover:bg-amber-500/20 transition-colors cursor-pointer shadow-sm"
-              title="Venda & Repasse de Plantões"
+              onClick={() => setShowUserPicker(!showUserPicker)}
+              className="w-10 h-10 rounded-xl bg-[#141720] border border-[#00d2d3]/35 active:scale-95 text-[#00d2d3] font-black text-xs flex items-center justify-center shadow-xs transition-all cursor-pointer shrink-0"
             >
-              <Coins className="w-4 h-4" />
+              {getInitials(currentProvider.name)}
             </button>
-          )}
 
-          {onOpenLeaderAuth && (
-            <button
-              type="button"
-              onClick={onOpenLeaderAuth}
-              className={`w-9 h-9 rounded-full border flex items-center justify-center transition-colors cursor-pointer shadow-sm ${
-                isLeaderAuthenticated
-                  ? 'bg-cyan-500/20 border-cyan-400/50 text-cyan-300'
-                  : 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white'
-              }`}
-              title={isLeaderAuthenticated ? 'Gestor Autenticado' : 'Acesso Gestor'}
-            >
-              {isLeaderAuthenticated ? <ShieldCheck className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={handleShareMyScheduleWhatsApp}
-            className="w-9 h-9 rounded-full bg-cyan-950/70 border border-cyan-800/80 flex items-center justify-center text-cyan-300 hover:bg-cyan-900/80 transition-colors cursor-pointer shadow-sm"
-            title="Compartilhar minha escala no WhatsApp"
-          >
-            <Share2 className="w-4 h-4" />
-          </button>
-
-          <button
-            type="button"
-            onClick={onOpenRequestsCenter}
-            className="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-700 transition-colors relative cursor-pointer shadow-sm"
-            title="Notificações e Solicitações"
-          >
-            <Bell className="w-4 h-4" />
-            <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-cyan-400 ring-2 ring-[#0c121c]" />
-          </button>
-        </div>
-      </div>
-
-      {mobileNotice && (
-        <div className="mx-4 mt-2 px-3.5 py-2 bg-amber-950/70 border border-amber-700/60 rounded-xl text-xs text-amber-200 text-center">
-          {mobileNotice}
-        </div>
-      )}
-
-      {/* Quick Module Switcher on Mobile (Clean 4-column grid bar, zero scrollbars) */}
-      <div className="px-3 py-2 bg-[#0d1420] border-b border-[#1e2a3a] grid grid-cols-4 gap-1">
-        <button
-          type="button"
-          onClick={() => setActiveModule('escala')}
-          className={`py-1.5 px-1 rounded-lg text-[11px] font-semibold text-center transition-all cursor-pointer ${
-            activeModule === 'escala'
-              ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-xs'
-              : 'bg-slate-800/60 text-slate-300 hover:bg-slate-700 border border-transparent'
-          }`}
-        >
-          📅 Escala
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveModule('prestadores_regional')}
-          className={`py-1.5 px-1 rounded-lg text-[11px] font-semibold text-center transition-all cursor-pointer ${
-            activeModule === 'prestadores_regional'
-              ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40 shadow-xs'
-              : 'bg-slate-800/60 text-slate-300 hover:bg-slate-700 border border-transparent'
-          }`}
-        >
-          👥 Técnicos
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveModule('pontos_fixos')}
-          className={`py-1.5 px-1 rounded-lg text-[11px] font-semibold text-center transition-all cursor-pointer ${
-            activeModule === 'pontos_fixos'
-              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-xs'
-              : 'bg-slate-800/60 text-slate-300 hover:bg-slate-700 border border-transparent'
-          }`}
-        >
-          📍 Postos
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveModule('central_inteligencia')}
-          className={`py-1.5 px-1 rounded-lg text-[11px] font-semibold text-center transition-all cursor-pointer ${
-            activeModule === 'central_inteligencia'
-              ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-xs'
-              : 'bg-slate-800/60 text-slate-300 hover:bg-slate-700 border border-transparent'
-          }`}
-        >
-          ⚡ Central
-        </button>
-      </div>
-
-      {/* 🔔 TOMORROW SHIFT REMINDER BANNER */}
-      {isWorkingTomorrow && (
-        <div className="mx-4 mt-2 px-3.5 py-2.5 bg-cyan-950/50 border border-cyan-800/70 rounded-2xl flex items-center justify-between gap-2 text-xs shadow-sm">
-          <div className="flex items-center gap-2 text-cyan-200 font-medium">
-            <Clock className="w-4 h-4 text-cyan-400 shrink-0" />
-            <span>
-              Lembrete: <strong>Amanhã você tem plantão</strong> das {currentProvider.entryTime || '07h00'} às {currentProvider.exitTime || '19h00'}.
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* ✅ CONFIRM AWARENESS BANNER (Confirmar Ciência) */}
-      {!isMonthAcknowledged && (
-        <div className="mx-4 mt-2 p-3 bg-amber-950/50 border border-amber-800/80 rounded-2xl flex items-center justify-between gap-2 shadow-2xs">
-          <div className="space-y-0.5">
-            <span className="text-xs font-bold text-amber-200 block">
-              Escala Oficial Publicada
-            </span>
-            <span className="text-xs text-amber-300/80 block">
-              Confirme que você visualizou seus plantões
-            </span>
-          </div>
-          <button
-            type="button"
-            onClick={() => acknowledgeAllMonthlyShifts(currentProvider.id, currentYear, currentMonthIndex)}
-            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-xs transition-colors flex items-center gap-1 cursor-pointer shrink-0"
-          >
-            <Check className="w-3.5 h-3.5" />
-            <span>Confirmar Ciência</span>
-          </button>
-        </div>
-      )}
-
-      {/* TAB 1: ESCALA */}
-      {activeTab === 'escala' && (
-        <div className="px-4 space-y-4 pt-3">
-          
-          {/* 2. HERO CARD (Electric Blue & Cyan Gradient) */}
-          <div className={`rounded-3xl p-5 shadow-md space-y-4 text-white ${
-            isWorkingToday
-              ? 'bg-gradient-to-br from-cyan-600 via-blue-600 to-indigo-900'
-              : 'bg-gradient-to-br from-slate-800 via-slate-900 to-[#0c121c] border border-[#1e2a3a]'
-          }`}>
-            {/* Top row */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-cyan-300 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
-                <span className="text-xs font-black uppercase tracking-wider text-white/90">
-                  {isWorkingToday ? 'PLANTÃO ATIVO HOJE' : 'PRÓXIMO PLANTÃO'}
-                </span>
-              </div>
-
-              {isWorkingToday ? (
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-xs text-white text-xs font-extrabold shadow-sm">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-cyan-200" />
-                  <span>Trabalhando Hoje</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs text-slate-200 text-xs font-extrabold shadow-sm">
-                  <Coffee className="w-3.5 h-3.5 text-slate-300" />
-                  <span>Dia de Folga</span>
-                </div>
-              )}
-            </div>
-
-            {/* Time Row */}
-            <div>
-              <div className="text-[1.875rem] sm:text-4xl font-black text-white tracking-tight flex items-baseline gap-2">
-                <span>{currentProvider.entryTime || '07:00'}</span>
-                <span className="text-sm font-semibold text-white/80">às</span>
-                <span>{currentProvider.exitTime || '19:00'}</span>
-              </div>
-              <div className="flex items-center gap-1.5 text-xs text-white/90 mt-1 font-medium">
-                <MapPin className="w-3.5 h-3.5 text-cyan-200 shrink-0" />
-                <span>
-                  Setor Central • {todayModality === 'home_office' ? 'Home Office (HO)' : 'Presencial'}
-                </span>
-              </div>
-            </div>
-
-            {/* Progress Bar (Visible on shift day) */}
-            <div className="space-y-1.5 bg-black/25 backdrop-blur-xs p-3 rounded-2xl">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-white/80 font-medium">Progresso do turno (12h)</span>
-                <span className="font-extrabold text-white">
-                  {isWorkingToday ? `${remainingHours}h restantes` : 'Turno programado'}
-                </span>
-              </div>
-              <div className="w-full h-2 rounded-full bg-black/40 overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-cyan-400 transition-all duration-500 shadow-sm"
-                  style={{ width: `${isWorkingToday ? Math.max(15, progressPercentage) : 100}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Team on duty row */}
-            <div className="flex items-center justify-between pt-1 border-t border-white/20">
-              <div className="flex items-center gap-2">
-                <div className="flex -space-x-2 overflow-hidden">
-                  {teammatesOnDutyToday.slice(0, 3).map(tm => (
-                    <div
-                      key={tm.id}
-                      className="h-6 w-6 rounded-full ring-2 ring-white/60 bg-slate-800 text-cyan-400 text-xs font-black flex items-center justify-center shadow-xs"
-                      title={tm.name}
-                    >
-                      {getInitials(tm.name)}
-                    </div>
-                  ))}
-                  {teammatesOnDutyToday.length > 3 && (
-                    <div className="h-6 w-6 rounded-full ring-2 ring-white/60 bg-white/30 text-white text-xs font-black flex items-center justify-center">
-                      +{teammatesOnDutyToday.length - 3}
-                    </div>
-                  )}
-                </div>
-                <span className="text-xs text-white/90 font-medium">
-                  {teammatesOnDutyToday.length > 0 ? 'Equipe no plantão' : 'Plantonista exclusivo'}
-                </span>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setActiveTab('equipe')}
-                className="text-xs font-bold text-white hover:underline flex items-center gap-0.5 cursor-pointer"
-              >
-                <span>Ver time</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-
-          {/* 3. THREE STAT CARDS (Plantões, Folgas, Regime) */}
-          <div className="grid grid-cols-3 gap-2.5">
-            <div className="bg-[#141c28] border border-[#1e2a3a] p-3 rounded-2xl text-center space-y-0.5 shadow-md">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-slate-400 block">
-                PLANTÕES
-              </span>
-              <div className="text-2xl font-black text-cyan-400">{countT}</div>
-              <span className="text-xs text-slate-400 font-medium block">
-                {totalHours}h totais
-              </span>
-            </div>
-
-            <div className="bg-[#141c28] border border-[#1e2a3a] p-3 rounded-2xl text-center space-y-0.5 shadow-md">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-slate-400 block">
-                FOLGAS
-              </span>
-              <div className="text-2xl font-black text-slate-200">{countD}</div>
-              <span className="text-xs text-slate-400 font-medium block">
-                descansos
-              </span>
-            </div>
-
-            <div className="bg-[#141c28] border border-[#1e2a3a] p-3 rounded-2xl text-center space-y-0.5 shadow-md">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-slate-400 block">
-                REGIME
-              </span>
-              <div className="text-2xl font-black text-white">
-                {currentProvider.regime || activeRegime}
-              </div>
-              <span className="text-xs text-slate-400 font-medium block">
-                oficial ativo
-              </span>
-            </div>
-          </div>
-
-          {/* 4. LINHA DO TEMPO (Timeline with Week / Month toggle + Day Detail Modal) */}
-          <div className="space-y-2.5 pt-1">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-extrabold text-white">Linha do Tempo</h3>
-              
-              <div className="flex items-center bg-[#0c121c] p-0.5 rounded-xl border border-[#1e2a3a] text-xs">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <button
                   type="button"
-                  onClick={() => setTimelineMode('week')}
-                  className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
-                    timelineMode === 'week'
-                      ? 'bg-slate-800 text-cyan-400 shadow-sm border border-cyan-500/30 font-black'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
+                  onClick={() => setShowUserPicker(!showUserPicker)}
+                  className="font-bold text-xs sm:text-sm text-white hover:text-[#00d2d3] flex items-center gap-1 transition-colors text-left cursor-pointer"
                 >
-                  Semana
+                  <span className="truncate max-w-[140px] sm:max-w-[200px]">
+                    {currentProvider.name.split(' ').slice(0, 2).join(' ')}
+                  </span>
+                  <ChevronDown className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setTimelineMode('month')}
-                  className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
-                    timelineMode === 'month'
-                      ? 'bg-slate-800 text-cyan-400 shadow-sm border border-cyan-500/30 font-black'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  Mês
-                </button>
+                <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-[#00d2d3]/12 text-[#00d2d3] border border-[#00d2d3]/25">
+                  {currentProvider.regime || activeRegime}
+                </span>
               </div>
+              <p className="text-[11px] font-medium text-zinc-400 capitalize truncate">
+                {todayDayOfWeekName}, {String(todayDayNum).padStart(2, '0')} de {todayMonthName}
+              </p>
             </div>
 
-            {/* List of Day Cards */}
-            <div className="space-y-2">
-              {timelineDays.map(d => {
-                const shift = assignments.find(
-                  a => a.providerId === currentProvider.id && a.date === d.dateStr
-                );
-                const isWorking = shift?.shiftTypeId === 'st-t';
-                const isResting = shift?.shiftTypeId === 'st-d';
-                const isToday = d.dateStr === todayISO;
-                const isPast = d.dateStr < todayISO;
-                const hasNotes = Boolean(shift?.notes);
-                const dayOfWeekShort = DAYS_SHORT_PT[d.dayOfWeek].toUpperCase();
-                const dayNumFormatted = String(d.dayNumber).padStart(2, '0');
-
-                let cardClass = 'bg-[#141c28] border border-[#1e2a3a] hover:border-slate-600 shadow-sm';
-                if (isToday) {
-                  cardClass = 'bg-[#141c28] border-2 border-cyan-400 shadow-md ring-2 ring-cyan-500/20';
-                }
-
-                return (
-                  <div
-                    key={d.dateStr}
-                    onClick={() => setSelectedDayDetail({
-                      dateStr: d.dateStr,
-                      dayNumber: d.dayNumber,
-                      dayOfWeek: d.dayOfWeek,
-                      shift,
-                    })}
-                    className={`p-3 rounded-2xl flex items-center justify-between gap-3 transition-all cursor-pointer active:scale-98 ${cardClass}`}
-                  >
-                    {/* Left: Date Box */}
-                    <div
-                      className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center shrink-0 border ${
-                        isToday
-                          ? 'bg-cyan-500 text-slate-950 font-black border-cyan-400 shadow-sm'
-                          : isWorking
-                          ? 'bg-cyan-950/50 text-cyan-300 border-cyan-800'
-                          : 'bg-[#0c121c] text-slate-300 border-[#1e2a3a]'
+            {/* User Picker Dropdown Modal */}
+            {showUserPicker && (
+              <div className="absolute top-12 left-0 w-64 bg-[#0e1017] border border-white/[0.12] rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95">
+                <div className="text-[11px] font-bold uppercase text-zinc-400 px-2 py-1">
+                  Trocar Colaborador:
+                </div>
+                <div className="max-h-56 overflow-y-auto space-y-1">
+                  {providers.map(p => (
+                    <button
+                      key={p.id}
+                      onClick={() => {
+                        setActiveProviderId(p.id);
+                        setShowUserPicker(false);
+                      }}
+                      className={`w-full text-left px-3 py-1.5 rounded-xl text-xs flex items-center justify-between transition-colors cursor-pointer ${
+                        p.id === currentProvider.id
+                          ? 'bg-[#00d2d3]/15 text-[#00d2d3] font-bold border border-[#00d2d3]/30'
+                          : 'text-zinc-300 hover:bg-white/[0.06]'
                       }`}
                     >
-                      <span className="text-xs font-extrabold uppercase leading-tight">
-                        {dayOfWeekShort}
-                      </span>
-                      <span className="text-base font-black leading-tight">
-                        {dayNumFormatted}
-                      </span>
-                    </div>
+                      <span className="truncate">{p.name}</span>
+                      <span className="text-[11px] font-mono text-zinc-400">{p.regime || '12x36'}</span>
+                    </button>
+                  ))}
+                </div>
 
-                    {/* Middle: Shift Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-extrabold text-xs text-white truncate">
-                          {isWorking
-                            ? isToday
-                              ? 'Plantão Ativo Hoje'
-                              : 'Plantão (12h)'
-                            : isResting
-                            ? 'Dia de Descanso'
-                            : 'Sem Escala'}
-                        </span>
-                        {isToday && (
-                          <span className="text-xs font-black uppercase px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-700">
-                            Hoje
-                          </span>
-                        )}
-                        {hasNotes && (
-                          <span className="w-2 h-2 rounded-full bg-rose-500" title="Possui anotação" />
-                        )}
-                      </div>
-                      <p className="text-xs text-slate-400 truncate">
-                        {isWorking
-                          ? `${currentProvider.entryTime || '07:00'} às ${currentProvider.exitTime || '19:00'} • Central`
-                          : isResting
-                          ? shift?.notes || 'Descanso programado (D)'
-                          : 'Sem agendamento'}
-                      </p>
-                    </div>
-
-                    {/* Right: Badge */}
-                    <div className="shrink-0">
-                      {isPast && !isToday && (
-                        <span className="text-xs font-bold text-slate-400 bg-[#0c121c] px-2.5 py-1 rounded-lg border border-[#1e2a3a]">
-                          Concluído
-                        </span>
-                      )}
-
-                      {!isPast && isWorking && (
-                        <span className="w-7 h-7 rounded-lg bg-cyan-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-sm">
-                          T
-                        </span>
-                      )}
-
-                      {!isPast && isResting && (
-                        <span className="w-7 h-7 rounded-lg bg-slate-700/80 text-slate-200 border border-slate-600/50 font-bold text-xs flex items-center justify-center shadow-xs">
-                          D
-                        </span>
-                      )}
-
-                      {!isPast && !isWorking && !isResting && (
-                        <span className="w-7 h-7 rounded-lg bg-[#0c121c] text-slate-500 border border-[#1e2a3a] font-bold text-xs flex items-center justify-center">
-                          -
-                        </span>
-                      )}
-                    </div>
+                {onOpenCollaboratorAuth && (
+                  <div className="pt-2 border-t border-white/[0.08] mt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowUserPicker(false);
+                        onOpenCollaboratorAuth();
+                      }}
+                      className="w-full text-center px-2 py-1.5 bg-[#00d2d3]/12 hover:bg-[#00d2d3]/20 border border-[#00d2d3]/25 rounded-xl text-xs font-bold text-[#00d2d3] transition-colors cursor-pointer"
+                    >
+                      Lista Completa & Gerenciar PIN
+                    </button>
                   </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* 5. AÇÕES RÁPIDAS (Quick Action Buttons) */}
-          <div className="space-y-2.5 pt-2">
-            <span className="text-xs font-black uppercase tracking-wider text-slate-400 block">
-              AÇÕES RÁPIDAS
-            </span>
-
-            <div className="grid grid-cols-2 gap-2.5">
-              <button
-                type="button"
-                onClick={onRequestSwap}
-                className="p-3.5 rounded-2xl bg-[#141c28] hover:bg-slate-800 active:scale-98 border border-[#1e2a3a] text-left space-y-1 transition-all cursor-pointer shadow-md group"
-              >
-                <div className="w-8 h-8 rounded-xl bg-blue-950/70 border border-blue-800/80 text-cyan-300 flex items-center justify-center">
-                  <ArrowLeftRight className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="font-extrabold text-xs text-white group-hover:text-cyan-300 transition-colors">
-                    Solicitar Troca
-                  </h4>
-                  <p className="text-xs text-slate-400">Permutar com colega</p>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={onNotifyAbsence}
-                className="p-3.5 rounded-2xl bg-[#141c28] hover:bg-slate-800 active:scale-98 border border-[#1e2a3a] text-left space-y-1 transition-all cursor-pointer shadow-md group"
-              >
-                <div className="w-8 h-8 rounded-xl bg-rose-950/70 border border-rose-800/80 text-rose-300 flex items-center justify-center">
-                  <AlertTriangle className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="font-extrabold text-xs text-white group-hover:text-rose-300 transition-colors">
-                    Notificar Falta
-                  </h4>
-                  <p className="text-xs text-slate-400">Atestado / Motivo</p>
-                </div>
-              </button>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleExportToICS}
-              className="w-full py-3 px-4 rounded-2xl bg-[#141c28] hover:bg-slate-800 active:scale-98 border border-[#1e2a3a] flex items-center justify-center gap-2 text-xs font-bold text-slate-200 hover:text-white transition-all cursor-pointer shadow-md"
-            >
-              <Calendar className="w-4 h-4 text-cyan-400" />
-              <span>Sincronizar com Google Agenda (.ics)</span>
-            </button>
-
-            {isLeaderAuthenticated && onOpenFeedbacks && (
-              <button
-                type="button"
-                onClick={onOpenFeedbacks}
-                className="w-full py-3 px-4 rounded-2xl bg-purple-950/40 hover:bg-purple-900/50 active:scale-98 border border-purple-700/50 flex items-center justify-center gap-2 text-xs font-bold text-purple-200 transition-all cursor-pointer shadow-md"
-              >
-                <Notebook className="w-4 h-4 text-purple-300" />
-                <span>Abrir Diário de Feedbacks (Gestor)</span>
-              </button>
+                )}
+              </div>
             )}
           </div>
 
-        </div>
-      )}
+          {/* Quick Personal Schedule Actions (Share WhatsApp & Requests Bell) */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              onClick={handleShareMyScheduleWhatsApp}
+              className="w-8.5 h-8.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] flex items-center justify-center text-[#00d2d3] transition-colors cursor-pointer"
+              title="Compartilhar minha escala no WhatsApp"
+            >
+              <Share2 className="w-4 h-4" />
+            </button>
 
-      {/* TAB 2: EQUIPE */}
-      {activeTab === 'equipe' && (
-        <div className="px-4 space-y-3 pt-3">
-          <div className="flex items-center justify-between pb-1">
-            <h3 className="text-base font-extrabold text-white">Equipe de Plantão</h3>
-            <span className="text-xs text-slate-400">{providers.length} colaboradores</span>
+            <button
+              type="button"
+              onClick={onOpenRequestsCenter}
+              className="w-8.5 h-8.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] flex items-center justify-center text-zinc-300 hover:text-white transition-colors relative cursor-pointer"
+              title="Notificações e Solicitações"
+            >
+              <Bell className="w-4 h-4" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#00d2d3] ring-2 ring-[#0e1016]" />
+            </button>
           </div>
+        </div>
 
-          <div className="space-y-2">
-            {providers
-              .filter(p => (p.regime || '12x36') === activeRegime)
-              .map(p => {
-                const shift = assignments.find(a => a.providerId === p.id && a.date === todayISO);
-                const isWorking = shift?.shiftTypeId === 'st-t';
+        {mobileNotice && (
+          <div className="mx-3.5 mt-2 px-3.5 py-2 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-200 text-center">
+            {mobileNotice}
+          </div>
+        )}
 
-                return (
+        {/* 🔔 TOMORROW SHIFT REMINDER BANNER */}
+        {isWorkingTomorrow && (
+          <div className="mx-3.5 mt-2.5 px-3.5 py-2.5 bg-[#0e1016] border border-[#00d2d3]/30 rounded-2xl flex items-center justify-between gap-2 text-xs shadow-xs">
+            <div className="flex items-center gap-2 text-zinc-200 font-medium">
+              <Clock className="w-4 h-4 text-[#00d2d3] shrink-0" />
+              <span>
+                Lembrete: <strong className="text-white">Amanhã você tem plantão</strong> das {currentProvider.entryTime || '07h00'} às {currentProvider.exitTime || '19h00'}.
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* ✅ CONFIRM AWARENESS BANNER (Confirmar Ciência) */}
+        {!isMonthAcknowledged && (
+          <div className="mx-3.5 mt-2.5 p-3 bg-[#0e1016] border border-amber-500/30 rounded-2xl flex items-center justify-between gap-2.5 shadow-xs">
+            <div className="space-y-0.5 min-w-0">
+              <span className="text-xs font-bold text-amber-300 block">
+                Escala Oficial Publicada
+              </span>
+              <span className="text-[11px] text-zinc-400 block">
+                Confirme que você visualizou seus plantões
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => acknowledgeAllMonthlyShifts(currentProvider.id, currentYear, currentMonthIndex)}
+              className="px-3 py-1.5 bg-[#00d2d3] hover:bg-[#57f1db] text-[#003731] rounded-xl text-xs font-bold shadow-xs transition-colors flex items-center gap-1 cursor-pointer shrink-0"
+            >
+              <Check className="w-3.5 h-3.5" />
+              <span>Confirmar Ciência</span>
+            </button>
+          </div>
+        )}
+
+        {/* TAB 1: ESCALA */}
+        {activeTab === 'escala' && (
+          <div className="px-3.5 space-y-4 pt-3">
+            
+            {/* 2. HERO CARD (Unified Obsidian Dark + Cyan Accent — No Electric Blue Block) */}
+            <div
+              className={`relative overflow-hidden rounded-3xl p-5 space-y-4 text-white border ${
+                isWorkingToday
+                  ? 'bg-gradient-to-br from-[#0f171a] via-[#0e1016] to-[#090A0F] border-[#00d2d3]/35 shadow-[0_12px_32px_rgba(0,0,0,0.5)]'
+                  : 'bg-[#0e1016] border-white/[0.08] shadow-[0_12px_32px_rgba(0,0,0,0.45)]'
+              }`}
+            >
+              {isWorkingToday && (
+                <div className="absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#00d2d3]/50 to-transparent pointer-events-none" />
+              )}
+
+              {/* Top row */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`w-2.5 h-2.5 rounded-full ${
+                      isWorkingToday
+                        ? 'bg-[#00d2d3] animate-pulse shadow-[0_0_8px_rgba(0,210,211,0.8)]'
+                        : 'bg-zinc-500'
+                    }`}
+                  />
+                  <span className="text-xs font-black uppercase tracking-wider text-zinc-200">
+                    {isWorkingToday ? 'PLANTÃO ATIVO HOJE' : 'PRÓXIMO PLANTÃO'}
+                  </span>
+                </div>
+
+                {isWorkingToday ? (
+                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00d2d3]/15 text-[#00d2d3] border border-[#00d2d3]/30 text-xs font-bold">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#00d2d3]" />
+                    <span>Trabalhando Hoje</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.05] border border-white/[0.08] text-zinc-300 text-xs font-bold">
+                    <Coffee className="w-3.5 h-3.5 text-zinc-400" />
+                    <span>Dia de Folga</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Time Row */}
+              <div>
+                <div className="text-[1.875rem] sm:text-4xl font-black text-white tracking-tight flex items-baseline gap-2 font-mono">
+                  <span>{currentProvider.entryTime || '07:00'}</span>
+                  <span className="text-sm font-sans font-semibold text-zinc-400">às</span>
+                  <span>{currentProvider.exitTime || '19:00'}</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-xs text-zinc-300 mt-1 font-medium">
+                  <MapPin className="w-3.5 h-3.5 text-[#00d2d3] shrink-0" />
+                  <span>
+                    Setor Central • {todayModality === 'home_office' ? 'Home Office (HO)' : 'Presencial'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="space-y-1.5 bg-[#090A0F] border border-white/[0.06] p-3 rounded-2xl">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-zinc-400 font-medium">Progresso do turno (12h)</span>
+                  <span className="font-bold text-white">
+                    {isWorkingToday ? `${remainingHours}h restantes` : 'Turno programado'}
+                  </span>
+                </div>
+                <div className="w-full h-2 rounded-full bg-white/[0.06] overflow-hidden">
                   <div
-                    key={p.id}
-                    className="p-3 bg-[#141c28] border border-[#1e2a3a] rounded-2xl flex items-center justify-between gap-3 shadow-md"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-9 h-9 rounded-xl bg-slate-800 border border-cyan-500/30 font-black text-xs text-cyan-400 flex items-center justify-center shrink-0">
-                        {getInitials(p.name)}
+                    className="h-full rounded-full bg-[#00d2d3] transition-all duration-500"
+                    style={{ width: `${isWorkingToday ? Math.max(15, progressPercentage) : 100}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Team on duty row */}
+              <div className="flex items-center justify-between pt-2 border-t border-white/[0.08]">
+                <div className="flex items-center gap-2">
+                  <div className="flex -space-x-2 overflow-hidden">
+                    {teammatesOnDutyToday.slice(0, 3).map(tm => (
+                      <div
+                        key={tm.id}
+                        className="h-6 w-6 rounded-full ring-2 ring-[#0e1016] bg-[#141720] text-[#00d2d3] border border-white/[0.10] text-[10px] font-bold flex items-center justify-center"
+                        title={tm.name}
+                      >
+                        {getInitials(tm.name)}
                       </div>
-                      <div className="min-w-0">
-                        <h4 className="font-bold text-xs text-white truncate">{p.name}</h4>
-                        <p className="text-xs text-slate-400">
-                          {p.role} • {p.entryTime || '07h00'} às {p.exitTime || '19h00'}
+                    ))}
+                    {teammatesOnDutyToday.length > 3 && (
+                      <div className="h-6 w-6 rounded-full ring-2 ring-[#0e1016] bg-white/[0.12] text-white text-[10px] font-bold flex items-center justify-center">
+                        +{teammatesOnDutyToday.length - 3}
+                      </div>
+                    )}
+                  </div>
+                  <span className="text-xs text-zinc-300 font-medium">
+                    {teammatesOnDutyToday.length > 0 ? 'Equipe no plantão' : 'Plantonista exclusivo'}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('equipe')}
+                  className="text-xs font-bold text-[#00d2d3] hover:underline flex items-center gap-0.5 cursor-pointer"
+                >
+                  <span>Ver time</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* 3. THREE STAT CARDS (Plantões, Folgas, Regime) */}
+            <div className="grid grid-cols-3 gap-2.5">
+              <div className="bg-[#0e1016] border border-white/[0.08] p-3 rounded-2xl text-center space-y-0.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 block">
+                  PLANTÕES
+                </span>
+                <div className="text-2xl font-black text-[#00d2d3] font-mono">{countT}</div>
+                <span className="text-[11px] text-zinc-400 font-medium block">
+                  {totalHours}h totais
+                </span>
+              </div>
+
+              <div className="bg-[#0e1016] border border-white/[0.08] p-3 rounded-2xl text-center space-y-0.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 block">
+                  FOLGAS
+                </span>
+                <div className="text-2xl font-black text-zinc-100 font-mono">{countD}</div>
+                <span className="text-[11px] text-zinc-400 font-medium block">
+                  descansos
+                </span>
+              </div>
+
+              <div className="bg-[#0e1016] border border-white/[0.08] p-3 rounded-2xl text-center space-y-0.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 block">
+                  REGIME
+                </span>
+                <div className="text-2xl font-black text-white font-mono">
+                  {currentProvider.regime || activeRegime}
+                </div>
+                <span className="text-[11px] text-zinc-400 font-medium block">
+                  oficial ativo
+                </span>
+              </div>
+            </div>
+
+            {/* 4. LINHA DO TEMPO (Timeline with Week / Month toggle + Day Detail Modal) */}
+            <div className="space-y-2.5 pt-1">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm sm:text-base font-bold text-white">Linha do Tempo</h3>
+                
+                <div className="flex items-center bg-[#0e1016] p-0.5 rounded-xl border border-white/[0.08] text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setTimelineMode('week')}
+                    className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                      timelineMode === 'week'
+                        ? 'bg-[#00d2d3]/15 text-[#00d2d3] border border-[#00d2d3]/30'
+                        : 'text-zinc-400 hover:text-zinc-200'
+                    }`}
+                  >
+                    Semana
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTimelineMode('month')}
+                    className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                      timelineMode === 'month'
+                        ? 'bg-[#00d2d3]/15 text-[#00d2d3] border border-[#00d2d3]/30'
+                        : 'text-zinc-400 hover:text-zinc-200'
+                    }`}
+                  >
+                    Mês
+                  </button>
+                </div>
+              </div>
+
+              {/* List of Day Cards */}
+              <div className="space-y-2">
+                {timelineDays.map(d => {
+                  const shift = assignments.find(
+                    a => a.providerId === currentProvider.id && a.date === d.dateStr
+                  );
+                  const isWorking = shift?.shiftTypeId === 'st-t';
+                  const isResting = shift?.shiftTypeId === 'st-d';
+                  const isToday = d.dateStr === todayISO;
+                  const isPast = d.dateStr < todayISO;
+                  const hasNotes = Boolean(shift?.notes);
+                  const dayOfWeekShort = DAYS_SHORT_PT[d.dayOfWeek].toUpperCase();
+                  const dayNumFormatted = String(d.dayNumber).padStart(2, '0');
+
+                  let cardClass = 'bg-[#0e1016] border border-white/[0.08] hover:border-white/[0.16]';
+                  if (isToday) {
+                    cardClass = 'bg-[#0e1016] border border-[#00d2d3]/60 ring-1 ring-[#00d2d3]/25';
+                  }
+
+                  return (
+                    <div
+                      key={d.dateStr}
+                      onClick={() => setSelectedDayDetail({
+                        dateStr: d.dateStr,
+                        dayNumber: d.dayNumber,
+                        dayOfWeek: d.dayOfWeek,
+                        shift,
+                      })}
+                      className={`p-3 rounded-2xl flex items-center justify-between gap-3 transition-all cursor-pointer active:scale-98 ${cardClass}`}
+                    >
+                      {/* Left: Date Box */}
+                      <div
+                        className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center shrink-0 border ${
+                          isToday
+                            ? 'bg-[#00d2d3] text-[#003731] font-black border-[#00d2d3] shadow-xs'
+                            : isWorking
+                            ? 'bg-[#00d2d3]/12 text-[#00d2d3] border-[#00d2d3]/30'
+                            : 'bg-[#090A0F] text-zinc-300 border-white/[0.06]'
+                        }`}
+                      >
+                        <span className="text-[10px] font-bold uppercase leading-tight">
+                          {dayOfWeekShort}
+                        </span>
+                        <span className="text-base font-black leading-tight font-mono">
+                          {dayNumFormatted}
+                        </span>
+                      </div>
+
+                      {/* Middle: Shift Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-bold text-xs text-white truncate">
+                            {isWorking
+                              ? isToday
+                                ? 'Plantão Ativo Hoje'
+                                : 'Plantão (12h)'
+                              : isResting
+                              ? 'Dia de Descanso'
+                              : 'Sem Escala'}
+                          </span>
+                          {isToday && (
+                            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-[#00d2d3]/15 text-[#00d2d3] border border-[#00d2d3]/30">
+                              Hoje
+                            </span>
+                          )}
+                          {hasNotes && (
+                            <span className="w-2 h-2 rounded-full bg-rose-500" title="Possui anotação" />
+                          )}
+                        </div>
+                        <p className="text-xs text-zinc-400 truncate">
+                          {isWorking
+                            ? `${currentProvider.entryTime || '07:00'} às ${currentProvider.exitTime || '19:00'} • Central`
+                            : isResting
+                            ? shift?.notes || 'Descanso programado (D)'
+                            : 'Sem agendamento'}
                         </p>
                       </div>
-                    </div>
 
-                    <div>
-                      {isWorking ? (
-                        <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-cyan-950/70 text-cyan-300 border border-cyan-800/80">
-                          🟢 No Plantão
-                        </span>
-                      ) : (
-                        <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#0c121c] text-slate-400 border border-[#1e2a3a]">
-                          Folga
-                        </span>
-                      )}
+                      {/* Right: Badge */}
+                      <div className="shrink-0">
+                        {isPast && !isToday && (
+                          <span className="text-[11px] font-semibold text-zinc-400 bg-[#090A0F] px-2.5 py-1 rounded-lg border border-white/[0.06]">
+                            Concluído
+                          </span>
+                        )}
+
+                        {!isPast && isWorking && (
+                          <span className="w-7 h-7 rounded-lg bg-[#00d2d3] text-[#003731] font-black text-xs flex items-center justify-center shadow-xs">
+                            T
+                          </span>
+                        )}
+
+                        {!isPast && isResting && (
+                          <span className="w-7 h-7 rounded-lg bg-white/[0.06] text-zinc-200 border border-white/[0.08] font-bold text-xs flex items-center justify-center">
+                            D
+                          </span>
+                        )}
+
+                        {!isPast && !isWorking && !isResting && (
+                          <span className="w-7 h-7 rounded-lg bg-[#090A0F] text-zinc-500 border border-white/[0.06] font-bold text-xs flex items-center justify-center">
+                            -
+                          </span>
+                        )}
+                      </div>
                     </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 5. AÇÕES RÁPIDAS (Quick Action Buttons) */}
+            <div className="space-y-2.5 pt-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 block">
+                AÇÕES RÁPIDAS
+              </span>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <button
+                  type="button"
+                  onClick={onRequestSwap}
+                  className="p-3.5 rounded-2xl bg-[#0e1016] hover:bg-white/[0.04] active:scale-98 border border-white/[0.08] text-left space-y-1.5 transition-all cursor-pointer group"
+                >
+                  <div className="w-8 h-8 rounded-xl bg-[#00d2d3]/12 border border-[#00d2d3]/25 text-[#00d2d3] flex items-center justify-center">
+                    <ArrowLeftRight className="w-4 h-4" />
                   </div>
-                );
-              })}
-          </div>
-        </div>
-      )}
+                  <div>
+                    <h4 className="font-bold text-xs text-white group-hover:text-[#00d2d3] transition-colors">
+                      Solicitar Troca
+                    </h4>
+                    <p className="text-[11px] text-zinc-400">Permutar com colega</p>
+                  </div>
+                </button>
 
-      {/* TAB 3: TROCAS */}
-      {activeTab === 'trocas' && (
-        <div className="px-4 space-y-3 pt-3">
-          <div className="flex items-center justify-between pb-1">
-            <h3 className="text-base font-extrabold text-white">Central de Permutas</h3>
-            <button
-              type="button"
-              onClick={onRequestSwap}
-              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-xs"
-            >
-              + Nova Troca
-            </button>
-          </div>
+                <button
+                  type="button"
+                  onClick={onNotifyAbsence}
+                  className="p-3.5 rounded-2xl bg-[#0e1016] hover:bg-white/[0.04] active:scale-98 border border-white/[0.08] text-left space-y-1.5 transition-all cursor-pointer group"
+                >
+                  <div className="w-8 h-8 rounded-xl bg-rose-500/12 border border-rose-500/25 text-rose-400 flex items-center justify-center">
+                    <AlertTriangle className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-xs text-white group-hover:text-rose-300 transition-colors">
+                      Notificar Falta
+                    </h4>
+                    <p className="text-[11px] text-zinc-400">Atestado / Motivo</p>
+                  </div>
+                </button>
+              </div>
 
-          <div className="p-5 bg-[#141c28] border border-[#1e2a3a] rounded-3xl text-center space-y-3 shadow-md">
-            <div className="w-12 h-12 rounded-2xl bg-blue-950/70 border border-blue-800/80 text-cyan-300 flex items-center justify-center mx-auto">
-              <ArrowLeftRight className="w-6 h-6" />
+              <button
+                type="button"
+                onClick={handleExportToICS}
+                className="w-full py-3 px-4 rounded-2xl bg-[#0e1016] hover:bg-white/[0.04] active:scale-98 border border-white/[0.08] flex items-center justify-center gap-2 text-xs font-bold text-zinc-200 hover:text-white transition-all cursor-pointer"
+              >
+                <Calendar className="w-4 h-4 text-[#00d2d3]" />
+                <span>Sincronizar com Google Agenda (.ics)</span>
+              </button>
+
+              {isLeaderAuthenticated && onOpenFeedbacks && (
+                <button
+                  type="button"
+                  onClick={onOpenFeedbacks}
+                  className="w-full py-3 px-4 rounded-2xl bg-purple-500/10 hover:bg-purple-500/15 active:scale-98 border border-purple-500/25 flex items-center justify-center gap-2 text-xs font-bold text-purple-200 transition-all cursor-pointer"
+                >
+                  <Notebook className="w-4 h-4 text-purple-300" />
+                  <span>Abrir Diário de Feedbacks (Gestor)</span>
+                </button>
+              )}
             </div>
-            <div>
-              <h4 className="text-sm font-bold text-white">Precisa trocar um plantão?</h4>
-              <p className="text-xs text-slate-400 mt-1">
-                Selecione a data que você não poderá comparecer e o colega para permutar.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={onRequestSwap}
-              className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all cursor-pointer"
-            >
-              Solicitar Troca com Colega
-            </button>
+
           </div>
+        )}
+
+        {/* TAB 2: EQUIPE */}
+        {activeTab === 'equipe' && (
+          <div className="px-3.5 space-y-3 pt-3">
+            <div className="flex items-center justify-between pb-1">
+              <h3 className="text-sm sm:text-base font-bold text-white">Equipe de Plantão</h3>
+              <span className="text-xs text-zinc-400">{providers.length} colaboradores</span>
+            </div>
+
+            <div className="space-y-2">
+              {providers
+                .filter(p => (p.regime || '12x36') === activeRegime)
+                .map(p => {
+                  const shift = assignments.find(a => a.providerId === p.id && a.date === todayISO);
+                  const isWorking = shift?.shiftTypeId === 'st-t';
+
+                  return (
+                    <div
+                      key={p.id}
+                      className="p-3 bg-[#0e1016] border border-white/[0.08] rounded-2xl flex items-center justify-between gap-3"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-9 h-9 rounded-xl bg-[#141720] border border-[#00d2d3]/25 font-bold text-xs text-[#00d2d3] flex items-center justify-center shrink-0">
+                          {getInitials(p.name)}
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="font-bold text-xs text-white truncate">{p.name}</h4>
+                          <p className="text-[11px] text-zinc-400 truncate">
+                            {p.role} • {p.entryTime || '07h00'} às {p.exitTime || '19h00'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="shrink-0">
+                        {isWorking ? (
+                          <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#00d2d3]/12 text-[#00d2d3] border border-[#00d2d3]/30 inline-flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#00d2d3]" />
+                            <span>No Plantão</span>
+                          </span>
+                        ) : (
+                          <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-[#090A0F] text-zinc-400 border border-white/[0.06]">
+                            Folga
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: TROCAS */}
+        {activeTab === 'trocas' && (
+          <div className="px-3.5 space-y-3 pt-3">
+            <div className="flex items-center justify-between pb-1">
+              <h3 className="text-sm sm:text-base font-bold text-white">Central de Permutas</h3>
+              <button
+                type="button"
+                onClick={onRequestSwap}
+                className="px-3 py-1.5 bg-[#00d2d3] hover:bg-[#57f1db] text-[#003731] rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-xs"
+              >
+                + Nova Troca
+              </button>
+            </div>
+
+            <div className="p-5 bg-[#0e1016] border border-white/[0.08] rounded-3xl text-center space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-[#00d2d3]/12 border border-[#00d2d3]/25 text-[#00d2d3] flex items-center justify-center mx-auto">
+                <ArrowLeftRight className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-white">Precisa trocar um plantão?</h4>
+                <p className="text-xs text-zinc-400 mt-1">
+                  Selecione a data que você não poderá comparecer e o colega para permutar.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={onRequestSwap}
+                className="w-full py-2.5 bg-[#00d2d3] hover:bg-[#57f1db] text-[#003731] rounded-xl text-xs font-bold shadow-xs transition-all cursor-pointer"
+              >
+                Solicitar Troca com Colega
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 6. BOTTOM SUB-NAVIGATION BAR (Unified Obsidian Dark Glass) */}
+      <div className="fixed bottom-0 inset-x-0 z-40 bg-[#0d0e13]/95 backdrop-blur-2xl border-t border-white/[0.08]">
+        <div className="max-w-2xl mx-auto px-6 py-2.5 flex items-center justify-around">
+          <button
+            type="button"
+            onClick={() => setActiveTab('escala')}
+            className={`flex flex-col items-center gap-1 transition-all cursor-pointer ${
+              activeTab === 'escala' ? 'text-[#00d2d3] font-bold scale-105' : 'text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            <CalendarDays className="w-5 h-5" />
+            <span className="text-[11px]">Escala</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('equipe')}
+            className={`flex flex-col items-center gap-1 transition-all cursor-pointer ${
+              activeTab === 'equipe' ? 'text-[#00d2d3] font-bold scale-105' : 'text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            <Users className="w-5 h-5" />
+            <span className="text-[11px]">Equipe</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('trocas')}
+            className={`flex flex-col items-center gap-1 transition-all cursor-pointer ${
+              activeTab === 'trocas' ? 'text-[#00d2d3] font-bold scale-105' : 'text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            <MessageSquare className="w-5 h-5" />
+            <span className="text-[11px]">Trocas</span>
+          </button>
         </div>
-      )}
-
-      {/* 6. BOTTOM NAVIGATION BAR */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#0c121c]/95 backdrop-blur-lg border-t border-[#1e2a3a] max-w-md mx-auto px-6 py-2.5 flex items-center justify-around shadow-2xl">
-        <button
-          type="button"
-          onClick={() => setActiveTab('escala')}
-          className={`flex flex-col items-center gap-1 transition-all cursor-pointer ${
-            activeTab === 'escala' ? 'text-cyan-400 font-black scale-105' : 'text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <CalendarDays className="w-5 h-5" />
-          <span className="text-xs">Escala</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('equipe')}
-          className={`flex flex-col items-center gap-1 transition-all cursor-pointer ${
-            activeTab === 'equipe' ? 'text-cyan-400 font-black scale-105' : 'text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <Users className="w-5 h-5" />
-          <span className="text-xs">Equipe</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('trocas')}
-          className={`flex flex-col items-center gap-1 transition-all cursor-pointer ${
-            activeTab === 'trocas' ? 'text-cyan-400 font-black scale-105' : 'text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <MessageSquare className="w-5 h-5" />
-          <span className="text-xs">Trocas</span>
-        </button>
       </div>
 
       {/* 7. DAY DETAIL BOTTOM SHEET MODAL */}
       {selectedDayDetail && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-100">
-          <div className="bg-[#141c28] border border-[#1e2a3a] rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl max-w-md w-full space-y-4 text-slate-100">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-100">
+          <div className="bg-[#0e1017] border border-white/[0.10] rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl max-w-md w-full space-y-4 text-[#e3e1e9]">
             
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-[#1e2a3a] pb-3">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
               <div>
-                <h4 className="font-extrabold text-base text-white">
+                <h4 className="font-bold text-base text-white">
                   {DAYS_FULL_PT[selectedDayDetail.dayOfWeek]}, {String(selectedDayDetail.dayNumber).padStart(2, '0')} de {MONTH_NAMES_PT[currentMonthIndex]}
                 </h4>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-zinc-400">
                   Detalhes da escala de {currentProvider.name.split(' ')[0]}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedDayDetail(null)}
-                className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+                className="p-1.5 text-zinc-400 hover:text-white rounded-lg hover:bg-white/[0.06] cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Status overview */}
-            <div className="p-3 bg-[#0c121c] rounded-2xl border border-[#1e2a3a] flex items-center justify-between">
+            <div className="p-3 bg-[#141720] rounded-2xl border border-white/[0.08] flex items-center justify-between">
               <div>
-                <span className="text-xs uppercase font-bold text-slate-400 block">Status</span>
-                <span className="text-sm font-black text-white">
+                <span className="text-[11px] uppercase font-bold text-zinc-400 block">Status</span>
+                <span className="text-sm font-bold text-white">
                   {selectedDayDetail.shift?.shiftTypeId === 'st-t'
                     ? 'Plantão de Trabalho (T)'
                     : selectedDayDetail.shift?.shiftTypeId === 'st-d'
@@ -944,8 +888,8 @@ export const MobileScheduleView: React.FC<MobileScheduleViewProps> = ({
               </div>
               <span className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm ${
                 selectedDayDetail.shift?.shiftTypeId === 'st-t'
-                  ? 'bg-cyan-500 text-slate-950 shadow-sm'
-                  : 'bg-slate-700/80 text-slate-200 border border-slate-600/50'
+                  ? 'bg-[#00d2d3] text-[#003731] shadow-xs'
+                  : 'bg-white/[0.08] text-zinc-200 border border-white/[0.10]'
               }`}>
                 {selectedDayDetail.shift?.shiftTypeId === 'st-t' ? 'T' : 'D'}
               </span>
@@ -954,16 +898,16 @@ export const MobileScheduleView: React.FC<MobileScheduleViewProps> = ({
             {/* Shift info */}
             {selectedDayDetail.shift?.shiftTypeId === 'st-t' && (
               <div className="space-y-2 text-xs">
-                <div className="flex items-center justify-between py-1 border-b border-[#1e2a3a]">
-                  <span className="text-slate-400">Horário:</span>
+                <div className="flex items-center justify-between py-1 border-b border-white/[0.06]">
+                  <span className="text-zinc-400">Horário:</span>
                   <strong className="text-white">{currentProvider.entryTime || '07h00'} às {currentProvider.exitTime || '19h00'} (12 horas)</strong>
                 </div>
-                <div className="flex items-center justify-between py-1 border-b border-[#1e2a3a]">
-                  <span className="text-slate-400">Modalidade:</span>
-                  <strong className="text-white">{selectedDayDetail.shift.workModality === 'home_office' ? '🏠 Home Office (HO)' : '🏢 Presencial (Setor Central)'}</strong>
+                <div className="flex items-center justify-between py-1 border-b border-white/[0.06]">
+                  <span className="text-zinc-400">Modalidade:</span>
+                  <strong className="text-white">{selectedDayDetail.shift.workModality === 'home_office' ? 'Home Office (HO)' : 'Presencial (Setor Central)'}</strong>
                 </div>
                 {selectedDayDetail.shift.notes && (
-                  <div className="p-2.5 bg-cyan-950/40 border border-cyan-800/60 rounded-xl text-cyan-300 text-xs">
+                  <div className="p-2.5 bg-[#00d2d3]/10 border border-[#00d2d3]/25 rounded-xl text-[#00d2d3] text-xs">
                     <strong>Anotação da Liderança:</strong> {selectedDayDetail.shift.notes}
                   </div>
                 )}
@@ -979,9 +923,9 @@ export const MobileScheduleView: React.FC<MobileScheduleViewProps> = ({
                     setSelectedDayDetail(null);
                     if (onRequestSwap) onRequestSwap();
                   }}
-                  className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-950/40 flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                  className="w-full py-2.5 bg-[#00d2d3] hover:bg-[#57f1db] text-[#003731] rounded-xl text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                 >
-                  <ArrowLeftRight className="w-4 h-4 text-cyan-200" />
+                  <ArrowLeftRight className="w-4 h-4" />
                   <span>Solicitar Troca deste Plantão</span>
                 </button>
               )}
@@ -989,7 +933,7 @@ export const MobileScheduleView: React.FC<MobileScheduleViewProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedDayDetail(null)}
-                className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl"
+                className="w-full py-2 bg-[#141720] hover:bg-white/[0.08] border border-white/[0.08] text-zinc-300 text-xs font-bold rounded-xl cursor-pointer"
               >
                 Fechar
               </button>

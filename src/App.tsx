@@ -121,32 +121,34 @@ function ScheduleAppContent() {
   const myTodayShiftType = myTodayShift ? shiftTypes.find(s => s.id === myTodayShift.shiftTypeId) : null;
   const myTodayDept = myTodayShift ? departments.find(d => d.id === myTodayShift.departmentId) : null;
 
-  if (activeModule !== 'escala') {
-    return (
-      <div
-        className={`${
-          activeModule === 'central_inteligencia' ? 'h-screen overflow-hidden' : 'min-h-screen'
-        } bg-[#090A0F] text-[#e3e1e9] flex flex-col font-sans selection:bg-[#00d2d3] selection:text-[#003731]`}
-      >
-        <Navbar
-          onOpenLeaderAuth={() => setLeaderAuthModalOpen(true)}
-          onOpenRequestsCenter={() => setRequestsCenterModalOpen(true)}
-          onOpenNewShiftModal={handleOpenNewShift}
-          onOpenAutoScheduleModal={() => setAutoScheduleModalOpen(true)}
-          onOpenProviderModal={() => setProviderModalOpen(true)}
-          onOpenShareModal={() => setWhatsAppModalOpen(true)}
-          onOpenCollaboratorAuth={() => {
-            setAuthModalProvider(null);
-            setCollaboratorAuthOpen(true);
-          }}
-          onOpenMarketplace={() => setMarketplaceModalOpen(true)}
-          onOpenProfileModal={() => setProfileModalOpen(true)}
-          onOpenImportModal={() => setImportScheduleModalOpen(true)}
-          onOpenAnnouncements={() => setAnnouncementsOpen(true)}
-          onOpenAuditLog={() => setAuditLogOpen(true)}
-          onOpenWeekendDutyModal={() => setWeekendDutyModalOpen(true)}
-          onOpenExecutiveReportModal={() => setExecutiveReportModalOpen(true)}
-        />
+  return (
+    <div
+      className={`${
+        activeModule === 'central_inteligencia' ? 'h-screen overflow-hidden' : 'min-h-screen'
+      } bg-[#090A0F] text-[#e3e1e9] flex flex-col font-sans selection:bg-[#00d2d3] selection:text-[#003731]`}
+    >
+      {/* Global Unified Navbar (Always visible on Mobile & Desktop across ALL modules) */}
+      <Navbar
+        onOpenLeaderAuth={() => setLeaderAuthModalOpen(true)}
+        onOpenRequestsCenter={() => setRequestsCenterModalOpen(true)}
+        onOpenNewShiftModal={handleOpenNewShift}
+        onOpenAutoScheduleModal={() => setAutoScheduleModalOpen(true)}
+        onOpenProviderModal={() => setProviderModalOpen(true)}
+        onOpenShareModal={() => setWhatsAppModalOpen(true)}
+        onOpenCollaboratorAuth={() => {
+          setAuthModalProvider(null);
+          setCollaboratorAuthOpen(true);
+        }}
+        onOpenMarketplace={() => setMarketplaceModalOpen(true)}
+        onOpenProfileModal={() => setProfileModalOpen(true)}
+        onOpenImportModal={() => setImportScheduleModalOpen(true)}
+        onOpenAnnouncements={() => setAnnouncementsOpen(true)}
+        onOpenAuditLog={() => setAuditLogOpen(true)}
+        onOpenWeekendDutyModal={() => setWeekendDutyModalOpen(true)}
+        onOpenExecutiveReportModal={() => setExecutiveReportModalOpen(true)}
+      />
+
+      {activeModule !== 'escala' ? (
         <div className="pt-[98px] md:pt-16 flex-1 flex flex-col min-h-0 overflow-hidden">
           {activeModule === 'gestor_feedbacks' ? (
             <GestorFeedbacksPage />
@@ -167,198 +169,120 @@ function ScheduleAppContent() {
             />
           )}
         </div>
-
-        {/* Global Modals for Navbar across all modules */}
-        <LeaderAuthModal
-          isOpen={leaderAuthModalOpen}
-          onClose={() => setLeaderAuthModalOpen(false)}
-        />
-        <LeaderRequestsCenterModal
-          isOpen={requestsCenterModalOpen}
-          onClose={() => setRequestsCenterModalOpen(false)}
-        />
-        <WhatsAppExportModal
-          isOpen={whatsAppModalOpen}
-          onClose={() => setWhatsAppModalOpen(false)}
-        />
-        <AuditLogModal
-          isOpen={auditLogOpen}
-          onClose={() => setAuditLogOpen(false)}
-        />
-        <WeekendDutyModal
-          isOpen={weekendDutyModalOpen}
-          onClose={() => setWeekendDutyModalOpen(false)}
-        />
-        <ShiftMarketplaceModal
-          isOpen={marketplaceModalOpen}
-          onClose={() => setMarketplaceModalOpen(false)}
-          onOpenSellModal={() => setShiftSaleModalOpen(true)}
-        />
-        <ShiftSaleModal
-          isOpen={shiftSaleModalOpen}
-          onClose={() => setShiftSaleModalOpen(false)}
-          defaultDate={saleModalDefaultDate}
-          defaultProviderId={saleModalDefaultProviderId}
-          onOfferCreated={() => {
-            setShiftSaleModalOpen(false);
-            setMarketplaceModalOpen(true);
-          }}
-        />
-        <CollaboratorProfileModal
-          isOpen={profileModalOpen}
-          onClose={() => setProfileModalOpen(false)}
-          onOpenCollaboratorAuth={() => setCollaboratorAuthOpen(true)}
-        />
-        <CollaboratorAuthModal
-          isOpen={collaboratorAuthOpen}
-          onClose={() => {
-            setCollaboratorAuthOpen(false);
-            setAuthModalProvider(null);
-          }}
-          targetProvider={authModalProvider}
-          onOpenLeaderAuth={() => {
-            setCollaboratorAuthOpen(false);
-            setLeaderAuthModalOpen(true);
-          }}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-[#090A0F] text-[#e3e1e9] flex flex-col font-sans selection:bg-[#00d2d3] selection:text-[#003731]">
-      
-      {/* 📱 MOBILE VIEW (Matches exact design on mobile screens < 768px - without profile tab) */}
-      <div className="md:hidden flex-1">
-        <MobileScheduleView
-          onRequestSwap={() => setQuickSwapModalOpen(true)}
-          onNotifyAbsence={() => setAbsenceModalOpen(true)}
-          onOpenRequestsCenter={() => setRequestsCenterModalOpen(true)}
-          onOpenCollaboratorAuth={prov => {
-            setAuthModalProvider(prov || null);
-            setCollaboratorAuthOpen(true);
-          }}
-          onOpenLeaderAuth={() => setLeaderAuthModalOpen(true)}
-          onOpenMarketplace={() => setMarketplaceModalOpen(true)}
-          onOpenFeedbacks={() => setActiveModule('gestor_feedbacks')}
-        />
-      </div>
-
-      {/* 🖥️ DESKTOP VIEW (Spreadsheet & Dashboard on screens >= 768px) */}
-      <div className="hidden md:flex flex-col flex-1">
-        {/* Top Navbar */}
-        <Navbar
-          onOpenLeaderAuth={() => setLeaderAuthModalOpen(true)}
-          onOpenRequestsCenter={() => setRequestsCenterModalOpen(true)}
-          onOpenNewShiftModal={handleOpenNewShift}
-          onOpenAutoScheduleModal={() => setAutoScheduleModalOpen(true)}
-          onOpenProviderModal={() => setProviderModalOpen(true)}
-          onOpenShareModal={() => setWhatsAppModalOpen(true)}
-          onOpenCollaboratorAuth={() => {
-            setAuthModalProvider(null);
-            setCollaboratorAuthOpen(true);
-          }}
-          onOpenMarketplace={() => setMarketplaceModalOpen(true)}
-          onOpenProfileModal={() => setProfileModalOpen(true)}
-          onOpenImportModal={() => setImportScheduleModalOpen(true)}
-          onOpenAnnouncements={() => setAnnouncementsOpen(true)}
-          onOpenAuditLog={() => setAuditLogOpen(true)}
-          onOpenWeekendDutyModal={() => setWeekendDutyModalOpen(true)}
-          onOpenExecutiveReportModal={() => setExecutiveReportModalOpen(true)}
-        />
-
-        {/* Main Container */}
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 pt-20 pb-10 space-y-4">
-          {/* Compact Month Toolbar with Navigation & Filters only on calendar & agenda */}
-          {viewMode !== 'my-schedule' && viewMode !== 'personal-calendar' && viewMode !== 'escala' && (
-            <ScheduleToolbar
+      ) : (
+        <>
+          {/* 📱 MOBILE ESCALA VIEW (< 768px) — Plugged into the same unified Navbar shell */}
+          <div className="md:hidden pt-[98px] flex-1 flex flex-col bg-[#090A0F]">
+            <MobileScheduleView
+              onRequestSwap={() => setQuickSwapModalOpen(true)}
+              onNotifyAbsence={() => setAbsenceModalOpen(true)}
+              onOpenRequestsCenter={() => setRequestsCenterModalOpen(true)}
+              onOpenCollaboratorAuth={prov => {
+                setAuthModalProvider(prov || null);
+                setCollaboratorAuthOpen(true);
+              }}
               onOpenLeaderAuth={() => setLeaderAuthModalOpen(true)}
-              onOpenAutoScheduleModal={() => setAutoScheduleModalOpen(true)}
-              onOpenProviderModal={() => setProviderModalOpen(true)}
-              onOpenCloneModal={() => setCloneModalOpen(true)}
-              onOpenWhatsAppModal={() => setWhatsAppModalOpen(true)}
-              onOpenQuickSwapModal={() => setQuickSwapModalOpen(true)}
-              onOpenPrintModal={() => setPrintModalOpen(true)}
-              onOpenBalanceModal={() => setBalanceModalOpen(true)}
-              onOpenExecutiveReportModal={() => setExecutiveReportModalOpen(true)}
-              onOpenIncidentModal={() => setIncidentModalOpen(true)}
-            />
-          )}
-
-          {/* Active View */}
-          {viewMode === 'escala' && (
-            <EscalaGridView
-              onAddProvider={() => setProviderModalOpen(true)}
-              onOpenCollaboratorAuth={(provider) => setAuthModalProvider(provider)}
-              onOpenPrintModal={() => setPrintModalOpen(true)}
               onOpenMarketplace={() => setMarketplaceModalOpen(true)}
-              onOpenSellModal={handleOpenSellModal}
-              onOpenLeaderAuth={() => setLeaderAuthModalOpen(true)}
+              onOpenFeedbacks={() => setActiveModule('gestor_feedbacks')}
             />
-          )}
-
-          {viewMode === 'personal-calendar' && (
-            currentProviderObj ? (
-              <PersonalMonthlyCalendar
-                provider={currentProviderObj}
-                onBackToGrid={() => setViewMode('escala')}
-                onOpenPrintModal={() => setPrintModalOpen(true)}
-                onOpenMarketplace={() => setMarketplaceModalOpen(true)}
-                onOpenSellModal={handleOpenSellModal}
-              />
-            ) : (
-              <div className="bg-[#12141A] border border-white/[0.08] rounded-2xl p-8 text-center max-w-lg mx-auto my-8 space-y-3">
-                <h3 className="text-base font-bold text-white">Nenhum Perfil Selecionado</h3>
-                <p className="text-xs text-zinc-400">Selecione o seu nome na lista e insira seu PIN para visualizar seu calendário pessoal.</p>
-                <button
-                  onClick={() => setCollaboratorAuthOpen(true)}
-                  className="px-4 py-2 bg-[#00d2d3] text-[#003731] font-bold text-xs rounded-xl hover:bg-[#57f1db] transition-all cursor-pointer shadow-sm"
-                >
-                  + Entrar no Meu Perfil
-                </button>
-              </div>
-            )
-          )}
-
-          {viewMode === 'calendar' && (
-            <MonthCalendarView
-              onSelectShift={handleSelectShift}
-              onAddShiftDate={handleAddShiftOnDate}
-            />
-          )}
-
-          {viewMode === 'agenda' && (
-            <AgendaView
-              onSelectShift={handleSelectShift}
-              onAddShiftDate={handleAddShiftOnDate}
-            />
-          )}
-
-          {viewMode === 'my-schedule' && (
-            <MyScheduleView
-              onRequestSwapForShift={handleSelectShift}
-              onOpenShiftDetail={handleSelectShift}
-              onPrint={() => window.print()}
-            />
-          )}
-        </main>
-      </div>
-
-      {/* Obsidian Shift Deep Footer */}
-      <footer className="border-t border-white/[0.08] bg-[#090A0F]/95 backdrop-blur-md py-4 px-6 text-xs text-zinc-400">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
-          <span className="font-medium text-zinc-400">
-            © 2026 OminiHub • Gestão Humanizada de Escalas • <span className="font-mono text-zinc-500">v2.5.0 (build 950)</span>
-          </span>
-          <div className="flex items-center gap-3 text-zinc-400 font-medium">
-            <span>Plantões Auditados</span>
-            <span className="text-zinc-600">•</span>
-            <span>Conformidade Médica</span>
-            <span className="text-zinc-600">•</span>
-            <span className="text-zinc-300">Suporte 24/7</span>
           </div>
-        </div>
-      </footer>
+
+          {/* 🖥️ DESKTOP ESCALA VIEW (>= 768px) */}
+          <div className="hidden md:flex flex-col flex-1">
+            {/* Main Container */}
+            <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 pt-20 pb-10 space-y-4">
+              {/* Compact Month Toolbar with Navigation & Filters only on calendar & agenda */}
+              {viewMode !== 'my-schedule' && viewMode !== 'personal-calendar' && viewMode !== 'escala' && (
+                <ScheduleToolbar
+                  onOpenLeaderAuth={() => setLeaderAuthModalOpen(true)}
+                  onOpenAutoScheduleModal={() => setAutoScheduleModalOpen(true)}
+                  onOpenProviderModal={() => setProviderModalOpen(true)}
+                  onOpenCloneModal={() => setCloneModalOpen(true)}
+                  onOpenWhatsAppModal={() => setWhatsAppModalOpen(true)}
+                  onOpenQuickSwapModal={() => setQuickSwapModalOpen(true)}
+                  onOpenPrintModal={() => setPrintModalOpen(true)}
+                  onOpenBalanceModal={() => setBalanceModalOpen(true)}
+                  onOpenExecutiveReportModal={() => setExecutiveReportModalOpen(true)}
+                  onOpenIncidentModal={() => setIncidentModalOpen(true)}
+                />
+              )}
+
+              {/* Active View */}
+              {viewMode === 'escala' && (
+                <EscalaGridView
+                  onAddProvider={() => setProviderModalOpen(true)}
+                  onOpenCollaboratorAuth={(provider) => setAuthModalProvider(provider)}
+                  onOpenPrintModal={() => setPrintModalOpen(true)}
+                  onOpenMarketplace={() => setMarketplaceModalOpen(true)}
+                  onOpenSellModal={handleOpenSellModal}
+                  onOpenLeaderAuth={() => setLeaderAuthModalOpen(true)}
+                />
+              )}
+
+              {viewMode === 'personal-calendar' && (
+                currentProviderObj ? (
+                  <PersonalMonthlyCalendar
+                    provider={currentProviderObj}
+                    onBackToGrid={() => setViewMode('escala')}
+                    onOpenPrintModal={() => setPrintModalOpen(true)}
+                    onOpenMarketplace={() => setMarketplaceModalOpen(true)}
+                    onOpenSellModal={handleOpenSellModal}
+                  />
+                ) : (
+                  <div className="bg-[#12141A] border border-white/[0.08] rounded-2xl p-8 text-center max-w-lg mx-auto my-8 space-y-3">
+                    <h3 className="text-base font-bold text-white">Nenhum Perfil Selecionado</h3>
+                    <p className="text-xs text-zinc-400">Selecione o seu nome na lista e insira seu PIN para visualizar seu calendário pessoal.</p>
+                    <button
+                      onClick={() => setCollaboratorAuthOpen(true)}
+                      className="px-4 py-2 bg-[#00d2d3] text-[#003731] font-bold text-xs rounded-xl hover:bg-[#57f1db] transition-all cursor-pointer shadow-sm"
+                    >
+                      + Entrar no Meu Perfil
+                    </button>
+                  </div>
+                )
+              )}
+
+              {viewMode === 'calendar' && (
+                <MonthCalendarView
+                  onSelectShift={handleSelectShift}
+                  onAddShiftDate={handleAddShiftOnDate}
+                />
+              )}
+
+              {viewMode === 'agenda' && (
+                <AgendaView
+                  onSelectShift={handleSelectShift}
+                  onAddShiftDate={handleAddShiftOnDate}
+                />
+              )}
+
+              {viewMode === 'my-schedule' && (
+                <MyScheduleView
+                  onRequestSwapForShift={handleSelectShift}
+                  onOpenShiftDetail={handleSelectShift}
+                  onPrint={() => window.print()}
+                />
+              )}
+            </main>
+
+            {/* Obsidian Shift Deep Footer (Desktop) */}
+            <footer className="border-t border-white/[0.08] bg-[#090A0F]/95 backdrop-blur-md py-4 px-6 text-xs text-zinc-400">
+              <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
+                <span className="font-medium text-zinc-400">
+                  © 2026 OminiHub • Gestão Humanizada de Escalas • <span className="font-mono text-zinc-500">v2.5.0 (build 950)</span>
+                </span>
+                <div className="flex items-center gap-3 text-zinc-400 font-medium">
+                  <span>Plantões Auditados</span>
+                  <span className="text-zinc-600">•</span>
+                  <span>Conformidade Médica</span>
+                  <span className="text-zinc-600">•</span>
+                  <span className="text-zinc-300">Suporte 24/7</span>
+                </div>
+              </div>
+            </footer>
+          </div>
+        </>
+      )}
 
       {/* Modals */}
       <LeaderAuthModal

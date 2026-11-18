@@ -142,52 +142,52 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => setActiveModule('escala')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium whitespace-nowrap ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium whitespace-nowrap border ${
                 activeModule === 'escala'
-                  ? 'bg-white/[0.12] text-white font-semibold shadow-sm border border-white/10'
-                  : 'text-white/60 hover:text-white hover:bg-white/5'
+                  ? 'bg-[#00d2d3]/15 text-white font-semibold border-[#00d2d3]/35 shadow-sm'
+                  : 'text-white/60 hover:text-white hover:bg-white/5 border-transparent'
               }`}
             >
-              <Calendar className="w-3.5 h-3.5 text-cyan-400" />
+              <Calendar className="w-3.5 h-3.5 text-[#00d2d3]" />
               <span>Quadro Geral</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveModule('prestadores_regional')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium whitespace-nowrap ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium whitespace-nowrap border ${
                 activeModule === 'prestadores_regional'
-                  ? 'bg-gradient-to-r from-cyan-500/25 to-teal-500/25 text-white font-semibold border border-cyan-400/40 shadow-sm'
-                  : 'text-white/60 hover:text-white hover:bg-white/5'
+                  ? 'bg-[#00d2d3]/15 text-white font-semibold border-[#00d2d3]/35 shadow-sm'
+                  : 'text-white/60 hover:text-white hover:bg-white/5 border-transparent'
               }`}
             >
-              <Users className="w-3.5 h-3.5 text-cyan-400" />
+              <Users className="w-3.5 h-3.5 text-[#00d2d3]" />
               <span>Técnicos & CEP</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveModule('pontos_fixos')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium whitespace-nowrap ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium whitespace-nowrap border ${
                 activeModule === 'pontos_fixos'
-                  ? 'bg-gradient-to-r from-emerald-600/35 to-teal-600/35 text-white font-semibold border border-emerald-400/40 shadow-sm'
-                  : 'text-white/60 hover:text-white hover:bg-white/5'
+                  ? 'bg-[#00d2d3]/15 text-white font-semibold border-[#00d2d3]/35 shadow-sm'
+                  : 'text-white/60 hover:text-white hover:bg-white/5 border-transparent'
               }`}
             >
-              <MapPin className="w-3.5 h-3.5 text-emerald-400" />
+              <MapPin className="w-3.5 h-3.5 text-[#00d2d3]" />
               <span>Pontos Fixos & Agendas</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveModule('central_inteligencia')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium whitespace-nowrap ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-medium whitespace-nowrap border ${
                 activeModule === 'central_inteligencia'
-                  ? 'bg-gradient-to-r from-cyan-500/25 to-sky-500/25 text-white font-semibold border border-cyan-400/40 shadow-sm'
-                  : 'text-white/60 hover:text-white hover:bg-white/5'
+                  ? 'bg-[#00d2d3]/15 text-white font-semibold border-[#00d2d3]/35 shadow-sm'
+                  : 'text-white/60 hover:text-white hover:bg-white/5 border-transparent'
               }`}
             >
-              <Activity className="w-3.5 h-3.5 text-cyan-400" />
+              <Activity className="w-3.5 h-3.5 text-[#00d2d3]" />
               <span>Central Operacional</span>
             </button>
           </nav>
@@ -294,7 +294,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
               {/* SLIDE-DOWN COMMAND DRAWER (Apple Frosted Glass) */}
               {isGestorDrawerOpen && (
-                <div className="fixed md:absolute top-[102px] md:top-full right-3 md:right-0 left-3 md:left-auto md:mt-2 md:w-[480px] max-h-[calc(100vh-7rem)] overflow-y-auto bg-slate-950/95 backdrop-blur-3xl border border-white/15 rounded-3xl p-4 sm:p-5 shadow-[0_25px_70px_rgba(0,0,0,0.85)] z-50 animate-in fade-in slide-in-from-top-3 duration-200 space-y-4">
+                <div className="fixed md:absolute top-[102px] md:top-full right-3 md:right-0 left-3 md:left-auto md:mt-2 md:w-[480px] max-h-[calc(100vh-7rem)] overflow-y-auto bg-[#0e1017]/98 backdrop-blur-3xl border border-white/15 rounded-3xl p-4 sm:p-5 shadow-[0_25px_70px_rgba(0,0,0,0.85)] z-50 animate-in fade-in slide-in-from-top-3 duration-200 space-y-4">
                   {/* Sheen line on top */}
                   <div className="absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent pointer-events-none rounded-t-3xl" />
 
@@ -558,49 +558,49 @@ export const Navbar: React.FC<NavbarProps> = ({
         <button
           type="button"
           onClick={() => setActiveModule('escala')}
-          className={`flex items-center justify-center gap-1 py-1.5 px-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
+          className={`flex items-center justify-center gap-1 py-1.5 px-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer border ${
             activeModule === 'escala'
-              ? 'bg-white/[0.12] text-white border border-white/10'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-[#00d2d3]/15 text-white border-[#00d2d3]/35 shadow-xs'
+              : 'text-zinc-400 hover:text-white border-transparent'
           }`}
         >
-          <Calendar className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+          <Calendar className={`w-3.5 h-3.5 shrink-0 ${activeModule === 'escala' ? 'text-[#00d2d3]' : 'text-zinc-400'}`} />
           <span className="truncate">Escala</span>
         </button>
         <button
           type="button"
           onClick={() => setActiveModule('prestadores_regional')}
-          className={`flex items-center justify-center gap-1 py-1.5 px-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
+          className={`flex items-center justify-center gap-1 py-1.5 px-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer border ${
             activeModule === 'prestadores_regional'
-              ? 'bg-cyan-500/20 text-white border border-cyan-400/40'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-[#00d2d3]/15 text-white border-[#00d2d3]/35 shadow-xs'
+              : 'text-zinc-400 hover:text-white border-transparent'
           }`}
         >
-          <Users className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+          <Users className={`w-3.5 h-3.5 shrink-0 ${activeModule === 'prestadores_regional' ? 'text-[#00d2d3]' : 'text-zinc-400'}`} />
           <span className="truncate">Técnicos</span>
         </button>
         <button
           type="button"
           onClick={() => setActiveModule('pontos_fixos')}
-          className={`flex items-center justify-center gap-1 py-1.5 px-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
+          className={`flex items-center justify-center gap-1 py-1.5 px-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer border ${
             activeModule === 'pontos_fixos'
-              ? 'bg-emerald-500/20 text-white border border-emerald-400/40'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-[#00d2d3]/15 text-white border-[#00d2d3]/35 shadow-xs'
+              : 'text-zinc-400 hover:text-white border-transparent'
           }`}
         >
-          <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          <MapPin className={`w-3.5 h-3.5 shrink-0 ${activeModule === 'pontos_fixos' ? 'text-[#00d2d3]' : 'text-zinc-400'}`} />
           <span className="truncate">Pontos</span>
         </button>
         <button
           type="button"
           onClick={() => setActiveModule('central_inteligencia')}
-          className={`flex items-center justify-center gap-1 py-1.5 px-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
+          className={`flex items-center justify-center gap-1 py-1.5 px-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer border ${
             activeModule === 'central_inteligencia'
-              ? 'bg-cyan-500/20 text-white border border-cyan-400/40'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-[#00d2d3]/15 text-white border-[#00d2d3]/35 shadow-xs'
+              : 'text-zinc-400 hover:text-white border-transparent'
           }`}
         >
-          <Activity className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+          <Activity className={`w-3.5 h-3.5 shrink-0 ${activeModule === 'central_inteligencia' ? 'text-[#00d2d3]' : 'text-zinc-400'}`} />
           <span className="truncate">Central</span>
         </button>
       </nav>

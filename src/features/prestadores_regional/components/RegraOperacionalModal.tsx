@@ -72,9 +72,9 @@ export const RegraOperacionalModal: React.FC<RegraOperacionalModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
-      <div className="bg-[#0e1628] border border-slate-700/80 rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
+      <div className="bg-[#0e1017] border border-white/[0.09] rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-800 sticky top-0 bg-[#0e1628] z-10">
+        <div className="flex items-center justify-between p-4 border-b border-white/[0.08] sticky top-0 bg-[#12141c] z-10">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-amber-600/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
               <ShieldAlert className="w-4 h-4" />
@@ -83,7 +83,7 @@ export const RegraOperacionalModal: React.FC<RegraOperacionalModalProps> = ({
               <h3 className="text-base font-bold text-white">
                 {editingItem ? 'Editar Regra Operacional' : 'Nova Regra Operacional'}
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-zinc-400">
                 Diretrizes críticas de agendamento, horário fixo, domingo, PIX e encaixes
               </p>
             </div>
@@ -91,7 +91,7 @@ export const RegraOperacionalModal: React.FC<RegraOperacionalModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -100,7 +100,7 @@ export const RegraOperacionalModal: React.FC<RegraOperacionalModalProps> = ({
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4 flex-1">
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-300">
+            <label className="text-xs font-semibold text-zinc-300">
               Título da Regra <span className="text-rose-400">*</span>
             </label>
             <input
@@ -109,28 +109,28 @@ export const RegraOperacionalModal: React.FC<RegraOperacionalModalProps> = ({
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
               placeholder="Ex: Horários de Atendimento & Horário Fixo (R$ 100,00)"
-              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 bg-[#141720] border border-white/[0.08] rounded-lg text-xs text-white focus:outline-none focus:border-[#00d2d3]"
             />
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-300">Subtítulo / Resumo</label>
+            <label className="text-xs font-semibold text-zinc-300">Subtítulo / Resumo</label>
             <input
               type="text"
               value={subtitulo}
               onChange={(e) => setSubtitulo(e.target.value)}
               placeholder="Ex: Política oficial sobre previsão de chegada e contratação"
-              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 bg-[#141720] border border-white/[0.08] rounded-lg text-xs text-white focus:outline-none focus:border-[#00d2d3]"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-300">Categoria</label>
+              <label className="text-xs font-semibold text-zinc-300">Categoria</label>
               <select
                 value={categoria}
                 onChange={(e) => setCategoria(e.target.value as any)}
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-[#141720] border border-white/[0.08] rounded-lg text-xs text-white focus:outline-none focus:border-[#00d2d3]"
               >
                 <option value="horario">Horário / Agendamento</option>
                 <option value="domingos">Domingos e Feriados</option>
@@ -141,13 +141,13 @@ export const RegraOperacionalModal: React.FC<RegraOperacionalModalProps> = ({
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-300">Cor de Destaque</label>
+              <label className="text-xs font-semibold text-zinc-300">Cor de Destaque</label>
               <select
                 value={destaqueCor}
                 onChange={(e) => setDestaqueCor(e.target.value as any)}
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-[#141720] border border-white/[0.08] rounded-lg text-xs text-white focus:outline-none focus:border-[#00d2d3]"
               >
-                <option value="blue">Azul (Padrão)</option>
+                <option value="blue">Ciano / Padrão</option>
                 <option value="amber">Âmbar (Atenção/PIX)</option>
                 <option value="rose">Rosa / Vermelho (Restrito/Domingo)</option>
                 <option value="emerald">Verde (Isenção/Vantagem)</option>
@@ -157,7 +157,7 @@ export const RegraOperacionalModal: React.FC<RegraOperacionalModalProps> = ({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-300">
+            <label className="text-xs font-semibold text-zinc-300">
               Alerta de Destaque / Caixa Amarela (opcional)
             </label>
             <input
@@ -165,12 +165,12 @@ export const RegraOperacionalModal: React.FC<RegraOperacionalModalProps> = ({
               value={alerta}
               onChange={(e) => setAlerta(e.target.value)}
               placeholder="Ex: Qualquer promessa de horário prioritário sem os R$ 100 gera advertência."
-              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-amber-500"
+              className="w-full px-3 py-2 bg-[#141720] border border-white/[0.08] rounded-lg text-xs text-white focus:outline-none focus:border-amber-500"
             />
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-300">
+            <label className="text-xs font-semibold text-zinc-300">
               Itens da Regra (um por linha) <span className="text-rose-400">*</span>
             </label>
             <textarea
@@ -179,15 +179,15 @@ export const RegraOperacionalModal: React.FC<RegraOperacionalModalProps> = ({
               value={itensRaw}
               onChange={(e) => setItensRaw(e.target.value)}
               placeholder="Digite cada norma em uma linha..."
-              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white font-mono focus:outline-none focus:border-blue-500 leading-relaxed"
+              className="w-full px-3 py-2 bg-[#141720] border border-white/[0.08] rounded-lg text-xs text-white font-mono focus:outline-none focus:border-[#00d2d3] leading-relaxed"
             />
-            <span className="text-xs text-slate-400 block">
+            <span className="text-xs text-zinc-400 block">
               Pressione Enter para criar novos pontos de instrução.
             </span>
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-300">
+            <label className="text-xs font-semibold text-zinc-300">
               Texto Pronto para Copiar e Enviar ao Cliente / Vendedor
             </label>
             <textarea
@@ -195,22 +195,22 @@ export const RegraOperacionalModal: React.FC<RegraOperacionalModalProps> = ({
               value={textoCopiaAtendente}
               onChange={(e) => setTextoCopiaAtendente(e.target.value)}
               placeholder="Mensagem formatada e educada pronta para o atendente copiar no WhatsApp..."
-              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-blue-500 leading-relaxed"
+              className="w-full px-3 py-2 bg-[#141720] border border-white/[0.08] rounded-lg text-xs text-white focus:outline-none focus:border-[#00d2d3] leading-relaxed"
             />
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/[0.08]">
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              className="px-3 py-2 rounded-lg text-xs font-medium text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white transition-colors shadow-sm"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-[#00d2d3] hover:bg-[#57f1db] text-[#003731] transition-colors shadow-xs cursor-pointer"
             >
               <Save className="w-3.5 h-3.5" />
               <span>Salvar Regra</span>

@@ -86,12 +86,12 @@ export const UnifiedToolbar: React.FC<UnifiedToolbarProps> = ({
   onViewModeChange,
 }) => {
   return (
-    <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800 rounded-2xl p-4 flex flex-col gap-3 shadow-sm relative overflow-hidden">
+    <div className="bg-[#0e1016] border border-white/[0.08] rounded-2xl p-4 flex flex-col gap-3 shadow-sm relative overflow-hidden">
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
         {/* Region Chips in iOS Glass Style */}
         <div className="flex flex-wrap items-center gap-2 relative z-10">
-          <span className="text-slate-400 font-medium text-xs flex items-center gap-1.5 mr-1">
-            <Filter className="w-3.5 h-3.5 text-cyan-400" />
+          <span className="text-zinc-400 font-medium text-xs flex items-center gap-1.5 mr-1">
+            <Filter className="w-3.5 h-3.5 text-[#00d2d3]" />
             <span>Região:</span>
           </span>
 
@@ -117,7 +117,7 @@ export const UnifiedToolbar: React.FC<UnifiedToolbarProps> = ({
             <button
               type="button"
               onClick={() => onSelectRegion(null)}
-              className="text-xs text-cyan-400 hover:text-cyan-300 underline ml-1.5 transition-colors font-medium cursor-pointer"
+              className="text-xs text-[#00d2d3] hover:text-[#57f1db] underline ml-1.5 transition-colors font-medium cursor-pointer"
             >
               Limpar
             </button>
@@ -126,9 +126,9 @@ export const UnifiedToolbar: React.FC<UnifiedToolbarProps> = ({
 
         {/* Grade Filter & Score Sort Strip */}
         <div className="flex flex-wrap items-center gap-2 relative z-10 text-xs">
-          <div className="inline-flex items-center gap-1 p-1 bg-slate-950/80 border border-white/10 rounded-xl backdrop-blur-md">
-            <span className="text-slate-400 font-medium px-1.5 flex items-center gap-1">
-              <Award className="w-3.5 h-3.5 text-cyan-400" />
+          <div className="inline-flex items-center gap-1 p-1 bg-[#090A0F] border border-white/[0.08] rounded-xl">
+            <span className="text-zinc-400 font-medium px-1.5 flex items-center gap-1">
+              <Award className="w-3.5 h-3.5 text-[#00d2d3]" />
               <span className="hidden sm:inline">Nota:</span>
             </span>
             {GRADE_OPTIONS.map((opt) => (
@@ -139,7 +139,7 @@ export const UnifiedToolbar: React.FC<UnifiedToolbarProps> = ({
                 className={`px-2 py-1 rounded-lg font-mono font-bold transition-all cursor-pointer ${
                   gradeFilter === opt.id
                     ? `${opt.activeTone} shadow-sm`
-                    : 'text-slate-400 hover:text-slate-200'
+                    : 'text-zinc-400 hover:text-zinc-200'
                 }`}
               >
                 {opt.label}
@@ -160,12 +160,12 @@ export const UnifiedToolbar: React.FC<UnifiedToolbarProps> = ({
             }
             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer ${
               scoreSort !== 'default'
-                ? 'bg-cyan-500/20 border-cyan-400/40 text-cyan-200'
-                : 'bg-slate-950/80 border-white/10 text-slate-300 hover:text-white'
+                ? 'bg-[#00d2d3]/15 border-[#00d2d3]/35 text-[#00d2d3]'
+                : 'bg-[#090A0F] border-white/[0.08] text-zinc-300 hover:text-white'
             }`}
             title="Alternar ordenação por nota operacional"
           >
-            <ArrowUpDown className="w-3.5 h-3.5 text-cyan-400" />
+            <ArrowUpDown className="w-3.5 h-3.5 text-[#00d2d3]" />
             <span>
               {scoreSort === 'default'
                 ? 'Ordem Padrão'
@@ -180,14 +180,14 @@ export const UnifiedToolbar: React.FC<UnifiedToolbarProps> = ({
       {/* Bottom Controls Row: Phone Filters, Density, View Modes, Export CSV */}
       <div className="flex flex-wrap items-center gap-2.5 justify-between lg:justify-end relative z-10 text-xs pt-2.5 border-t border-white/[0.06]">
         {/* Phone Filter Toggle */}
-        <div className="inline-flex p-1 bg-slate-950/80 border border-white/10 rounded-xl text-xs backdrop-blur-md">
+        <div className="inline-flex p-1 bg-[#090A0F] border border-white/[0.08] rounded-xl text-xs">
           <button
             type="button"
             onClick={() => onPhoneFilterChange('all')}
             className={`px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer ${
               phoneFilter === 'all'
                 ? 'bg-white/15 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
             Todos
@@ -198,7 +198,7 @@ export const UnifiedToolbar: React.FC<UnifiedToolbarProps> = ({
             className={`px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer flex items-center gap-1 ${
               phoneFilter === 'with'
                 ? 'bg-emerald-500/20 text-emerald-300 shadow-sm'
-                : 'text-slate-400 hover:text-emerald-300'
+                : 'text-zinc-400 hover:text-emerald-300'
             }`}
             title="Prestadores com telefone cadastrado"
           >
@@ -211,7 +211,7 @@ export const UnifiedToolbar: React.FC<UnifiedToolbarProps> = ({
             className={`px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer flex items-center gap-1 ${
               phoneFilter === 'without'
                 ? 'bg-amber-500/20 text-amber-300 shadow-sm'
-                : 'text-slate-400 hover:text-amber-300'
+                : 'text-zinc-400 hover:text-amber-300'
             }`}
             title="Prestadores sem telefone cadastrado"
           >
@@ -221,14 +221,14 @@ export const UnifiedToolbar: React.FC<UnifiedToolbarProps> = ({
         </div>
 
         {/* Density Toggle */}
-        <div className="inline-flex p-1 bg-slate-950/80 border border-white/10 rounded-xl text-xs backdrop-blur-md">
+        <div className="inline-flex p-1 bg-[#090A0F] border border-white/[0.08] rounded-xl text-xs">
           <button
             type="button"
             onClick={() => onCardDensityChange('spacious')}
             className={`px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer ${
               cardDensity === 'spacious'
                 ? 'bg-white/15 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
             Confortável
@@ -239,7 +239,7 @@ export const UnifiedToolbar: React.FC<UnifiedToolbarProps> = ({
             className={`px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer ${
               cardDensity === 'compact'
                 ? 'bg-white/15 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
             Compacto
@@ -247,14 +247,14 @@ export const UnifiedToolbar: React.FC<UnifiedToolbarProps> = ({
         </div>
 
         {/* View Mode Toggle */}
-        <div className="inline-flex p-1 bg-slate-950/80 border border-white/10 rounded-xl text-xs backdrop-blur-md">
+        <div className="inline-flex p-1 bg-[#090A0F] border border-white/[0.08] rounded-xl text-xs">
           <button
             type="button"
             onClick={() => onViewModeChange('cards')}
             className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
               viewMode === 'cards'
-                ? 'bg-cyan-500/20 text-cyan-300 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-[#00d2d3]/20 text-[#00d2d3] shadow-sm'
+                : 'text-zinc-400 hover:text-zinc-200'
             }`}
             title="Visualização em Cards"
           >
@@ -265,8 +265,8 @@ export const UnifiedToolbar: React.FC<UnifiedToolbarProps> = ({
             onClick={() => onViewModeChange('table')}
             className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
               viewMode === 'table'
-                ? 'bg-cyan-500/20 text-cyan-300 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-[#00d2d3]/20 text-[#00d2d3] shadow-sm'
+                : 'text-zinc-400 hover:text-zinc-200'
             }`}
             title="Visualização em Tabela"
           >
@@ -277,8 +277,8 @@ export const UnifiedToolbar: React.FC<UnifiedToolbarProps> = ({
             onClick={() => onViewModeChange('terminal')}
             className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
               viewMode === 'terminal'
-                ? 'bg-cyan-500/20 text-cyan-300 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-[#00d2d3]/20 text-[#00d2d3] shadow-sm'
+                : 'text-zinc-400 hover:text-zinc-200'
             }`}
             title="Terminal de Ações Rápidas"
           >
@@ -290,7 +290,7 @@ export const UnifiedToolbar: React.FC<UnifiedToolbarProps> = ({
         <button
           type="button"
           onClick={onExportCSV}
-          className="p-2 rounded-xl bg-slate-950/80 hover:bg-slate-900 border border-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer flex items-center gap-1.5 backdrop-blur-md"
+          className="p-2 rounded-xl bg-[#090A0F] hover:bg-white/[0.06] border border-white/[0.08] text-zinc-300 hover:text-white transition-colors cursor-pointer flex items-center gap-1.5"
           title="Exportar dados para CSV"
         >
           <Download className="w-3.5 h-3.5" />

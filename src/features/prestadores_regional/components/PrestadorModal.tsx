@@ -90,12 +90,12 @@ export const PrestadorModal: React.FC<PrestadorModalProps> = ({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-[#121929] border border-slate-700/80 rounded-2xl w-full max-w-sm sm:max-w-md shadow-2xl overflow-hidden flex flex-col animate-slideUp"
+        className="bg-[#0e1017] border border-white/[0.09] rounded-2xl w-full max-w-sm sm:max-w-md shadow-2xl overflow-hidden flex flex-col animate-slideUp"
       >
         {/* Header - Compact */}
-        <div className="bg-[#182338] px-4 py-3 border-b border-slate-700/70 flex items-center justify-between">
+        <div className="bg-[#12141c] px-4 py-3 border-b border-white/[0.08] flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-blue-600/20 text-blue-400">
+            <div className="p-1.5 rounded-lg bg-[#00d2d3]/15 text-[#00d2d3] border border-[#00d2d3]/25">
               {editingPrestador ? <Save className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
             </div>
             <h2 className="text-sm font-bold text-white">
@@ -105,7 +105,7 @@ export const PrestadorModal: React.FC<PrestadorModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/60 transition-colors"
+            className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
             title="Fechar (ou clique fora)"
           >
             <X className="w-4 h-4" />
@@ -131,12 +131,12 @@ export const PrestadorModal: React.FC<PrestadorModalProps> = ({
                 value={codigo}
                 onChange={(e) => setCodigo(e.target.value)}
                 placeholder="Ex: 18890"
-                className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono text-xs focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+                className="w-full px-3 py-1.5 bg-[#141720] border border-white/[0.08] rounded-xl text-white font-mono text-xs focus:border-[#00d2d3] focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-300 mb-1">
                 Região / Base <span className="text-red-400">*</span>
               </label>
               <input
@@ -146,7 +146,7 @@ export const PrestadorModal: React.FC<PrestadorModalProps> = ({
                 value={regiao}
                 onChange={(e) => setRegiao(e.target.value)}
                 placeholder="Ex: OESTE 1"
-                className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono text-xs uppercase focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+                className="w-full px-3 py-1.5 bg-[#141720] border border-white/[0.08] rounded-xl text-white font-mono text-xs uppercase focus:border-[#00d2d3] focus:outline-none"
               />
               <datalist id="regioes-list">
                 {knownRegions.map((r) => (
@@ -157,7 +157,7 @@ export const PrestadorModal: React.FC<PrestadorModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-300 mb-1">
               Nome do Prestador <span className="text-red-400">*</span>
             </label>
             <input
@@ -166,13 +166,13 @@ export const PrestadorModal: React.FC<PrestadorModalProps> = ({
               value={nome}
               onChange={(e) => setNome(e.target.value)}
               placeholder="Ex: RICARDO N. GODOY"
-              className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs uppercase focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+              className="w-full px-3 py-1.5 bg-[#141720] border border-white/[0.08] rounded-xl text-white text-xs uppercase focus:border-[#00d2d3] focus:outline-none"
             />
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-300">
                 Telefone / WhatsApp
               </label>
               {cleanPhoneNumber(telefone) && (
@@ -197,12 +197,12 @@ export const PrestadorModal: React.FC<PrestadorModalProps> = ({
               value={telefone}
               onChange={(e) => setTelefone(e.target.value)}
               placeholder="Ex: (11) 98765-4321"
-              className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono text-xs focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+              className="w-full px-3 py-1.5 bg-[#141720] border border-white/[0.08] rounded-xl text-white font-mono text-xs focus:border-[#00d2d3] focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-300 mb-1">
               Observações (Opcional)
             </label>
             <input
@@ -210,7 +210,7 @@ export const PrestadorModal: React.FC<PrestadorModalProps> = ({
               value={observacao}
               onChange={(e) => setObservacao(e.target.value)}
               placeholder="Detalhes adicionais, turno, veículo..."
-              className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+              className="w-full px-3 py-1.5 bg-[#141720] border border-white/[0.08] rounded-xl text-white text-xs focus:border-[#00d2d3] focus:outline-none"
             />
           </div>
 
@@ -254,7 +254,7 @@ export const PrestadorModal: React.FC<PrestadorModalProps> = ({
                   key={reg}
                   type="button"
                   onClick={() => setRegiao(reg)}
-                  className="px-2.5 py-1 text-xs rounded-md bg-slate-800/80 text-slate-300 border border-slate-700/80 hover:bg-slate-700 hover:text-white transition-colors cursor-pointer"
+                  className="px-2.5 py-1 text-xs rounded-md bg-[#141720] text-zinc-300 border border-white/[0.08] hover:bg-white/[0.08] hover:text-white transition-colors cursor-pointer"
                 >
                   {reg}
                 </button>
@@ -263,17 +263,17 @@ export const PrestadorModal: React.FC<PrestadorModalProps> = ({
           </div>
 
           {/* Footer buttons */}
-          <div className="pt-2.5 border-t border-slate-800 flex items-center justify-end gap-2">
+          <div className="pt-2.5 border-t border-white/[0.08] flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-1.5 text-xs rounded-xl font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              className="px-3 py-1.5 text-xs rounded-xl font-medium text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-4 py-1.5 text-xs rounded-xl font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/30 flex items-center gap-1.5 transition-all"
+              className="px-4 py-1.5 text-xs rounded-xl font-bold bg-[#00d2d3] hover:bg-[#57f1db] text-[#003731] shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
             >
               <CheckCircle className="w-3.5 h-3.5" />
               <span>{editingPrestador ? 'Salvar' : 'Cadastrar'}</span>

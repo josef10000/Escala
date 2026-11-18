@@ -145,12 +145,12 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
   return (
     <div className="space-y-4 animate-in fade-in duration-150">
       {/* Top Banner of Accordion Feed */}
-      <div className="relative overflow-hidden rounded-2xl bg-[#0e1424]/80 backdrop-blur-xl border border-white/10 shadow-[0_12px_32px_rgba(0,0,0,0.55)] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="relative overflow-hidden rounded-2xl bg-[#0e1016] border border-white/[0.08] shadow-[0_12px_32px_rgba(0,0,0,0.45)] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         {/* Specular line */}
-        <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent pointer-events-none" />
 
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/25 to-indigo-500/25 border border-blue-400/30 flex items-center justify-center text-blue-300 shrink-0 shadow-sm shadow-blue-500/20">
+          <div className="w-10 h-10 rounded-xl bg-[#00d2d3]/12 border border-[#00d2d3]/25 flex items-center justify-center text-[#00d2d3] shrink-0">
             <Sparkles className="w-5 h-5" />
           </div>
           <div>
@@ -158,11 +158,11 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
               <h2 className="text-sm sm:text-base font-bold text-white tracking-tight">
                 Resultados da Busca Universal
               </h2>
-              <span className="px-2.5 py-0.5 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-300 font-mono text-xs font-bold shadow-xs">
+              <span className="px-2.5 py-0.5 rounded-full bg-[#00d2d3]/12 border border-[#00d2d3]/30 text-[#00d2d3] font-mono text-xs font-bold">
                 {total} {total === 1 ? 'item encontrado' : 'itens encontrados'}
               </span>
             </div>
-            <p className="text-xs text-slate-300 mt-0.5">
+            <p className="text-xs text-zinc-400 mt-0.5">
               Pesquisando por: <strong className="text-white">&quot;{query}&quot;</strong> em todos os módulos integrados.
             </p>
           </div>
@@ -201,7 +201,7 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
       </div>
 
       {/* Greeting info notification */}
-      <div className="px-4 py-2.5 rounded-xl bg-[#080d18]/70 backdrop-blur-md border border-white/10 text-xs text-slate-300 flex items-center justify-between shadow-inner">
+      <div className="px-4 py-2.5 rounded-xl bg-[#0e1016] border border-white/[0.08] text-xs text-zinc-300 flex items-center justify-between">
         <span className="flex items-center gap-2">
           <span>{greetingInfo.icon}</span>
           <span>
@@ -216,7 +216,7 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
 
       {/* Zero results state */}
       {total === 0 && (
-        <div className="relative overflow-hidden rounded-2xl bg-[#0e1424]/80 backdrop-blur-xl border border-white/10 shadow-[0_12px_32px_rgba(0,0,0,0.55)] p-8 text-center space-y-4">
+        <div className="relative overflow-hidden rounded-2xl bg-[#0e1016] border border-white/[0.08] shadow-[0_12px_32px_rgba(0,0,0,0.45)] p-8 text-center space-y-4">
           <p className="text-sm font-semibold text-slate-200">
             Nenhum resultado encontrado para &quot;{query}&quot; em toda a base de prestadores, templates e regras.
           </p>
@@ -248,23 +248,23 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
 
       {/* 1. Accordion Block: Prestadores de Serviços */}
       {results.prestadoresMatches.length > 0 && (
-        <div className="relative overflow-hidden rounded-2xl bg-[#0e1424]/80 backdrop-blur-xl border border-white/10 shadow-[0_12px_32px_rgba(0,0,0,0.55)] transition-all">
+        <div className="relative overflow-hidden rounded-2xl bg-[#0e1016] border border-white/[0.08] shadow-[0_12px_32px_rgba(0,0,0,0.45)] transition-all">
           <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent pointer-events-none" />
 
           {/* Accordion Header */}
           <button
             type="button"
             onClick={() => toggleSection('prestadores')}
-            className="w-full px-5 py-4 bg-white/5 hover:bg-white/10 flex items-center justify-between text-left transition-all border-b border-white/5"
+            className="w-full px-5 py-4 bg-white/[0.02] hover:bg-white/[0.05] flex items-center justify-between text-left transition-all border-b border-white/[0.06]"
           >
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-300 border border-blue-400/30 flex items-center justify-center shadow-xs">
+              <div className="w-8 h-8 rounded-xl bg-[#00d2d3]/15 text-[#00d2d3] border border-[#00d2d3]/30 flex items-center justify-center">
                 <Users className="w-4 h-4" />
               </div>
               <div>
                 <h3 className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
                   <span>Prestadores de Serviços</span>
-                  <span className="px-2.5 py-0.5 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-300 text-xs font-mono font-bold">
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#00d2d3]/15 border border-[#00d2d3]/30 text-[#00d2d3] text-xs font-mono font-bold">
                     {results.prestadoresMatches.length}
                   </span>
                 </h3>
@@ -315,7 +315,7 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
 
       {/* 2. Accordion Block: Templates OPA */}
       {results.templatesMatches.length > 0 && (
-        <div className="relative overflow-hidden rounded-2xl bg-[#0e1424]/80 backdrop-blur-xl border border-white/10 shadow-[0_12px_32px_rgba(0,0,0,0.55)] transition-all">
+        <div className="relative overflow-hidden rounded-2xl bg-[#0e1016] border border-white/[0.08] shadow-[0_12px_32px_rgba(0,0,0,0.45)] transition-all">
           <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent pointer-events-none" />
 
           {/* Accordion Header */}
@@ -363,7 +363,7 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
                   return (
                     <div
                       key={t.id}
-                      className="relative overflow-hidden rounded-xl bg-gradient-to-b from-[#141b2b]/90 via-[#101623]/90 to-[#0c101a]/90 backdrop-blur-md border border-white/10 hover:border-white/20 p-4 flex flex-col justify-between gap-3 transition-all hover:-translate-y-0.5 shadow-md group"
+                      className="relative overflow-hidden rounded-xl bg-[#090A0F] border border-white/[0.08] hover:border-white/[0.16] p-4 flex flex-col justify-between gap-3 transition-all shadow-xs group"
                     >
                       <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent pointer-events-none" />
 
@@ -377,13 +377,13 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
                           </span>
                         </div>
 
-                        <p className="text-xs text-slate-300 whitespace-pre-line leading-relaxed bg-[#070b14]/80 p-3 rounded-xl border border-white/5 font-sans shadow-inner">
+                        <p className="text-xs text-zinc-300 whitespace-pre-line leading-relaxed bg-[#0e1016] p-3 rounded-xl border border-white/[0.06] font-sans">
                           {adaptedText}
                         </p>
                       </div>
 
-                      <div className="flex items-center justify-between pt-2.5 border-t border-white/10 text-xs">
-                        <span className="text-[11px] text-slate-400 flex items-center gap-1 font-medium">
+                      <div className="flex items-center justify-between pt-2.5 border-t border-white/[0.08] text-xs">
+                        <span className="text-[11px] text-zinc-400 flex items-center gap-1 font-medium">
                           <span>{greetingInfo.icon}</span>
                           <span>{greetingInfo.greeting}</span>
                         </span>
@@ -391,10 +391,10 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
                         <button
                           type="button"
                           onClick={() => handleCopy(`acc-tpl-${t.id}`, adaptedText, t.titulo)}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-xs active:scale-95 ${
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer ${
                             isCopied
                               ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                              : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:brightness-110 text-white shadow-md shadow-blue-500/25 border-t border-white/25'
+                              : 'bg-[#00d2d3] hover:bg-[#57f1db] text-[#003731]'
                           }`}
                         >
                           {isCopied ? (
@@ -421,7 +421,7 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
 
       {/* 3. Accordion Block: Pontos Fixos */}
       {results.pontosFixosMatches.length > 0 && (
-        <div className="relative overflow-hidden rounded-2xl bg-[#0e1424]/80 backdrop-blur-xl border border-white/10 shadow-[0_12px_32px_rgba(0,0,0,0.55)] transition-all">
+        <div className="relative overflow-hidden rounded-2xl bg-[#0e1016] border border-white/[0.08] shadow-[0_12px_32px_rgba(0,0,0,0.45)] transition-all">
           <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent pointer-events-none" />
 
           {/* Accordion Header */}
@@ -469,7 +469,7 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
                   return (
                     <div
                       key={pf.id}
-                      className="relative overflow-hidden rounded-xl bg-gradient-to-b from-[#141b2b]/90 via-[#101623]/90 to-[#0c101a]/90 backdrop-blur-md border border-white/10 hover:border-white/20 p-4 flex flex-col justify-between gap-3 transition-all hover:-translate-y-0.5 shadow-md group"
+                      className="relative overflow-hidden rounded-xl bg-[#090A0F] border border-white/[0.08] hover:border-white/[0.16] p-4 flex flex-col justify-between gap-3 transition-all shadow-xs group"
                     >
                       <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent pointer-events-none" />
 
@@ -486,7 +486,7 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
                         <p className="text-xs text-slate-300">{pf.endereco}</p>
 
                         {/* CEP Highlight Box with Instant 1-Click Copy */}
-                        <div className="flex items-center justify-between gap-2 bg-[#070b14]/90 border border-sky-500/25 rounded-xl px-2.5 py-1.5 transition-all shadow-inner">
+                        <div className="flex items-center justify-between gap-2 bg-[#0e1016] border border-[#00d2d3]/25 rounded-xl px-2.5 py-1.5 transition-all">
                           <div className="flex items-center gap-1.5 min-w-0">
                             <span className="text-slate-400 text-xs font-mono">📬 CEP:</span>
                             <span className="text-sky-300 font-mono font-bold text-xs tracking-wider select-all">
@@ -596,7 +596,7 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
 
       {/* 4. Accordion Block: Regras Operacionais */}
       {results.regrasMatches.length > 0 && (
-        <div className="relative overflow-hidden rounded-2xl bg-[#0e1424]/80 backdrop-blur-xl border border-white/10 shadow-[0_12px_32px_rgba(0,0,0,0.55)] transition-all">
+        <div className="relative overflow-hidden rounded-2xl bg-[#0e1016] border border-white/[0.08] shadow-[0_12px_32px_rgba(0,0,0,0.45)] transition-all">
           <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent pointer-events-none" />
 
           {/* Accordion Header */}
@@ -643,7 +643,7 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
                   return (
                     <div
                       key={r.id}
-                      className="relative overflow-hidden rounded-xl bg-gradient-to-b from-[#141b2b]/90 via-[#101623]/90 to-[#0c101a]/90 backdrop-blur-md border border-white/10 hover:border-white/20 p-4 flex flex-col justify-between gap-3 transition-all hover:-translate-y-0.5 shadow-md group"
+                      className="relative overflow-hidden rounded-xl bg-[#090A0F] border border-white/[0.08] hover:border-white/[0.16] p-4 flex flex-col justify-between gap-3 transition-all shadow-xs group"
                     >
                       <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent pointer-events-none" />
 
@@ -700,7 +700,7 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
 
       {/* 5. Accordion Block: Agendas Regionais & Isenções */}
       {results.agendasMatches.length > 0 && (
-        <div className="relative overflow-hidden rounded-2xl bg-[#0e1424]/80 backdrop-blur-xl border border-white/10 shadow-[0_12px_32px_rgba(0,0,0,0.55)] transition-all">
+        <div className="relative overflow-hidden rounded-2xl bg-[#0e1016] border border-white/[0.08] shadow-[0_12px_32px_rgba(0,0,0,0.45)] transition-all">
           <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent pointer-events-none" />
 
           {/* Accordion Header */}
@@ -748,7 +748,7 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
                   return (
                     <div
                       key={ag.id}
-                      className="relative overflow-hidden rounded-xl bg-gradient-to-b from-[#141b2b]/90 via-[#101623]/90 to-[#0c101a]/90 backdrop-blur-md border border-white/10 hover:border-white/20 p-4 flex flex-col justify-between gap-3 transition-all hover:-translate-y-0.5 shadow-md group"
+                      className="relative overflow-hidden rounded-xl bg-[#090A0F] border border-white/[0.08] hover:border-white/[0.16] p-4 flex flex-col justify-between gap-3 transition-all shadow-xs group"
                     >
                       <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent pointer-events-none" />
 

@@ -81,18 +81,18 @@ export const PontoFixoModal: React.FC<PontoFixoModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
-      <div className="bg-[#0e1628] border border-slate-700/80 rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
+      <div className="bg-[#0e1017] border border-white/[0.09] rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-800 sticky top-0 bg-[#0e1628] z-10">
+        <div className="flex items-center justify-between p-4 border-b border-white/[0.08] sticky top-0 bg-[#12141c] z-10">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+            <div className="w-8 h-8 rounded-lg bg-[#00d2d3]/15 border border-[#00d2d3]/30 flex items-center justify-center text-[#00d2d3]">
               <MapPin className="w-4 h-4" />
             </div>
             <div>
               <h3 className="text-base font-bold text-white">
                 {editingItem ? 'Editar Ponto Fixo de Atendimento' : 'Novo Ponto Fixo de Atendimento'}
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-zinc-400">
                 Informações de base física para envio de clientes
               </p>
             </div>
@@ -100,7 +100,7 @@ export const PontoFixoModal: React.FC<PontoFixoModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -110,7 +110,7 @@ export const PontoFixoModal: React.FC<PontoFixoModalProps> = ({
         <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4 flex-1">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-300">
+              <label className="text-xs font-semibold text-zinc-300">
                 Nome da Base / Região <span className="text-rose-400">*</span>
               </label>
               <input
@@ -119,24 +119,24 @@ export const PontoFixoModal: React.FC<PontoFixoModalProps> = ({
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
                 placeholder="Ex: Zona Norte – Guarulhos"
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-[#141720] border border-white/[0.08] rounded-lg text-xs text-white focus:outline-none focus:border-[#00d2d3]"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-300">Subtítulo / Estabelecimento</label>
+              <label className="text-xs font-semibold text-zinc-300">Subtítulo / Estabelecimento</label>
               <input
                 type="text"
                 value={subtitulo}
                 onChange={(e) => setSubtitulo(e.target.value)}
                 placeholder="Ex: Posto de Combustível ALE"
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-[#141720] border border-white/[0.08] rounded-lg text-xs text-white focus:outline-none focus:border-[#00d2d3]"
               />
             </div>
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-300">
+            <label className="text-xs font-semibold text-zinc-300">
               Endereço Completo <span className="text-rose-400">*</span>
             </label>
             <input
@@ -145,70 +145,70 @@ export const PontoFixoModal: React.FC<PontoFixoModalProps> = ({
               value={endereco}
               onChange={(e) => setEndereco(e.target.value)}
               placeholder="Ex: Av. Papa João Paulo I, 4489 – Guarulhos"
-              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 bg-[#141720] border border-white/[0.08] rounded-lg text-xs text-white focus:outline-none focus:border-[#00d2d3]"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-300">CEP</label>
+              <label className="text-xs font-semibold text-zinc-300">CEP</label>
               <input
                 type="text"
                 value={cep}
                 onChange={(e) => setCep(e.target.value)}
                 placeholder="07170-350"
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-[#141720] border border-white/[0.08] rounded-lg text-xs text-white focus:outline-none focus:border-[#00d2d3]"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-300">Ponto de Referência</label>
+              <label className="text-xs font-semibold text-zinc-300">Ponto de Referência</label>
               <input
                 type="text"
                 value={referencia}
                 onChange={(e) => setReferencia(e.target.value)}
                 placeholder="Ex: Próximo à Ponte do Limão"
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-[#141720] border border-white/[0.08] rounded-lg text-xs text-white focus:outline-none focus:border-[#00d2d3]"
               />
             </div>
           </div>
 
           {/* Horários */}
-          <div className="p-3 bg-slate-900/60 border border-slate-800 rounded-xl space-y-3">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
+          <div className="p-3 bg-[#141720]/60 border border-white/[0.08] rounded-xl space-y-3">
+            <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block">
               Horários de Funcionamento
             </span>
 
             <div className="space-y-1">
-              <label className="text-xs text-slate-300">Segunda a Sexta</label>
+              <label className="text-xs text-zinc-300">Segunda a Sexta</label>
               <input
                 type="text"
                 value={horarioSemana}
                 onChange={(e) => setHorarioSemana(e.target.value)}
                 placeholder="08:00 às 17:00 (Segunda a Sexta)"
-                className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-1.5 bg-[#090A0F] border border-white/[0.08] rounded-lg text-xs text-white focus:outline-none focus:border-[#00d2d3]"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs text-slate-300">Sábado</label>
+              <label className="text-xs text-zinc-300">Sábado</label>
               <input
                 type="text"
                 value={horarioSabado}
                 onChange={(e) => setHorarioSabado(e.target.value)}
                 placeholder="08:00 às 12:00 (Sábado)"
-                className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-1.5 bg-[#090A0F] border border-white/[0.08] rounded-lg text-xs text-white focus:outline-none focus:border-[#00d2d3]"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs text-slate-300">Domingos e Feriados</label>
+              <label className="text-xs text-zinc-300">Domingos e Feriados</label>
               <input
                 type="text"
                 value={horarioFeriados}
                 onChange={(e) => setHorarioFeriados(e.target.value)}
                 placeholder="Fechado aos Domingos e Feriados"
-                className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-1.5 bg-[#090A0F] border border-white/[0.08] rounded-lg text-xs text-white focus:outline-none focus:border-[#00d2d3]"
               />
             </div>
           </div>
@@ -216,40 +216,40 @@ export const PontoFixoModal: React.FC<PontoFixoModalProps> = ({
           {/* Links Maps / Waze */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="text-xs text-slate-300">Termo de busca Google Maps</label>
+              <label className="text-xs text-zinc-300">Termo de busca Google Maps</label>
               <input
                 type="text"
                 value={mapsQuery}
                 onChange={(e) => setMapsQuery(e.target.value)}
                 placeholder="Ex: Av. Ordem e Progresso 56 SP"
-                className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-1.5 bg-[#141720] border border-white/[0.08] rounded-lg text-xs text-white focus:outline-none focus:border-[#00d2d3]"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs text-slate-300">Link direto Waze (opcional)</label>
+              <label className="text-xs text-zinc-300">Link direto Waze (opcional)</label>
               <input
                 type="text"
                 value={wazeQuery}
                 onChange={(e) => setWazeQuery(e.target.value)}
                 placeholder="https://waze.com/ul?q=..."
-                className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-1.5 bg-[#141720] border border-white/[0.08] rounded-lg text-xs text-white focus:outline-none focus:border-[#00d2d3]"
               />
             </div>
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/[0.08]">
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              className="px-3 py-2 rounded-lg text-xs font-medium text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white transition-colors shadow-sm"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-[#00d2d3] hover:bg-[#57f1db] text-[#003731] transition-colors shadow-xs cursor-pointer"
             >
               <Save className="w-3.5 h-3.5" />
               <span>Salvar Ponto Fixo</span>

@@ -162,63 +162,63 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
   return (
     <div className="space-y-4">
       {/* Overview & Quick KPIs */}
-      <div className="relative overflow-hidden rounded-2xl bg-[#0e1424]/75 backdrop-blur-xl border border-white/10 shadow-[0_12px_32px_rgba(0,0,0,0.55)] p-4 sm:p-5 group">
+      <div className="relative overflow-hidden rounded-2xl bg-[#0e1016] border border-white/[0.08] shadow-[0_12px_32px_rgba(0,0,0,0.45)] p-4 sm:p-5 group">
         {/* Specular top highlight */}
-        <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent pointer-events-none" />
 
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="space-y-1">
             <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight flex items-center gap-2">
               <span>Regras Operacionais, Agendas & Pontos Fixos</span>
             </h2>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-3xl">
+            <p className="text-xs sm:text-sm text-zinc-400 max-w-3xl">
               Consulte roteiros de atendimento, isenções de KM, pontos fixos e diretrizes de agendamento do OPA.
             </p>
           </div>
 
-          {/* Today Info Card - Frosted Pill */}
-          <div className="bg-[#080d18]/80 backdrop-blur-md border border-white/10 shadow-inner rounded-xl px-4 py-2.5 flex items-center gap-3 shrink-0">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500/25 to-indigo-500/25 border border-blue-400/30 flex items-center justify-center text-blue-300 shadow-sm shadow-blue-500/20">
+          {/* Today Info Card - Obsidian Pill */}
+          <div className="bg-[#090A0F] border border-white/[0.08] rounded-xl px-4 py-2.5 flex items-center gap-3 shrink-0">
+            <div className="w-9 h-9 rounded-lg bg-[#00d2d3]/12 border border-[#00d2d3]/25 flex items-center justify-center text-[#00d2d3]">
               <Calendar className="w-4 h-4" />
             </div>
             <div>
-              <div className="text-[11px] text-slate-400 uppercase tracking-wider font-mono">Hoje no sistema</div>
+              <div className="text-[11px] text-zinc-400 uppercase tracking-wider font-mono">Hoje no sistema</div>
               <div className="text-xs font-bold text-white">{todayInfo.label}</div>
-              <div className="text-xs text-cyan-300 font-medium">{todayInfo.desc}</div>
+              <div className="text-xs text-[#00d2d3] font-medium">{todayInfo.desc}</div>
             </div>
           </div>
         </div>
 
         {/* Quick Operational Metrics */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-4 pt-3.5 border-t border-white/10 text-xs">
-          <div className="bg-[#080d18]/70 backdrop-blur-md border border-white/10 hover:border-blue-500/30 rounded-xl p-3 shadow-inner hover:-translate-y-0.5 transition-all">
-            <span className="text-slate-400 text-[11px] uppercase font-mono tracking-wider block">Horário Fixo</span>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-4 pt-3.5 border-t border-white/[0.08] text-xs">
+          <div className="bg-[#090A0F] border border-white/[0.08] hover:border-[#00d2d3]/30 rounded-xl p-3 transition-all">
+            <span className="text-zinc-400 text-[11px] uppercase font-mono tracking-wider block">Horário Fixo</span>
             <strong className="text-white font-semibold text-xs sm:text-sm">R$ 100,00 contratado</strong>
-            <span className="text-[11px] text-slate-400 block mt-0.5">08h, 12h ou 18h apenas</span>
+            <span className="text-[11px] text-zinc-400 block mt-0.5">08h, 12h ou 18h apenas</span>
           </div>
 
-          <div className="bg-[#080d18]/70 backdrop-blur-md border border-white/10 hover:border-amber-500/30 rounded-xl p-3 shadow-inner hover:-translate-y-0.5 transition-all">
-            <span className="text-slate-400 text-[11px] uppercase font-mono tracking-wider block">Domingos e Feriados</span>
+          <div className="bg-[#090A0F] border border-white/[0.08] hover:border-amber-500/30 rounded-xl p-3 transition-all">
+            <span className="text-zinc-400 text-[11px] uppercase font-mono tracking-wider block">Domingos e Feriados</span>
             <strong className="text-amber-300 font-semibold text-xs sm:text-sm">+R$ 10,00 por serviço</strong>
-            <span className="text-[11px] text-slate-400 block mt-0.5">Sem encaixes / Sem horário fixo</span>
+            <span className="text-[11px] text-zinc-400 block mt-0.5">Sem encaixes / Sem horário fixo</span>
           </div>
 
-          <div className="bg-[#080d18]/70 backdrop-blur-md border border-white/10 hover:border-emerald-500/30 rounded-xl p-3 shadow-inner hover:-translate-y-0.5 transition-all">
-            <span className="text-slate-400 text-[11px] uppercase font-mono tracking-wider block">Isenção KM SJC</span>
+          <div className="bg-[#090A0F] border border-white/[0.08] hover:border-emerald-500/30 rounded-xl p-3 transition-all">
+            <span className="text-zinc-400 text-[11px] uppercase font-mono tracking-wider block">Isenção KM SJC</span>
             <strong className="text-emerald-400 font-semibold text-xs sm:text-sm">Quarta-feira (Fora Mapa)</strong>
-            <span className="text-[11px] text-slate-400 block mt-0.5">Outros dias cobra KM</span>
+            <span className="text-[11px] text-zinc-400 block mt-0.5">Outros dias cobra KM</span>
           </div>
 
-          <div className="bg-[#080d18]/70 backdrop-blur-md border border-white/10 hover:border-emerald-500/30 rounded-xl p-3 shadow-inner hover:-translate-y-0.5 transition-all">
-            <span className="text-slate-400 text-[11px] uppercase font-mono tracking-wider block">Isenção KM Litoral N.</span>
+          <div className="bg-[#090A0F] border border-white/[0.08] hover:border-emerald-500/30 rounded-xl p-3 transition-all">
+            <span className="text-zinc-400 text-[11px] uppercase font-mono tracking-wider block">Isenção KM Litoral N.</span>
             <strong className="text-emerald-400 font-semibold text-xs sm:text-sm">Quinta-feira (Fora Mapa)</strong>
-            <span className="text-[11px] text-slate-400 block mt-0.5">Agenda de SJC integrada</span>
+            <span className="text-[11px] text-zinc-400 block mt-0.5">Agenda de SJC integrada</span>
           </div>
         </div>
       </div>
 
       {/* Unified Toolbar for Regras & Agendas */}
-      <div className="relative overflow-hidden bg-[#0e1424]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-3 sm:p-4 space-y-3 shadow-xl">
+      <div className="relative overflow-hidden bg-[#0e1016] border border-white/[0.08] rounded-2xl p-3 sm:p-4 space-y-3 shadow-sm">
         <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent pointer-events-none" />
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
@@ -226,7 +226,7 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
           <div className="flex flex-wrap items-center gap-1.5 text-xs">
             {[
               { id: 'todos', label: 'Todos os Módulos' },
-              { id: 'localizador_cep', label: '🧭 Consultar CEP do Cliente' },
+              { id: 'localizador_cep', label: 'Consultar CEP do Cliente' },
               { id: 'pontos_fixos', label: `Pontos Fixos (${pontosFixos.length})` },
               { id: 'isencao_km', label: 'Isenção de KM' },
               { id: 'agendas', label: `Agendas (${agendas.length})` },
@@ -236,10 +236,10 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id as TabFilter)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
                   activeTab === tab.id
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/25 border-t border-white/25 ring-1 ring-white/10'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                    ? 'bg-[#00d2d3]/15 text-[#00d2d3] border-[#00d2d3]/35 shadow-xs'
+                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] border-transparent'
                 }`}
               >
                 {tab.label}
@@ -266,7 +266,7 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
                   setIsPfModalOpen(true);
                 }
               }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/25 border-t border-white/25 hover:brightness-110 active:scale-95 transition-all"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#00d2d3] hover:bg-[#57f1db] text-[#003731] shadow-xs active:scale-95 transition-all cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>
@@ -287,7 +287,7 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
                   onResetDefaults();
                 }
               }}
-              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-slate-200 border border-white/10 shadow-xs hover:border-white/20 transition-all active:scale-95"
+              className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-400 hover:text-zinc-200 border border-white/[0.08] transition-all active:scale-95 cursor-pointer"
               title="Restaurar valores padrão"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -297,15 +297,15 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
 
         {/* Day of Week Filter */}
         {(activeTab === 'todos' || activeTab === 'agendas') && (
-          <div className="flex flex-wrap items-center gap-1.5 pt-2.5 border-t border-white/10 text-xs">
-            <span className="text-slate-400 text-xs font-medium mr-1">Filtrar dia:</span>
+          <div className="flex flex-wrap items-center gap-1.5 pt-2.5 border-t border-white/[0.08] text-xs">
+            <span className="text-zinc-400 text-xs font-medium mr-1">Filtrar dia:</span>
             <button
               type="button"
               onClick={() => setSelectedDayFilter(null)}
-              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer border ${
                 selectedDayFilter === null
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs border-t border-white/25'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                  ? 'bg-[#00d2d3]/15 text-[#00d2d3] border-[#00d2d3]/35 font-semibold'
+                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] border-transparent'
               }`}
             >
               Todos os dias
@@ -313,10 +313,10 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
             <button
               type="button"
               onClick={() => setSelectedDayFilter(currentDayOfWeek)}
-              className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer border ${
                 selectedDayFilter === currentDayOfWeek
-                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xs border-t border-white/25'
-                  : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20'
+                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                  : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20'
               }`}
             >
               Hoje ({todayInfo.abbrev})
@@ -326,10 +326,10 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
                 key={d.id}
                 type="button"
                 onClick={() => setSelectedDayFilter(d.id)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer border ${
                   selectedDayFilter === d.id
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs border-t border-white/25'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                    ? 'bg-[#00d2d3]/15 text-[#00d2d3] border-[#00d2d3]/35 font-semibold'
+                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] border-transparent'
                 }`}
               >
                 {d.abbrev}
@@ -375,22 +375,22 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
               return (
                 <div
                   key={pf.id}
-                  className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#151c2e]/95 via-[#101625]/95 to-[#0a0e18]/95 backdrop-blur-xl border border-[#22293d] border-t-white/20 border-b-black/90 hover:border-sky-400/60 p-5 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.01] shadow-[0_14px_35px_-8px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.1)] hover:shadow-[0_22px_48px_-10px_rgba(0,0,0,0.95),0_0_25px_rgba(14,165,233,0.18)] group"
+                  className="relative overflow-hidden rounded-2xl bg-[#0e1016] border border-white/[0.08] hover:border-[#00d2d3]/40 p-5 flex flex-col justify-between transition-all duration-200 shadow-[0_12px_32px_rgba(0,0,0,0.45)] group"
                 >
                   {/* Top Specular Line */}
-                  <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-sky-400/40 to-transparent pointer-events-none" />
+                  <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-[#00d2d3]/35 to-transparent pointer-events-none" />
 
                   <div className="space-y-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2.5">
-                        <span className="w-7 h-7 rounded-lg bg-gradient-to-br from-slate-700 to-slate-800 text-slate-200 border border-white/15 shadow-sm text-xs font-bold flex items-center justify-center shrink-0">
+                        <span className="w-7 h-7 rounded-lg bg-[#141720] text-zinc-200 border border-white/[0.10] text-xs font-bold flex items-center justify-center shrink-0">
                           {pf.numero}
                         </span>
                         <div>
-                          <h4 className="text-sm font-bold text-white leading-tight group-hover:text-sky-300 transition-colors">
+                          <h4 className="text-sm font-bold text-white leading-tight group-hover:text-[#00d2d3] transition-colors">
                             {pf.nome}
                           </h4>
-                          <span className="text-xs text-slate-400">{pf.subtitulo}</span>
+                          <span className="text-xs text-zinc-400">{pf.subtitulo}</span>
                         </div>
                       </div>
 
@@ -401,7 +401,7 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
                             setEditingPf(pf);
                             setIsPfModalOpen(true);
                           }}
-                          className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-slate-200 border border-white/10 transition-colors"
+                          className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-zinc-200 border border-white/10 transition-colors cursor-pointer"
                           title="Editar ponto fixo"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
@@ -413,7 +413,7 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
                               onDeletePontoFixo(pf.id);
                             }
                           }}
-                          className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition-colors"
+                          className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition-colors cursor-pointer"
                           title="Excluir ponto fixo"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -427,25 +427,25 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
                     </div>
 
                     {/* Address & Hours Inset Box */}
-                    <div className="bg-[#070b14]/80 backdrop-blur-md border border-white/5 rounded-xl p-3.5 space-y-2 text-xs shadow-inner">
+                    <div className="bg-[#090A0F] border border-white/[0.06] rounded-xl p-3.5 space-y-2 text-xs">
                       <div>
-                        <span className="text-slate-400 text-[11px] uppercase font-mono tracking-wider block">
+                        <span className="text-zinc-400 text-[11px] uppercase font-mono tracking-wider block">
                           Endereço Completo
                         </span>
-                        <p className="text-slate-200 font-medium mt-0.5">{pf.endereco}</p>
+                        <p className="text-zinc-200 font-medium mt-0.5">{pf.endereco}</p>
                         
                         {/* CEP Highlight Box with Instant 1-Click Copy */}
-                        <div className="mt-2.5 flex items-center justify-between gap-2 bg-[#0c1424]/90 border border-sky-500/25 hover:border-sky-500/40 rounded-xl px-2.5 py-1.5 transition-all shadow-inner">
+                        <div className="mt-2.5 flex items-center justify-between gap-2 bg-[#0e1016] border border-[#00d2d3]/25 hover:border-[#00d2d3]/40 rounded-xl px-2.5 py-1.5 transition-all">
                           <div className="flex items-center gap-1.5 min-w-0">
-                            <span className="text-slate-400 text-xs font-mono">📬 CEP:</span>
-                            <span className="text-sky-300 font-mono font-bold text-xs tracking-wider select-all">
+                            <span className="text-zinc-400 text-xs font-mono">CEP:</span>
+                            <span className="text-[#00d2d3] font-mono font-bold text-xs tracking-wider select-all">
                               {pf.cep}
                             </span>
                           </div>
                           <button
                             type="button"
                             onClick={() => handleCopy(`pf-cep-${pf.id}`, pf.cep, `CEP ${pf.cep}`)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 transition-all active:scale-95 shrink-0 shadow-xs"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#00d2d3]/12 hover:bg-[#00d2d3]/20 text-[#00d2d3] border border-[#00d2d3]/30 transition-all active:scale-95 shrink-0 cursor-pointer"
                             title="Copiar apenas o CEP"
                           >
                             {copiedId === `pf-cep-${pf.id}` ? (
@@ -455,7 +455,7 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
                               </>
                             ) : (
                               <>
-                                <Copy className="w-3 h-3 text-sky-400" />
+                                <Copy className="w-3 h-3 text-[#00d2d3]" />
                                 <span>Copiar CEP</span>
                               </>
                             )}
@@ -585,7 +585,7 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
 
       {/* SECTION 2: ISENÇÃO DE KM */}
       {(activeTab === 'todos' || activeTab === 'isencao_km') && (
-        <section className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#0f1d2d]/90 via-[#0c1724]/90 to-[#08101a]/90 backdrop-blur-xl border border-emerald-500/25 shadow-[0_12px_32px_rgba(0,0,0,0.6)] p-5 space-y-4 group">
+        <section className="relative overflow-hidden rounded-2xl bg-[#0e1016] border border-emerald-500/25 shadow-[0_12px_32px_rgba(0,0,0,0.45)] p-5 space-y-4 group">
           <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent pointer-events-none" />
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -597,7 +597,7 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
                 <h3 className="text-sm font-bold text-white tracking-tight">
                   Instalação Sem Custo de KM – Fora do Mapa
                 </h3>
-                <p className="text-xs text-slate-300">
+                <p className="text-xs text-zinc-400">
                   Dias com isenção total de cobrança de quilometragem para o cliente
                 </p>
               </div>
@@ -610,7 +610,7 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
             {/* Card 1: São José dos Campos */}
-            <div className="relative overflow-hidden rounded-xl bg-[#070d18]/80 backdrop-blur-md border border-white/10 hover:border-emerald-500/40 p-4 space-y-3 shadow-inner hover:-translate-y-0.5 transition-all">
+            <div className="relative overflow-hidden rounded-xl bg-[#090A0F] border border-white/[0.08] hover:border-emerald-500/40 p-4 space-y-3 transition-all">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-white flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400" />
@@ -657,7 +657,7 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
             </div>
 
             {/* Card 2: Litoral Norte */}
-            <div className="relative overflow-hidden rounded-xl bg-[#070d18]/80 backdrop-blur-md border border-white/10 hover:border-emerald-500/40 p-4 space-y-3 shadow-inner hover:-translate-y-0.5 transition-all">
+            <div className="relative overflow-hidden rounded-xl bg-[#090A0F] border border-white/[0.08] hover:border-emerald-500/40 p-4 space-y-3 transition-all">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-white flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400" />
@@ -730,7 +730,7 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
               return (
                 <div
                   key={item.id}
-                  className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#141b2b]/95 via-[#101623]/95 to-[#0c101a]/95 backdrop-blur-xl border border-white/10 border-t-slate-700/80 hover:border-t-indigo-400/50 hover:border-white/20 p-5 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 shadow-[0_12px_28px_-6px_rgba(0,0,0,0.65)] hover:shadow-[0_22px_45px_-10px_rgba(0,0,0,0.9)] group"
+                  className="relative overflow-hidden rounded-2xl bg-[#0e1016] border border-white/[0.08] hover:border-[#00d2d3]/35 p-5 flex flex-col justify-between transition-all duration-200 shadow-[0_12px_28px_rgba(0,0,0,0.45)] group"
                 >
                   <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
 
@@ -783,7 +783,7 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
                     {/* Tags */}
                     <div className="flex flex-wrap items-center gap-1.5 text-xs">
                       {item.semHorarioFixo && (
-                        <span className="px-2.5 py-0.5 rounded-lg bg-[#070b14]/80 border border-white/10 text-slate-400 font-mono text-[11px]">
+                        <span className="px-2.5 py-0.5 rounded-lg bg-[#090A0F] border border-white/[0.08] text-zinc-400 font-mono text-[11px]">
                           Sem Horário Fixo
                         </span>
                       )}
@@ -804,7 +804,7 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
                           {item.cidades.map((c) => (
                             <span
                               key={c}
-                              className="px-2 py-0.5 rounded-md bg-[#070b14]/80 border border-white/5 text-[11px] text-slate-300"
+                              className="px-2 py-0.5 rounded-md bg-[#090A0F] border border-white/[0.06] text-[11px] text-zinc-300"
                             >
                               {c}
                             </span>
@@ -872,7 +872,7 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
               return (
                 <div
                   key={regra.id}
-                  className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#141b2b]/95 via-[#101623]/95 to-[#0c101a]/95 backdrop-blur-xl border border-white/10 border-t-slate-700/80 hover:border-t-amber-400/50 hover:border-white/20 p-5 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 shadow-[0_12px_28px_-6px_rgba(0,0,0,0.65)] hover:shadow-[0_22px_45px_-10px_rgba(0,0,0,0.9)] group"
+                  className="relative overflow-hidden rounded-2xl bg-[#0e1016] border border-white/[0.08] hover:border-amber-400/35 p-5 flex flex-col justify-between transition-all duration-200 shadow-[0_12px_28px_rgba(0,0,0,0.45)] group"
                 >
                   <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
 
@@ -924,7 +924,7 @@ export const RegrasAgendasView: React.FC<RegrasAgendasViewProps> = ({
                     <ul className="space-y-2 text-xs text-slate-300">
                       {regra.itens.map((item, idx) => (
                         <li key={idx} className="flex items-start gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-1.5 shrink-0 shadow-xs shadow-blue-400" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#00d2d3] mt-1.5 shrink-0" />
                           <span className="leading-relaxed">{item}</span>
                         </li>
                       ))}

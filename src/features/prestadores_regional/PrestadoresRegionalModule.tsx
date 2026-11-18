@@ -680,7 +680,7 @@ export function PrestadoresRegionalModule({
               <div className="space-y-3.5">
                 {/* Recent Consults Strip (if any prestador was consulted) */}
                 {recentConsults.length > 0 && (
-                  <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-[#11141e]/80 border border-[#1e2230] backdrop-blur-md text-xs shadow-sm">
+                  <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-[#0e1016] border border-white/[0.08] text-xs shadow-xs">
                     <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
                       <span className="text-slate-400 font-medium text-[11px] flex items-center gap-1 shrink-0">
                         <Clock className="w-3 h-3 text-cyan-400" />

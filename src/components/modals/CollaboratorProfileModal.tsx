@@ -90,7 +90,7 @@ export const CollaboratorProfileModal: React.FC<CollaboratorProfileModalProps> =
       >
         <div
           onClick={e => e.stopPropagation()}
-          className="relative w-full max-w-md bg-slate-900 border border-white/10 rounded-3xl p-6 shadow-2xl text-center cursor-default backdrop-blur-xl"
+          className="relative w-full max-w-md bg-[#0e1017] border border-white/10 rounded-3xl p-6 shadow-2xl text-center cursor-default backdrop-blur-xl"
         >
           <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center mx-auto mb-4 shadow-sm">
             <User className="w-7 h-7" />
@@ -229,7 +229,7 @@ export const CollaboratorProfileModal: React.FC<CollaboratorProfileModalProps> =
     >
       <div
         onClick={e => e.stopPropagation()}
-        className="relative w-full max-w-lg bg-slate-900/95 border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] cursor-default backdrop-blur-xl"
+        className="relative w-full max-w-lg bg-[#0e1017] border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] cursor-default backdrop-blur-xl"
       >
         {/* Top Header - Frosted Glass Style */}
         <div className="px-6 py-5 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">

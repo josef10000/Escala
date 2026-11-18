@@ -252,7 +252,7 @@ export const WeekendDutyModal: React.FC<WeekendDutyModalProps> = ({ isOpen, onCl
     >
       <div
         onClick={e => e.stopPropagation()}
-        className="relative w-full max-w-4xl bg-slate-900 border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] cursor-default"
+        className="relative w-full max-w-4xl bg-[#0e1017] border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] cursor-default"
       >
         {/* Header */}
         <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
@@ -466,7 +466,7 @@ export const WeekendDutyModal: React.FC<WeekendDutyModalProps> = ({ isOpen, onCl
           </div>
 
           {/* RIGHT COLUMN: WhatsApp Real-time Preview (5 cols) */}
-          <div className="lg:col-span-5 flex flex-col justify-between bg-slate-950/80 border border-white/10 rounded-3xl p-4 shadow-inner">
+          <div className="lg:col-span-5 flex flex-col justify-between bg-[#090A0F] border border-white/10 rounded-3xl p-4 shadow-inner">
             <div>
               <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
                 <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5">

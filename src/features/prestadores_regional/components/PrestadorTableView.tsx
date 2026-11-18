@@ -106,19 +106,19 @@ export const PrestadorTableView: React.FC<PrestadorTableViewProps> = ({
 
   if (prestadores.length === 0) {
     return (
-      <div className="bg-[#111827] border border-slate-800/80 rounded-2xl p-12 text-center">
+      <div className="bg-[#0e1016] border border-white/[0.08] rounded-2xl p-12 text-center">
         <p className="text-sm font-semibold text-white">Nenhum registro encontrado</p>
-        <p className="text-xs text-[#9CA3AF] mt-1.5">Ajuste os filtros de pesquisa para visualizar os prestadores.</p>
+        <p className="text-xs text-zinc-400 mt-1.5">Ajuste os filtros de pesquisa para visualizar os prestadores.</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <div className="bg-[#111622]/80 backdrop-blur-2xl border border-white/[0.08] rounded-2xl overflow-hidden shadow-[0_12px_32px_rgba(0,0,0,0.6)]">
+      <div className="bg-[#0e1016] border border-white/[0.08] rounded-2xl overflow-hidden shadow-[0_12px_32px_rgba(0,0,0,0.45)]">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-[#090d16]/80 uppercase font-semibold text-slate-400 border-b border-white/[0.08]">
+          <table className="w-full text-left text-xs text-zinc-300">
+            <thead className="bg-[#090A0F] uppercase font-semibold text-zinc-400 border-b border-white/[0.08]">
               <tr>
                 <th scope="col" className="px-3 py-3 w-10 text-center">Fav</th>
                 <th

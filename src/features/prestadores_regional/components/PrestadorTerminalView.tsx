@@ -107,33 +107,33 @@ export const PrestadorTerminalView: React.FC<PrestadorTerminalViewProps> = ({
 
   if (prestadores.length === 0) {
     return (
-      <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-12 text-center backdrop-blur-sm">
+      <div className="bg-[#0e1016] border border-white/[0.08] rounded-3xl p-12 text-center">
         <p className="text-base font-bold text-white">Nenhum prestador encontrado</p>
-        <p className="text-sm text-slate-400 mt-1">Ajuste os filtros de pesquisa para visualizar os prestadores.</p>
+        <p className="text-sm text-zinc-400 mt-1">Ajuste os filtros de pesquisa para visualizar os prestadores.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl shadow-xl overflow-hidden flex flex-col backdrop-blur-sm">
+    <div className="bg-[#0e1016] border border-white/[0.08] rounded-2xl shadow-xl overflow-hidden flex flex-col">
       {/* Header bar */}
-      <div className="bg-slate-950/80 px-5 py-3 border-b border-slate-800 flex items-center justify-between text-xs text-slate-300 select-none">
+      <div className="bg-[#090A0F] px-5 py-3 border-b border-white/[0.08] flex items-center justify-between text-xs text-zinc-300 select-none">
         <div className="flex items-center gap-2.5 font-semibold">
-          <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+          <span className="w-2 h-2 rounded-full bg-[#00d2d3] animate-pulse"></span>
           <span>LISTA COMPACTA ({prestadores.length} prestadores)</span>
-          <span className="text-slate-400 hidden md:inline font-normal">
+          <span className="text-zinc-400 hidden md:inline font-normal">
             • Navegue com ↑ ↓ e pressione Enter para copiar
           </span>
         </div>
-        <div className="text-slate-400 text-xs font-mono">
-          Item <strong className="text-blue-400">{selectedIndex + 1}</strong> de {prestadores.length}
+        <div className="text-zinc-400 text-xs font-mono">
+          Item <strong className="text-[#00d2d3]">{selectedIndex + 1}</strong> de {prestadores.length}
         </div>
       </div>
 
       {/* List items with modern compact layout */}
       <div
         ref={containerRef}
-        className="max-h-[600px] overflow-y-auto divide-y divide-slate-800/60 select-none scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent"
+        className="max-h-[600px] overflow-y-auto divide-y divide-white/[0.06] select-none"
       >
         {prestadores.map((prestador, idx) => {
           const isSelected = selectedIndex === idx;
@@ -149,8 +149,8 @@ export const PrestadorTerminalView: React.FC<PrestadorTerminalViewProps> = ({
               onDoubleClick={() => handleCopyLine(prestador)}
               className={`group relative flex items-center justify-between px-3.5 py-2.5 cursor-pointer transition-colors ${
                 isSelected
-                  ? 'bg-slate-800/50 border-l-2 border-blue-400 text-white'
-                  : 'hover:bg-slate-800/30 text-slate-200 border-l-2 border-transparent'
+                  ? 'bg-white/[0.06] border-l-2 border-[#00d2d3] text-white'
+                  : 'hover:bg-white/[0.03] text-zinc-200 border-l-2 border-transparent'
               }`}
             >
               {/* Prestador Info */}

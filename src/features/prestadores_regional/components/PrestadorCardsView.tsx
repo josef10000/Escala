@@ -58,10 +58,10 @@ export const PrestadorCardsView: React.FC<PrestadorCardsViewProps> = ({
 
   if (prestadores.length === 0) {
     return (
-      <div className="bg-[#111827] border border-slate-800/80 rounded-2xl p-12 text-center max-w-lg mx-auto my-8 shadow-lg">
-        <MapPin className="w-8 h-8 text-slate-600 mx-auto mb-3" />
+      <div className="bg-[#0e1016] border border-white/[0.08] rounded-2xl p-12 text-center max-w-lg mx-auto my-8 shadow-lg">
+        <MapPin className="w-8 h-8 text-zinc-600 mx-auto mb-3" />
         <h3 className="text-sm font-semibold text-white">Nenhum prestador encontrado</h3>
-        <p className="text-xs text-[#9CA3AF] mt-1.5 leading-relaxed">
+        <p className="text-xs text-zinc-400 mt-1.5 leading-relaxed">
           Tente ajustar os termos da busca ou selecione outra região para visualizar os técnicos.
         </p>
       </div>
