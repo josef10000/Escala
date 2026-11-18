@@ -45,12 +45,12 @@ export const PrintExportModal: React.FC<PrintExportModalProps> = ({ isOpen, onCl
     ).length;
   };
 
-  // Download Native PDF
-  const handleDownloadPDF = () => {
+  // Download Native PDF (on-demand jsPDF chunk load)
+  const handleDownloadPDF = async () => {
     try {
       setIsGenerating(true);
 
-      const doc = generateEscalaPDF({
+      const doc = await generateEscalaPDF({
         providers,
         assignments,
         currentYear,

@@ -11,6 +11,7 @@ import {
   TechnicianComputedMetrics,
 } from '../../central_inteligencia/types';
 import { normalizeText } from './search';
+import { pushCloudFields } from '../../../lib/cloudSync';
 
 const EVALUATIONS_STORAGE_KEY = 'prestadores_avaliacoes_v1';
 
@@ -183,6 +184,7 @@ export function saveTechnicianEvaluation(
   try {
     localStorage.setItem(EVALUATIONS_STORAGE_KEY, JSON.stringify(next));
     window.dispatchEvent(new Event('prestadores-evaluations-updated'));
+    void pushCloudFields({ technicianEvaluations: next });
   } catch {
     // ignore storage quota errors
   }

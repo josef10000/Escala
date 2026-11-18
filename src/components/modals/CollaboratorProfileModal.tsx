@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSchedule } from '../../context/ScheduleContext';
 import { Provider } from '../../types';
+import { MONTH_NAMES_PT } from '../../utils/dateUtils';
 import {
   X,
   User,
@@ -28,6 +29,8 @@ export const CollaboratorProfileModal: React.FC<CollaboratorProfileModalProps> =
   onOpenCollaboratorAuth,
 }) => {
   const {
+    currentYear,
+    currentMonthIndex,
     providers,
     activeProviderId,
     authenticatedProviderId,
@@ -123,9 +126,16 @@ export const CollaboratorProfileModal: React.FC<CollaboratorProfileModalProps> =
     );
   }
 
-  // Monthly stats
+  // Dynamic Monthly stats for active calendar month
+  const activeMonthPrefix = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-`;
+  const activeMonthLabel = `${MONTH_NAMES_PT[currentMonthIndex].slice(0, 3)}/${String(currentYear).slice(-2)}`;
+  const shiftHoursPerDay = currentProviderObj.regime === '5x2' ? 8 : 12;
   const monthAssignments = assignments.filter(
-    a => a.providerId === currentProviderObj.id && a.date && a.date.startsWith('2026-10-')
+    a =>
+      a.providerId === currentProviderObj.id &&
+      a.date &&
+      a.date.startsWith(activeMonthPrefix) &&
+      a.shiftTypeId === 'st-t'
   );
   const activeSales = shiftSaleOffers.filter(
     o => o.providerId === currentProviderObj.id && o.status === 'available'
@@ -278,13 +288,13 @@ export const CollaboratorProfileModal: React.FC<CollaboratorProfileModalProps> =
           <div className="grid grid-cols-3 gap-3">
             <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/5 text-center shadow-sm">
               <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
-                Plantões em Out/26
+                Plantões em {activeMonthLabel}
               </span>
               <span className="text-lg font-bold font-mono text-white">
                 {monthAssignments.length}
               </span>
               <span className="text-[10px] text-slate-500 block">
-                {monthAssignments.length * 12}h escaladas
+                {monthAssignments.length * shiftHoursPerDay}h escaladas
               </span>
             </div>
 

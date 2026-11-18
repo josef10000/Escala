@@ -17,6 +17,7 @@ import {
   CalendarDays,
   Users,
   MessageSquare,
+  ChevronLeft,
   ChevronRight,
   CheckCircle2,
   Building2,
@@ -58,6 +59,9 @@ export const MobileScheduleView: React.FC<MobileScheduleViewProps> = ({
   const {
     currentYear,
     currentMonthIndex,
+    goToPreviousMonth,
+    goToNextMonth,
+    goToToday,
     providers,
     assignments,
     activeProviderId,
@@ -335,6 +339,54 @@ export const MobileScheduleView: React.FC<MobileScheduleViewProps> = ({
           </div>
         </div>
 
+        {/* 1B. MONTH SELECTOR STRIP (< Mês Anterior | Mês/Ano + Hoje | Próximo Mês >) */}
+        <div className="mx-3.5 mt-2.5 px-2.5 py-2 rounded-2xl bg-[#0e1016] border border-white/[0.08] flex items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={goToPreviousMonth}
+            className="w-8.5 h-8.5 rounded-xl bg-[#090A0F] hover:bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-zinc-300 hover:text-white active:scale-95 transition-all cursor-pointer shrink-0"
+            title="Mês anterior"
+            aria-label="Mês anterior"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+
+          <div className="flex items-center justify-center gap-2 min-w-0 flex-wrap">
+            <span className="text-xs sm:text-sm font-bold text-white tracking-tight">
+              {MONTH_NAMES_PT[currentMonthIndex]} {currentYear}
+            </span>
+            {isMonthPublished(currentYear, currentMonthIndex) ? (
+              <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-emerald-500/12 text-emerald-300 border border-emerald-500/25">
+                Oficial
+              </span>
+            ) : (
+              <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-white/[0.05] text-zinc-400 border border-white/[0.08]">
+                Prévia
+              </span>
+            )}
+            {(currentYear !== todayObj.getFullYear() || currentMonthIndex !== todayObj.getMonth()) && (
+              <button
+                type="button"
+                onClick={goToToday}
+                className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#00d2d3]/15 hover:bg-[#00d2d3]/25 text-[#00d2d3] border border-[#00d2d3]/30 transition-colors cursor-pointer"
+                title="Voltar para o mês atual"
+              >
+                Hoje
+              </button>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={goToNextMonth}
+            className="w-8.5 h-8.5 rounded-xl bg-[#090A0F] hover:bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-zinc-300 hover:text-white active:scale-95 transition-all cursor-pointer shrink-0"
+            title="Próximo mês"
+            aria-label="Próximo mês"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
         {mobileNotice && (
           <div className="mx-3.5 mt-2 px-3.5 py-2 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-200 text-center">
             {mobileNotice}
@@ -354,14 +406,14 @@ export const MobileScheduleView: React.FC<MobileScheduleViewProps> = ({
         )}
 
         {/* ✅ CONFIRM AWARENESS BANNER (Confirmar Ciência) */}
-        {!isMonthAcknowledged && (
+        {myMonthlyShifts.length > 0 && !isMonthAcknowledged && (
           <div className="mx-3.5 mt-2.5 p-3 bg-[#0e1016] border border-amber-500/30 rounded-2xl flex items-center justify-between gap-2.5 shadow-xs">
             <div className="space-y-0.5 min-w-0">
               <span className="text-xs font-bold text-amber-300 block">
-                Escala Oficial Publicada
+                Escala Oficial • {MONTH_NAMES_PT[currentMonthIndex]}/{currentYear}
               </span>
               <span className="text-[11px] text-zinc-400 block">
-                Confirme que você visualizou seus plantões
+                Confirme que você visualizou seus plantões deste mês
               </span>
             </div>
             <button
@@ -522,8 +574,10 @@ export const MobileScheduleView: React.FC<MobileScheduleViewProps> = ({
 
             {/* 4. LINHA DO TEMPO (Timeline with Week / Month toggle + Day Detail Modal) */}
             <div className="space-y-2.5 pt-1">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm sm:text-base font-bold text-white">Linha do Tempo</h3>
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="text-sm sm:text-base font-bold text-white">
+                  Linha do Tempo • {MONTH_NAMES_PT[currentMonthIndex].slice(0, 3)}/{String(currentYear).slice(-2)}
+                </h3>
                 
                 <div className="flex items-center bg-[#0e1016] p-0.5 rounded-xl border border-white/[0.08] text-xs">
                   <button

@@ -1,54 +1,150 @@
-import React, { useState } from 'react';
+import React, { Suspense, lazy, useState } from 'react';
 import { ScheduleProvider, useSchedule } from './context/ScheduleContext';
 import { Navbar } from './components/Navbar';
-import { ScheduleToolbar } from './components/ScheduleToolbar';
-import { EscalaGridView } from './components/views/EscalaGridView';
-import { PersonalMonthlyCalendar } from './components/views/PersonalMonthlyCalendar';
-import { MonthCalendarView } from './components/views/MonthCalendarView';
-import { AgendaView } from './components/views/AgendaView';
-import { MyScheduleView } from './components/views/MyScheduleView';
-import { ShiftModal } from './components/modals/ShiftModal';
-import { ProviderManagementModal } from './components/modals/ProviderManagementModal';
-import { AutoScheduleModal } from './components/modals/AutoScheduleModal';
-import { CloneMonthModal } from './components/modals/CloneMonthModal';
-import { WhatsAppExportModal } from './components/modals/WhatsAppExportModal';
-import { LeaderAuthModal } from './components/modals/LeaderAuthModal';
-import { LeaderRequestsCenterModal } from './components/modals/LeaderRequestsCenterModal';
-import { CollaboratorAuthModal } from './components/modals/CollaboratorAuthModal';
-import { QuickSwapModal } from './components/modals/QuickSwapModal';
-import { PrintExportModal } from './components/modals/PrintExportModal';
-import { AbsenceBatchModal } from './components/modals/AbsenceBatchModal';
-import { TeamBalanceModal } from './components/modals/TeamBalanceModal';
-import { AttendanceIncidentModal } from './components/modals/AttendanceIncidentModal';
-import { ExecutiveMonthlyReportModal } from './components/modals/ExecutiveMonthlyReportModal';
-import { ShiftSaleModal } from './components/modals/ShiftSaleModal';
-import { ShiftMarketplaceModal } from './components/modals/ShiftMarketplaceModal';
-import { CollaboratorProfileModal } from './components/modals/CollaboratorProfileModal';
-import { ImportScheduleModal } from './components/modals/ImportScheduleModal';
-import { AnnouncementsModal } from './components/modals/AnnouncementsModal';
-import { AuditLogModal } from './components/modals/AuditLogModal';
-import { WeekendDutyModal } from './components/modals/WeekendDutyModal';
-import { GestorFeedbacksPage } from './components/views/GestorFeedbacksPage';
-import { MobileScheduleView } from './components/views/MobileScheduleView';
-import { PrestadoresRegionalModule } from './features/prestadores_regional/PrestadoresRegionalModule';
-import { CentralInteligenciaModule } from './features/central_inteligencia/CentralInteligenciaModule';
 import { Provider, ShiftAssignment } from './types';
-import { Calendar, Clock, CheckCircle2, AlertCircle, Plus, CalendarDays } from 'lucide-react';
-import { formatFriendlyDate } from './utils/dateUtils';
+
+// Lazy-loaded Views & Operational Modules (Code Splitting for fast 4G/Mobile initial load)
+const ScheduleToolbar = lazy(() =>
+  import('./components/ScheduleToolbar').then((m) => ({ default: m.ScheduleToolbar }))
+);
+const EscalaGridView = lazy(() =>
+  import('./components/views/EscalaGridView').then((m) => ({ default: m.EscalaGridView }))
+);
+const PersonalMonthlyCalendar = lazy(() =>
+  import('./components/views/PersonalMonthlyCalendar').then((m) => ({
+    default: m.PersonalMonthlyCalendar,
+  }))
+);
+const MonthCalendarView = lazy(() =>
+  import('./components/views/MonthCalendarView').then((m) => ({ default: m.MonthCalendarView }))
+);
+const AgendaView = lazy(() =>
+  import('./components/views/AgendaView').then((m) => ({ default: m.AgendaView }))
+);
+const MyScheduleView = lazy(() =>
+  import('./components/views/MyScheduleView').then((m) => ({ default: m.MyScheduleView }))
+);
+const MobileScheduleView = lazy(() =>
+  import('./components/views/MobileScheduleView').then((m) => ({ default: m.MobileScheduleView }))
+);
+const GestorFeedbacksPage = lazy(() =>
+  import('./components/views/GestorFeedbacksPage').then((m) => ({
+    default: m.GestorFeedbacksPage,
+  }))
+);
+const PrestadoresRegionalModule = lazy(() =>
+  import('./features/prestadores_regional/PrestadoresRegionalModule').then((m) => ({
+    default: m.PrestadoresRegionalModule,
+  }))
+);
+const CentralInteligenciaModule = lazy(() =>
+  import('./features/central_inteligencia/CentralInteligenciaModule').then((m) => ({
+    default: m.CentralInteligenciaModule,
+  }))
+);
+
+// Lazy-loaded Modals (Downloaded only when opened)
+const ShiftModal = lazy(() =>
+  import('./components/modals/ShiftModal').then((m) => ({ default: m.ShiftModal }))
+);
+const ProviderManagementModal = lazy(() =>
+  import('./components/modals/ProviderManagementModal').then((m) => ({
+    default: m.ProviderManagementModal,
+  }))
+);
+const AutoScheduleModal = lazy(() =>
+  import('./components/modals/AutoScheduleModal').then((m) => ({ default: m.AutoScheduleModal }))
+);
+const CloneMonthModal = lazy(() =>
+  import('./components/modals/CloneMonthModal').then((m) => ({ default: m.CloneMonthModal }))
+);
+const WhatsAppExportModal = lazy(() =>
+  import('./components/modals/WhatsAppExportModal').then((m) => ({
+    default: m.WhatsAppExportModal,
+  }))
+);
+const LeaderAuthModal = lazy(() =>
+  import('./components/modals/LeaderAuthModal').then((m) => ({ default: m.LeaderAuthModal }))
+);
+const LeaderRequestsCenterModal = lazy(() =>
+  import('./components/modals/LeaderRequestsCenterModal').then((m) => ({
+    default: m.LeaderRequestsCenterModal,
+  }))
+);
+const CollaboratorAuthModal = lazy(() =>
+  import('./components/modals/CollaboratorAuthModal').then((m) => ({
+    default: m.CollaboratorAuthModal,
+  }))
+);
+const QuickSwapModal = lazy(() =>
+  import('./components/modals/QuickSwapModal').then((m) => ({ default: m.QuickSwapModal }))
+);
+const PrintExportModal = lazy(() =>
+  import('./components/modals/PrintExportModal').then((m) => ({ default: m.PrintExportModal }))
+);
+const AbsenceBatchModal = lazy(() =>
+  import('./components/modals/AbsenceBatchModal').then((m) => ({ default: m.AbsenceBatchModal }))
+);
+const TeamBalanceModal = lazy(() =>
+  import('./components/modals/TeamBalanceModal').then((m) => ({ default: m.TeamBalanceModal }))
+);
+const AttendanceIncidentModal = lazy(() =>
+  import('./components/modals/AttendanceIncidentModal').then((m) => ({
+    default: m.AttendanceIncidentModal,
+  }))
+);
+const ExecutiveMonthlyReportModal = lazy(() =>
+  import('./components/modals/ExecutiveMonthlyReportModal').then((m) => ({
+    default: m.ExecutiveMonthlyReportModal,
+  }))
+);
+const ShiftSaleModal = lazy(() =>
+  import('./components/modals/ShiftSaleModal').then((m) => ({ default: m.ShiftSaleModal }))
+);
+const ShiftMarketplaceModal = lazy(() =>
+  import('./components/modals/ShiftMarketplaceModal').then((m) => ({
+    default: m.ShiftMarketplaceModal,
+  }))
+);
+const CollaboratorProfileModal = lazy(() =>
+  import('./components/modals/CollaboratorProfileModal').then((m) => ({
+    default: m.CollaboratorProfileModal,
+  }))
+);
+const ImportScheduleModal = lazy(() =>
+  import('./components/modals/ImportScheduleModal').then((m) => ({
+    default: m.ImportScheduleModal,
+  }))
+);
+const AnnouncementsModal = lazy(() =>
+  import('./components/modals/AnnouncementsModal').then((m) => ({ default: m.AnnouncementsModal }))
+);
+const AuditLogModal = lazy(() =>
+  import('./components/modals/AuditLogModal').then((m) => ({ default: m.AuditLogModal }))
+);
+const WeekendDutyModal = lazy(() =>
+  import('./components/modals/WeekendDutyModal').then((m) => ({ default: m.WeekendDutyModal }))
+);
+
+function ModuleLoadingFallback() {
+  return (
+    <div className="flex-1 flex items-center justify-center p-8 bg-[#090A0F]">
+      <div className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-[#0e1016] border border-white/[0.08] text-xs font-medium text-zinc-300">
+        <span className="w-2.5 h-2.5 rounded-full bg-[#00d2d3] animate-pulse" />
+        <span>Carregando módulo...</span>
+      </div>
+    </div>
+  );
+}
 
 function ScheduleAppContent() {
   const {
     viewMode,
     setViewMode,
-    role,
     activeProviderId,
     setActiveProviderId,
     providers,
-    assignments,
-    shiftTypes,
-    departments,
     authenticatedProviderId,
-    isLeaderAuthenticated,
     activeModule,
     setActiveModule,
   } = useSchedule();
@@ -112,14 +208,9 @@ function ScheduleAppContent() {
   };
 
   const activeUserProvId = authenticatedProviderId || activeProviderId;
-  const currentProviderObj = activeUserProvId ? providers.find(p => p.id === activeUserProvId) || null : null;
-
-  // Today's summary
-  const todayStr = new Date().toISOString().split('T')[0];
-  const todayShifts = assignments.filter(a => a.date === todayStr);
-  const myTodayShift = todayShifts.find(a => a.providerId === activeProviderId);
-  const myTodayShiftType = myTodayShift ? shiftTypes.find(s => s.id === myTodayShift.shiftTypeId) : null;
-  const myTodayDept = myTodayShift ? departments.find(d => d.id === myTodayShift.departmentId) : null;
+  const currentProviderObj = activeUserProvId
+    ? providers.find((p) => p.id === activeUserProvId) || null
+    : null;
 
   return (
     <div
@@ -150,126 +241,130 @@ function ScheduleAppContent() {
 
       {activeModule !== 'escala' ? (
         <div className="pt-[98px] md:pt-16 flex-1 flex flex-col min-h-0 overflow-hidden">
-          {activeModule === 'gestor_feedbacks' ? (
-            <GestorFeedbacksPage />
-          ) : activeModule === 'central_inteligencia' ? (
-            <CentralInteligenciaModule />
-          ) : (
-            <PrestadoresRegionalModule
-              initialTab={
-                activeModule === 'pontos_fixos'
-                  ? 'regras'
-                  : 'prestadores'
-              }
-              onNavigateToEscala={() => setActiveModule('escala')}
-              onTabChange={(tab) => {
-                if (tab === 'prestadores') setActiveModule('prestadores_regional');
-                else if (tab === 'regras') setActiveModule('pontos_fixos');
-              }}
-            />
-          )}
+          <Suspense fallback={<ModuleLoadingFallback />}>
+            {activeModule === 'gestor_feedbacks' ? (
+              <GestorFeedbacksPage />
+            ) : activeModule === 'central_inteligencia' ? (
+              <CentralInteligenciaModule />
+            ) : (
+              <PrestadoresRegionalModule
+                initialTab={activeModule === 'pontos_fixos' ? 'regras' : 'prestadores'}
+                onNavigateToEscala={() => setActiveModule('escala')}
+                onTabChange={(tab) => {
+                  if (tab === 'prestadores') setActiveModule('prestadores_regional');
+                  else if (tab === 'regras') setActiveModule('pontos_fixos');
+                }}
+              />
+            )}
+          </Suspense>
         </div>
       ) : (
         <>
           {/* 📱 MOBILE ESCALA VIEW (< 768px) — Plugged into the same unified Navbar shell */}
           <div className="md:hidden pt-[98px] flex-1 flex flex-col bg-[#090A0F]">
-            <MobileScheduleView
-              onRequestSwap={() => setQuickSwapModalOpen(true)}
-              onNotifyAbsence={() => setAbsenceModalOpen(true)}
-              onOpenRequestsCenter={() => setRequestsCenterModalOpen(true)}
-              onOpenCollaboratorAuth={prov => {
-                setAuthModalProvider(prov || null);
-                setCollaboratorAuthOpen(true);
-              }}
-              onOpenLeaderAuth={() => setLeaderAuthModalOpen(true)}
-              onOpenMarketplace={() => setMarketplaceModalOpen(true)}
-              onOpenFeedbacks={() => setActiveModule('gestor_feedbacks')}
-            />
+            <Suspense fallback={<ModuleLoadingFallback />}>
+              <MobileScheduleView
+                onRequestSwap={() => setQuickSwapModalOpen(true)}
+                onNotifyAbsence={() => setAbsenceModalOpen(true)}
+                onOpenRequestsCenter={() => setRequestsCenterModalOpen(true)}
+                onOpenCollaboratorAuth={(prov) => {
+                  setAuthModalProvider(prov || null);
+                  setCollaboratorAuthOpen(true);
+                }}
+                onOpenLeaderAuth={() => setLeaderAuthModalOpen(true)}
+                onOpenMarketplace={() => setMarketplaceModalOpen(true)}
+                onOpenFeedbacks={() => setActiveModule('gestor_feedbacks')}
+              />
+            </Suspense>
           </div>
 
           {/* 🖥️ DESKTOP ESCALA VIEW (>= 768px) */}
           <div className="hidden md:flex flex-col flex-1">
-            {/* Main Container */}
             <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 pt-20 pb-10 space-y-4">
-              {/* Compact Month Toolbar with Navigation & Filters only on calendar & agenda */}
-              {viewMode !== 'my-schedule' && viewMode !== 'personal-calendar' && viewMode !== 'escala' && (
-                <ScheduleToolbar
-                  onOpenLeaderAuth={() => setLeaderAuthModalOpen(true)}
-                  onOpenAutoScheduleModal={() => setAutoScheduleModalOpen(true)}
-                  onOpenProviderModal={() => setProviderModalOpen(true)}
-                  onOpenCloneModal={() => setCloneModalOpen(true)}
-                  onOpenWhatsAppModal={() => setWhatsAppModalOpen(true)}
-                  onOpenQuickSwapModal={() => setQuickSwapModalOpen(true)}
-                  onOpenPrintModal={() => setPrintModalOpen(true)}
-                  onOpenBalanceModal={() => setBalanceModalOpen(true)}
-                  onOpenExecutiveReportModal={() => setExecutiveReportModalOpen(true)}
-                  onOpenIncidentModal={() => setIncidentModalOpen(true)}
-                />
-              )}
+              <Suspense fallback={<ModuleLoadingFallback />}>
+                {viewMode !== 'my-schedule' &&
+                  viewMode !== 'personal-calendar' &&
+                  viewMode !== 'escala' && (
+                    <ScheduleToolbar
+                      onOpenLeaderAuth={() => setLeaderAuthModalOpen(true)}
+                      onOpenAutoScheduleModal={() => setAutoScheduleModalOpen(true)}
+                      onOpenProviderModal={() => setProviderModalOpen(true)}
+                      onOpenCloneModal={() => setCloneModalOpen(true)}
+                      onOpenWhatsAppModal={() => setWhatsAppModalOpen(true)}
+                      onOpenQuickSwapModal={() => setQuickSwapModalOpen(true)}
+                      onOpenPrintModal={() => setPrintModalOpen(true)}
+                      onOpenBalanceModal={() => setBalanceModalOpen(true)}
+                      onOpenExecutiveReportModal={() => setExecutiveReportModalOpen(true)}
+                      onOpenIncidentModal={() => setIncidentModalOpen(true)}
+                    />
+                  )}
 
-              {/* Active View */}
-              {viewMode === 'escala' && (
-                <EscalaGridView
-                  onAddProvider={() => setProviderModalOpen(true)}
-                  onOpenCollaboratorAuth={(provider) => setAuthModalProvider(provider)}
-                  onOpenPrintModal={() => setPrintModalOpen(true)}
-                  onOpenMarketplace={() => setMarketplaceModalOpen(true)}
-                  onOpenSellModal={handleOpenSellModal}
-                  onOpenLeaderAuth={() => setLeaderAuthModalOpen(true)}
-                />
-              )}
-
-              {viewMode === 'personal-calendar' && (
-                currentProviderObj ? (
-                  <PersonalMonthlyCalendar
-                    provider={currentProviderObj}
-                    onBackToGrid={() => setViewMode('escala')}
+                {viewMode === 'escala' && (
+                  <EscalaGridView
+                    onAddProvider={() => setProviderModalOpen(true)}
+                    onOpenCollaboratorAuth={(provider) => setAuthModalProvider(provider)}
                     onOpenPrintModal={() => setPrintModalOpen(true)}
                     onOpenMarketplace={() => setMarketplaceModalOpen(true)}
                     onOpenSellModal={handleOpenSellModal}
+                    onOpenLeaderAuth={() => setLeaderAuthModalOpen(true)}
                   />
-                ) : (
-                  <div className="bg-[#12141A] border border-white/[0.08] rounded-2xl p-8 text-center max-w-lg mx-auto my-8 space-y-3">
-                    <h3 className="text-base font-bold text-white">Nenhum Perfil Selecionado</h3>
-                    <p className="text-xs text-zinc-400">Selecione o seu nome na lista e insira seu PIN para visualizar seu calendário pessoal.</p>
-                    <button
-                      onClick={() => setCollaboratorAuthOpen(true)}
-                      className="px-4 py-2 bg-[#00d2d3] text-[#003731] font-bold text-xs rounded-xl hover:bg-[#57f1db] transition-all cursor-pointer shadow-sm"
-                    >
-                      + Entrar no Meu Perfil
-                    </button>
-                  </div>
-                )
-              )}
+                )}
 
-              {viewMode === 'calendar' && (
-                <MonthCalendarView
-                  onSelectShift={handleSelectShift}
-                  onAddShiftDate={handleAddShiftOnDate}
-                />
-              )}
+                {viewMode === 'personal-calendar' &&
+                  (currentProviderObj ? (
+                    <PersonalMonthlyCalendar
+                      provider={currentProviderObj}
+                      onBackToGrid={() => setViewMode('escala')}
+                      onOpenPrintModal={() => setPrintModalOpen(true)}
+                      onOpenMarketplace={() => setMarketplaceModalOpen(true)}
+                      onOpenSellModal={handleOpenSellModal}
+                    />
+                  ) : (
+                    <div className="bg-[#12141A] border border-white/[0.08] rounded-2xl p-8 text-center max-w-lg mx-auto my-8 space-y-3">
+                      <h3 className="text-base font-bold text-white">Nenhum Perfil Selecionado</h3>
+                      <p className="text-xs text-zinc-400">
+                        Selecione o seu nome na lista e insira seu PIN para visualizar seu calendário
+                        pessoal.
+                      </p>
+                      <button
+                        onClick={() => setCollaboratorAuthOpen(true)}
+                        className="px-4 py-2 bg-[#00d2d3] text-[#003731] font-bold text-xs rounded-xl hover:bg-[#57f1db] transition-all cursor-pointer shadow-sm"
+                      >
+                        + Entrar no Meu Perfil
+                      </button>
+                    </div>
+                  ))}
 
-              {viewMode === 'agenda' && (
-                <AgendaView
-                  onSelectShift={handleSelectShift}
-                  onAddShiftDate={handleAddShiftOnDate}
-                />
-              )}
+                {viewMode === 'calendar' && (
+                  <MonthCalendarView
+                    onSelectShift={handleSelectShift}
+                    onAddShiftDate={handleAddShiftOnDate}
+                  />
+                )}
 
-              {viewMode === 'my-schedule' && (
-                <MyScheduleView
-                  onRequestSwapForShift={handleSelectShift}
-                  onOpenShiftDetail={handleSelectShift}
-                  onPrint={() => window.print()}
-                />
-              )}
+                {viewMode === 'agenda' && (
+                  <AgendaView
+                    onSelectShift={handleSelectShift}
+                    onAddShiftDate={handleAddShiftOnDate}
+                  />
+                )}
+
+                {viewMode === 'my-schedule' && (
+                  <MyScheduleView
+                    onRequestSwapForShift={handleSelectShift}
+                    onOpenShiftDetail={handleSelectShift}
+                    onPrint={() => window.print()}
+                  />
+                )}
+              </Suspense>
             </main>
 
             {/* Obsidian Shift Deep Footer (Desktop) */}
             <footer className="border-t border-white/[0.08] bg-[#090A0F]/95 backdrop-blur-md py-4 px-6 text-xs text-zinc-400">
               <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
                 <span className="font-medium text-zinc-400">
-                  © 2026 OminiHub • Gestão Humanizada de Escalas • <span className="font-mono text-zinc-500">v2.5.0 (build 950)</span>
+                  © 2026 OminiHub • Gestão Humanizada de Escalas •{' '}
+                  <span className="font-mono text-zinc-500">v2.5.0 (build 950)</span>
                 </span>
                 <div className="flex items-center gap-3 text-zinc-400 font-medium">
                   <span>Plantões Auditados</span>
@@ -284,148 +379,169 @@ function ScheduleAppContent() {
         </>
       )}
 
-      {/* Modals */}
-      <LeaderAuthModal
-        isOpen={leaderAuthModalOpen}
-        onClose={() => setLeaderAuthModalOpen(false)}
-      />
+      {/* Lazy-Loaded Global Modals (Loaded on demand only when opened) */}
+      <Suspense fallback={null}>
+        {leaderAuthModalOpen && (
+          <LeaderAuthModal
+            isOpen={leaderAuthModalOpen}
+            onClose={() => setLeaderAuthModalOpen(false)}
+          />
+        )}
 
-      <LeaderRequestsCenterModal
-        isOpen={requestsCenterModalOpen}
-        onClose={() => setRequestsCenterModalOpen(false)}
-      />
+        {requestsCenterModalOpen && (
+          <LeaderRequestsCenterModal
+            isOpen={requestsCenterModalOpen}
+            onClose={() => setRequestsCenterModalOpen(false)}
+          />
+        )}
 
-      <ShiftModal
-        isOpen={shiftModalOpen}
-        onClose={() => setShiftModalOpen(false)}
-        shiftToEdit={shiftToEdit}
-        initialDate={initialDateForShift}
-        initialProviderId={initialProviderForShift}
-      />
+        {shiftModalOpen && (
+          <ShiftModal
+            isOpen={shiftModalOpen}
+            onClose={() => setShiftModalOpen(false)}
+            shiftToEdit={shiftToEdit}
+            initialDate={initialDateForShift}
+            initialProviderId={initialProviderForShift}
+          />
+        )}
 
-      <ProviderManagementModal
-        isOpen={providerModalOpen}
-        onClose={() => setProviderModalOpen(false)}
-      />
+        {providerModalOpen && (
+          <ProviderManagementModal
+            isOpen={providerModalOpen}
+            onClose={() => setProviderModalOpen(false)}
+          />
+        )}
 
-      <AutoScheduleModal
-        isOpen={autoScheduleModalOpen}
-        onClose={() => setAutoScheduleModalOpen(false)}
-      />
+        {autoScheduleModalOpen && (
+          <AutoScheduleModal
+            isOpen={autoScheduleModalOpen}
+            onClose={() => setAutoScheduleModalOpen(false)}
+          />
+        )}
 
-      <CloneMonthModal
-        isOpen={cloneModalOpen}
-        onClose={() => setCloneModalOpen(false)}
-      />
+        {cloneModalOpen && (
+          <CloneMonthModal isOpen={cloneModalOpen} onClose={() => setCloneModalOpen(false)} />
+        )}
 
-      <WhatsAppExportModal
-        isOpen={whatsAppModalOpen}
-        onClose={() => setWhatsAppModalOpen(false)}
-      />
+        {whatsAppModalOpen && (
+          <WhatsAppExportModal
+            isOpen={whatsAppModalOpen}
+            onClose={() => setWhatsAppModalOpen(false)}
+          />
+        )}
 
-      <QuickSwapModal
-        isOpen={quickSwapModalOpen}
-        onClose={() => setQuickSwapModalOpen(false)}
-      />
+        {quickSwapModalOpen && (
+          <QuickSwapModal
+            isOpen={quickSwapModalOpen}
+            onClose={() => setQuickSwapModalOpen(false)}
+          />
+        )}
 
-      <PrintExportModal
-        isOpen={printModalOpen}
-        onClose={() => setPrintModalOpen(false)}
-      />
+        {printModalOpen && (
+          <PrintExportModal isOpen={printModalOpen} onClose={() => setPrintModalOpen(false)} />
+        )}
 
-      <AbsenceBatchModal
-        isOpen={absenceModalOpen}
-        onClose={() => setAbsenceModalOpen(false)}
-      />
+        {absenceModalOpen && (
+          <AbsenceBatchModal isOpen={absenceModalOpen} onClose={() => setAbsenceModalOpen(false)} />
+        )}
 
-      <TeamBalanceModal
-        isOpen={balanceModalOpen}
-        onClose={() => setBalanceModalOpen(false)}
-      />
+        {balanceModalOpen && (
+          <TeamBalanceModal isOpen={balanceModalOpen} onClose={() => setBalanceModalOpen(false)} />
+        )}
 
-      <AttendanceIncidentModal
-        isOpen={incidentModalOpen}
-        onClose={() => setIncidentModalOpen(false)}
-      />
+        {incidentModalOpen && (
+          <AttendanceIncidentModal
+            isOpen={incidentModalOpen}
+            onClose={() => setIncidentModalOpen(false)}
+          />
+        )}
 
-      <ExecutiveMonthlyReportModal
-        isOpen={executiveReportModalOpen}
-        onClose={() => setExecutiveReportModalOpen(false)}
-        onOpenIncidentModal={() => {
-          setExecutiveReportModalOpen(false);
-          setIncidentModalOpen(true);
-        }}
-      />
+        {executiveReportModalOpen && (
+          <ExecutiveMonthlyReportModal
+            isOpen={executiveReportModalOpen}
+            onClose={() => setExecutiveReportModalOpen(false)}
+            onOpenIncidentModal={() => {
+              setExecutiveReportModalOpen(false);
+              setIncidentModalOpen(true);
+            }}
+          />
+        )}
 
-      {/* Collaborator Authentication Modal */}
-      <CollaboratorAuthModal
-        isOpen={collaboratorAuthOpen || Boolean(authModalProvider)}
-        targetProvider={authModalProvider}
-        onClose={() => {
-          setCollaboratorAuthOpen(false);
-          setAuthModalProvider(null);
-        }}
-        onSuccess={prov => {
-          setActiveProviderId(prov.id);
-          setViewMode('personal-calendar');
-          setCollaboratorAuthOpen(false);
-          setAuthModalProvider(null);
-        }}
-        onOpenLeaderAuth={() => {
-          setCollaboratorAuthOpen(false);
-          setLeaderAuthModalOpen(true);
-        }}
-      />
+        {(collaboratorAuthOpen || Boolean(authModalProvider)) && (
+          <CollaboratorAuthModal
+            isOpen={collaboratorAuthOpen || Boolean(authModalProvider)}
+            targetProvider={authModalProvider}
+            onClose={() => {
+              setCollaboratorAuthOpen(false);
+              setAuthModalProvider(null);
+            }}
+            onSuccess={(prov) => {
+              setActiveProviderId(prov.id);
+              setViewMode('personal-calendar');
+              setCollaboratorAuthOpen(false);
+              setAuthModalProvider(null);
+            }}
+            onOpenLeaderAuth={() => {
+              setCollaboratorAuthOpen(false);
+              setLeaderAuthModalOpen(true);
+            }}
+          />
+        )}
 
-      {/* Venda & Repasse de Plantões PJ - Marketplace Modal */}
-      <ShiftMarketplaceModal
-        isOpen={marketplaceModalOpen}
-        onClose={() => setMarketplaceModalOpen(false)}
-        onOpenSellModal={() => setShiftSaleModalOpen(true)}
-      />
+        {marketplaceModalOpen && (
+          <ShiftMarketplaceModal
+            isOpen={marketplaceModalOpen}
+            onClose={() => setMarketplaceModalOpen(false)}
+            onOpenSellModal={() => setShiftSaleModalOpen(true)}
+          />
+        )}
 
-      {/* Venda de Plantão - Anunciar Modal */}
-      <ShiftSaleModal
-        isOpen={shiftSaleModalOpen}
-        onClose={() => setShiftSaleModalOpen(false)}
-        defaultDate={saleModalDefaultDate}
-        defaultProviderId={saleModalDefaultProviderId}
-        onOfferCreated={() => {
-          setShiftSaleModalOpen(false);
-          setMarketplaceModalOpen(true);
-        }}
-      />
+        {shiftSaleModalOpen && (
+          <ShiftSaleModal
+            isOpen={shiftSaleModalOpen}
+            onClose={() => setShiftSaleModalOpen(false)}
+            defaultDate={saleModalDefaultDate}
+            defaultProviderId={saleModalDefaultProviderId}
+            onOfferCreated={() => {
+              setShiftSaleModalOpen(false);
+              setMarketplaceModalOpen(true);
+            }}
+          />
+        )}
 
-      {/* Perfil do Prestador - WhatsApp e PIN Modal */}
-      <CollaboratorProfileModal
-        isOpen={profileModalOpen}
-        onClose={() => setProfileModalOpen(false)}
-        onOpenCollaboratorAuth={() => setCollaboratorAuthOpen(true)}
-      />
+        {profileModalOpen && (
+          <CollaboratorProfileModal
+            isOpen={profileModalOpen}
+            onClose={() => setProfileModalOpen(false)}
+            onOpenCollaboratorAuth={() => setCollaboratorAuthOpen(true)}
+          />
+        )}
 
-      {/* Montador e Importador de Escala Inteligente (IA / Foto / WhatsApp / Zerar) */}
-      <ImportScheduleModal
-        isOpen={importScheduleModalOpen}
-        onClose={() => setImportScheduleModalOpen(false)}
-      />
+        {importScheduleModalOpen && (
+          <ImportScheduleModal
+            isOpen={importScheduleModalOpen}
+            onClose={() => setImportScheduleModalOpen(false)}
+          />
+        )}
 
-      {/* Mural de Avisos & Comunicados */}
-      <AnnouncementsModal
-        isOpen={announcementsOpen}
-        onClose={() => setAnnouncementsOpen(false)}
-      />
+        {announcementsOpen && (
+          <AnnouncementsModal
+            isOpen={announcementsOpen}
+            onClose={() => setAnnouncementsOpen(false)}
+          />
+        )}
 
-      {/* Histórico de Auditoria */}
-      <AuditLogModal
-        isOpen={auditLogOpen}
-        onClose={() => setAuditLogOpen(false)}
-      />
+        {auditLogOpen && (
+          <AuditLogModal isOpen={auditLogOpen} onClose={() => setAuditLogOpen(false)} />
+        )}
 
-      {/* Confirmação de Plantão Fim de Semana (Exclusivo Gestor) */}
-      <WeekendDutyModal
-        isOpen={weekendDutyModalOpen}
-        onClose={() => setWeekendDutyModalOpen(false)}
-      />
+        {weekendDutyModalOpen && (
+          <WeekendDutyModal
+            isOpen={weekendDutyModalOpen}
+            onClose={() => setWeekendDutyModalOpen(false)}
+          />
+        )}
+      </Suspense>
     </div>
   );
 }

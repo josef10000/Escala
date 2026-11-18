@@ -1,4 +1,4 @@
-import jsPDF from 'jspdf';
+import type jsPDF from 'jspdf';
 import { Provider, ShiftAssignment, WorkRegime } from '../types';
 import { MONTH_NAMES_PT, DAYS_SHORT_PT, getMonthDaysArray } from './dateUtils';
 
@@ -11,15 +11,16 @@ interface GeneratePDFParams {
   regime?: WorkRegime;
 }
 
-export function generateEscalaPDF({
+export async function generateEscalaPDF({
   providers,
   assignments,
   currentYear,
   currentMonthIndex,
   departmentName = 'Equipe Técnica',
   regime = '12x36',
-}: GeneratePDFParams): jsPDF {
-  const doc = new jsPDF({
+}: GeneratePDFParams): Promise<jsPDF> {
+  const { default: JsPDFConstructor } = await import('jspdf');
+  const doc = new JsPDFConstructor({
     orientation: 'landscape',
     unit: 'mm',
     format: 'a4',

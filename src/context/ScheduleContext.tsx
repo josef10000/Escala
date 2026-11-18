@@ -33,6 +33,16 @@ import {
 import { formatDateToISO } from '../utils/dateUtils';
 import { db } from '../lib/firebase';
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+import {
+  applyIncomingCloudSnapshot,
+  sanitizeForFirestore,
+  seedMissingCloudOperationalFields,
+} from '../lib/cloudSync';
+import {
+  readEscalaViewFromUrl,
+  readModuleFromUrl,
+  writeModuleToUrl,
+} from '../utils/urlRouting';
 
 interface FilterState {
   departmentId: string;
@@ -247,7 +257,9 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Default starting calendar view to October 2026
   const [currentYear, setCurrentYear] = useState<number>(2026);
   const [currentMonthIndex, setCurrentMonthIndex] = useState<number>(9); // 9 is October (0-indexed)
-  const [viewMode, setViewMode] = useState<ViewMode>('escala');
+  const [viewMode, setViewModeState] = useState<ViewMode>(() => {
+    return readEscalaViewFromUrl() || 'escala';
+  });
 
   // Regime: 12x36 or 5x2
   const [activeRegime, setActiveRegimeState] = useState<WorkRegime>(() => {
@@ -259,23 +271,58 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.setItem(STORAGE_KEYS.REGIME, regime);
   };
 
-  // Active top-level operational module
+  // Active top-level operational module (URL query/path takes priority for deep-linking & F5)
   const [activeModule, setActiveModuleState] = useState<ActiveModule>(() => {
+    const urlMod = readModuleFromUrl();
+    if (urlMod) return urlMod;
     try {
       const saved = localStorage.getItem('escalapro_active_module');
-      if (saved && ['escala', 'prestadores_regional', 'pontos_fixos', 'templates_whatsapp', 'central_inteligencia'].includes(saved)) {
+      if (
+        saved &&
+        ['escala', 'prestadores_regional', 'pontos_fixos', 'gestor_feedbacks', 'central_inteligencia'].includes(saved)
+      ) {
         return saved as ActiveModule;
       }
     } catch (_) {}
     return 'escala';
   });
 
+  const setViewMode = (mode: ViewMode) => {
+    setViewModeState(mode);
+    if (activeModule === 'escala') {
+      writeModuleToUrl('escala', { viewMode: mode, replace: true });
+    }
+  };
+
   const setActiveModule = (mod: ActiveModule) => {
     setActiveModuleState(mod);
     try {
       localStorage.setItem('escalapro_active_module', mod);
     } catch (_) {}
+    writeModuleToUrl(mod, { viewMode });
   };
+
+  // Sync URL bar on initial mount & browser Back/Forward navigation
+  useEffect(() => {
+    writeModuleToUrl(activeModule, { viewMode, replace: true });
+
+    const handlePopState = () => {
+      const urlMod = readModuleFromUrl();
+      if (urlMod) {
+        setActiveModuleState(urlMod);
+        try {
+          localStorage.setItem('escalapro_active_module', urlMod);
+        } catch (_) {}
+      }
+      const urlView = readEscalaViewFromUrl();
+      if (urlView) {
+        setViewModeState(urlView);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Role: supervisor or provider
   const [role, setRoleState] = useState<UserRole>('provider');
@@ -756,6 +803,23 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               localStorage.setItem(STORAGE_KEYS.WEEKEND_ASSIGNMENTS, JSON.stringify(data.weekendAssignments));
             } catch (_) {}
           }
+          if (data.teamFeedbacks && Array.isArray(data.teamFeedbacks)) {
+            setTeamFeedbacks(data.teamFeedbacks);
+            try {
+              localStorage.setItem(STORAGE_KEYS.TEAM_FEEDBACKS, JSON.stringify(data.teamFeedbacks));
+            } catch (_) {}
+          }
+          if (data.announcements && Array.isArray(data.announcements)) {
+            setAnnouncements(data.announcements);
+            try {
+              localStorage.setItem('escalapro_announcements_v1', JSON.stringify(data.announcements));
+            } catch (_) {}
+          }
+
+          // Hydrate & sync Regional Technicians, Pontos Fixos, Evaluations & Central Operacional
+          applyIncomingCloudSnapshot(data);
+          seedMissingCloudOperationalFields(data);
+
           if (data.updatedAt) {
             setLastUpdatedAt(data.updatedAt);
             localStorage.setItem(STORAGE_KEYS.LAST_UPDATED, data.updatedAt);
@@ -836,16 +900,25 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     publishedMonths?: Record<string, boolean>;
     weekendColumns?: WeekendColumn[];
     weekendAssignments?: Record<string, Record<string, string>>;
+    teamFeedbacks?: TeamFeedback[];
+    announcements?: Array<{
+      id: string;
+      title: string;
+      message: string;
+      priority: 'normal' | 'urgent';
+      authorName: string;
+      createdAt: string;
+    }>;
   }): Promise<boolean> => {
     try {
       const scheduleDocRef = doc(db, 'schedule_store', 'main');
       const nowStr = new Date().toISOString();
       const activeLeader = sessionStorage.getItem(STORAGE_KEYS.LEADER_NAME) || localStorage.getItem(STORAGE_KEYS.LEADER_NAME) || 'Líder';
-      const payload: Record<string, any> = {
+      const payload = sanitizeForFirestore({
         updatedAt: nowStr,
         lastUpdatedBy: activeLeader,
         ...updates
-      };
+      });
       setLastUpdatedAt(nowStr);
       setLastUpdatedByState(activeLeader);
       localStorage.setItem(STORAGE_KEYS.LAST_UPDATED, nowStr);
@@ -854,12 +927,17 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
       return true;
     } catch (e: any) {
       const errStr = String(e?.message || e);
-      if (errStr.includes('resource-exhausted') || errStr.includes('Quota') || errStr.includes('quota')) {
-        console.warn('Firestore quota limit reached. Running locally in offline storage mode.');
+      if (
+        errStr.includes('resource-exhausted') ||
+        errStr.includes('Quota') ||
+        errStr.includes('quota') ||
+        errStr.includes('permission-denied') ||
+        errStr.includes('Missing or insufficient permissions')
+      ) {
+        console.warn('Firestore sync skipped (offline/unauthenticated or quota); kept in localStorage.');
         return false;
       }
-      console.error('Failed to sync to Firebase:', e);
-      handleFirestoreError(e, OperationType.WRITE, 'schedule_store/main');
+      console.warn('Failed to sync to Firebase:', e);
       return false;
     }
   };
@@ -1483,6 +1561,7 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     try {
       localStorage.setItem(STORAGE_KEYS.TEAM_FEEDBACKS, JSON.stringify(updated));
     } catch (_) {}
+    void syncToFirebase({ teamFeedbacks: updated });
     return newId;
   };
 
@@ -1492,6 +1571,7 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     try {
       localStorage.setItem(STORAGE_KEYS.TEAM_FEEDBACKS, JSON.stringify(updated));
     } catch (_) {}
+    void syncToFirebase({ teamFeedbacks: updated });
   };
 
   const deleteTeamFeedback = (id: string) => {
@@ -1500,6 +1580,7 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     try {
       localStorage.setItem(STORAGE_KEYS.TEAM_FEEDBACKS, JSON.stringify(updated));
     } catch (_) {}
+    void syncToFirebase({ teamFeedbacks: updated });
   };
 
   // Swap requests between collaborators

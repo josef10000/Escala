@@ -30,17 +30,20 @@ import {
   WhatsAppGroupKey,
 } from './types';
 import {
-  buildInitialOcorrencias,
+  getStoredCentralConfig,
   getStoredDailyAgendas,
   getStoredEncaixes,
+  getStoredOcorrencias,
   INITIAL_CLIENTES_CHAMADOS,
   INITIAL_GEO_HIERARCHY,
-  INITIAL_OPERATIONAL_CONFIG,
   INITIAL_RAW_MESSAGES,
+  saveStoredCentralConfig,
   saveStoredDailyAgendas,
   saveStoredEncaixes,
+  saveStoredOcorrencias,
   TODAY_ISO,
 } from './data/mockCentralData';
+import { readCentralTabFromUrl, writeModuleToUrl } from '../../utils/urlRouting';
 import { OverviewView } from './components/OverviewView';
 import { EncaixesView } from './components/EncaixesView';
 import { OcorrenciasView } from './components/OcorrenciasView';
@@ -50,8 +53,15 @@ import { ChatConsultaView } from './components/ChatConsultaView';
 import { WhatsAppConnectionView } from './components/WhatsAppConnectionView';
 
 export const CentralInteligenciaModule: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<CentralTab>('overview');
+  const [activeTab, setActiveTabState] = useState<CentralTab>(() => {
+    return readCentralTabFromUrl() || 'overview';
+  });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const setActiveTab = (nextTab: CentralTab) => {
+    setActiveTabState(nextTab);
+    writeModuleToUrl('central_inteligencia', { centralTab: nextTab, replace: true });
+  };
 
   // Reaproveita exatamente os mesmos técnicos/regiões já cadastrados em Técnicos & CEP
   const [prestadores, setPrestadores] = useState<Prestador[]>(() => getStoredPrestadores());
@@ -66,21 +76,21 @@ export const CentralInteligenciaModule: React.FC = () => {
     'AGENDAS E MUDANÇAS': true,
   });
 
-  // Dados operacionais simulados (conectados aos técnicos reais e compartilhados com os cards)
+  // Dados operacionais sincronizados via localStorage + Firebase Firestore
   const [rawMessages, setRawMessages] = useState<RawWhatsAppMessage[]>(INITIAL_RAW_MESSAGES);
   const [encaixes, setEncaixes] = useState<EncaixeRecord[]>(() =>
     getStoredEncaixes(getStoredPrestadores())
   );
   const [selectedEncaixeId, setSelectedEncaixeId] = useState<string | null>(null);
   const [ocorrencias, setOcorrencias] = useState<OcorrenciaRecord[]>(() =>
-    buildInitialOcorrencias(getStoredPrestadores())
+    getStoredOcorrencias(getStoredPrestadores())
   );
   const [dailyAgendas, setDailyAgendas] = useState<DailyAgendaEntry[]>(() =>
     getStoredDailyAgendas(getStoredPrestadores())
   );
   const [geoHierarchy] = useState<GeoHierarchyItem[]>(INITIAL_GEO_HIERARCHY);
   const [clientes] = useState<ClienteChamadoRecord[]>(INITIAL_CLIENTES_CHAMADOS);
-  const [config, setConfig] = useState<CentralOperationalConfig>(INITIAL_OPERATIONAL_CONFIG);
+  const [config, setConfig] = useState<CentralOperationalConfig>(() => getStoredCentralConfig());
 
   // Filtros controlados para navegação cruzada entre telas
   const [encaixesSearch, setEncaixesSearch] = useState('');
@@ -111,9 +121,35 @@ export const CentralInteligenciaModule: React.FC = () => {
     showToast(label);
   };
 
-  // Mantém sincronizado caso o usuário cadastre algo em Técnicos & CEP antes de voltar
+  // Mantém sincronizado em tempo real com Firebase / outras abas
   useEffect(() => {
-    setPrestadores(getStoredPrestadores());
+    const syncPrestadores = () => {
+      setPrestadores(getStoredPrestadores());
+    };
+    const syncCentralFromCloud = () => {
+      const currentPrestadores = getStoredPrestadores();
+      setEncaixes(getStoredEncaixes(currentPrestadores));
+      setDailyAgendas(getStoredDailyAgendas(currentPrestadores));
+      setOcorrencias(getStoredOcorrencias(currentPrestadores));
+      setConfig(getStoredCentralConfig());
+    };
+    const handlePopState = () => {
+      const urlTab = readCentralTabFromUrl();
+      if (urlTab) setActiveTabState(urlTab);
+    };
+
+    window.addEventListener('prestadores-cloud-updated', syncPrestadores);
+    window.addEventListener('central-metrics-updated', syncCentralFromCloud);
+    window.addEventListener('storage', syncPrestadores);
+    window.addEventListener('storage', syncCentralFromCloud);
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('prestadores-cloud-updated', syncPrestadores);
+      window.removeEventListener('central-metrics-updated', syncCentralFromCloud);
+      window.removeEventListener('storage', syncPrestadores);
+      window.removeEventListener('storage', syncCentralFromCloud);
+      window.removeEventListener('popstate', handlePopState);
+    };
   }, []);
 
   useEffect(() => {
@@ -123,6 +159,14 @@ export const CentralInteligenciaModule: React.FC = () => {
   useEffect(() => {
     saveStoredDailyAgendas(dailyAgendas);
   }, [dailyAgendas]);
+
+  useEffect(() => {
+    saveStoredOcorrencias(ocorrencias);
+  }, [ocorrencias]);
+
+  useEffect(() => {
+    saveStoredCentralConfig(config);
+  }, [config]);
 
   // Volta o scroll central ao topo ao trocar de aba
   useEffect(() => {

@@ -1247,8 +1247,12 @@ export function computeTechnicianMetrics(
   };
 }
 
+import { pushCloudFields } from '../../../lib/cloudSync';
+
 const CENTRAL_ENCAIXES_KEY = 'ominihub_central_encaixes_v1';
 const CENTRAL_AGENDAS_KEY = 'ominihub_central_agendas_v1';
+const CENTRAL_OCORRENCIAS_KEY = 'ominihub_central_ocorrencias_v1';
+const CENTRAL_CONFIG_KEY = 'ominihub_central_config_v1';
 
 export function getStoredEncaixes(prestadores: Prestador[]): EncaixeRecord[] {
   try {
@@ -1271,8 +1275,11 @@ export function getStoredEncaixes(prestadores: Prestador[]): EncaixeRecord[] {
 
 export function saveStoredEncaixes(encaixes: EncaixeRecord[]): void {
   try {
-    localStorage.setItem(CENTRAL_ENCAIXES_KEY, JSON.stringify(encaixes));
+    const serialized = JSON.stringify(encaixes);
+    if (localStorage.getItem(CENTRAL_ENCAIXES_KEY) === serialized) return;
+    localStorage.setItem(CENTRAL_ENCAIXES_KEY, serialized);
     window.dispatchEvent(new Event('central-metrics-updated'));
+    void pushCloudFields({ centralEncaixes: encaixes });
   } catch {}
 }
 
@@ -1297,8 +1304,60 @@ export function getStoredDailyAgendas(prestadores: Prestador[]): DailyAgendaEntr
 
 export function saveStoredDailyAgendas(agendas: DailyAgendaEntry[]): void {
   try {
-    localStorage.setItem(CENTRAL_AGENDAS_KEY, JSON.stringify(agendas));
+    const serialized = JSON.stringify(agendas);
+    if (localStorage.getItem(CENTRAL_AGENDAS_KEY) === serialized) return;
+    localStorage.setItem(CENTRAL_AGENDAS_KEY, serialized);
     window.dispatchEvent(new Event('central-metrics-updated'));
+    void pushCloudFields({ centralDailyAgendas: agendas });
+  } catch {}
+}
+
+export function getStoredOcorrencias(prestadores: Prestador[]): OcorrenciaRecord[] {
+  try {
+    const raw = localStorage.getItem(CENTRAL_OCORRENCIAS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed as OcorrenciaRecord[];
+      }
+    }
+  } catch {}
+  const seeded = buildInitialOcorrencias(prestadores);
+  try {
+    localStorage.setItem(CENTRAL_OCORRENCIAS_KEY, JSON.stringify(seeded));
+  } catch {}
+  return seeded;
+}
+
+export function saveStoredOcorrencias(ocorrencias: OcorrenciaRecord[]): void {
+  try {
+    const serialized = JSON.stringify(ocorrencias);
+    if (localStorage.getItem(CENTRAL_OCORRENCIAS_KEY) === serialized) return;
+    localStorage.setItem(CENTRAL_OCORRENCIAS_KEY, serialized);
+    window.dispatchEvent(new Event('central-metrics-updated'));
+    void pushCloudFields({ centralOcorrencias: ocorrencias });
+  } catch {}
+}
+
+export function getStoredCentralConfig(): CentralOperationalConfig {
+  try {
+    const raw = localStorage.getItem(CENTRAL_CONFIG_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        return { ...INITIAL_OPERATIONAL_CONFIG, ...parsed };
+      }
+    }
+  } catch {}
+  return INITIAL_OPERATIONAL_CONFIG;
+}
+
+export function saveStoredCentralConfig(config: CentralOperationalConfig): void {
+  try {
+    const serialized = JSON.stringify(config);
+    if (localStorage.getItem(CENTRAL_CONFIG_KEY) === serialized) return;
+    localStorage.setItem(CENTRAL_CONFIG_KEY, serialized);
+    void pushCloudFields({ centralConfig: config });
   } catch {}
 }
 

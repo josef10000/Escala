@@ -55,10 +55,10 @@ import { PontoFixoModal } from './components/PontoFixoModal';
 import { SearchAccordionFeed } from './components/SearchAccordionFeed';
 import { DailyAgendaEntry, EncaixeRecord, OcorrenciaRecord } from '../central_inteligencia/types';
 import {
-  buildInitialOcorrencias,
   computeTechnicianMetrics,
   getStoredDailyAgendas,
   getStoredEncaixes,
+  getStoredOcorrencias,
   TODAY_ISO,
 } from '../central_inteligencia/data/mockCentralData';
 import {
@@ -106,29 +106,41 @@ export function PrestadoresRegionalModule({
     getStoredDailyAgendas(getStoredPrestadores())
   );
   const [centralOcorrencias, setCentralOcorrencias] = useState<OcorrenciaRecord[]>(() =>
-    buildInitialOcorrencias(getStoredPrestadores())
+    getStoredOcorrencias(getStoredPrestadores())
   );
   const [evaluationsMap, setEvaluationsMap] = useState<Record<string, TechnicianQualitativeEvaluation>>(() =>
     getStoredEvaluations()
   );
 
   useEffect(() => {
+    const syncRegionalCloud = () => {
+      setPrestadores(getStoredPrestadores());
+      setTemplates(getStoredTemplates());
+      setPontosFixos(getStoredPontosFixos());
+      setAgendas(getStoredAgendas());
+      setRegras(getStoredRegras());
+      setFavorites(getFavoriteIds());
+    };
     const syncCentral = () => {
       const current = getStoredPrestadores();
       setCentralEncaixes(getStoredEncaixes(current));
       setCentralDailyAgendas(getStoredDailyAgendas(current));
-      setCentralOcorrencias(buildInitialOcorrencias(current));
+      setCentralOcorrencias(getStoredOcorrencias(current));
     };
     const syncEvaluations = () => {
       setEvaluationsMap(getStoredEvaluations());
     };
+    window.addEventListener('prestadores-cloud-updated', syncRegionalCloud);
     window.addEventListener('central-metrics-updated', syncCentral);
     window.addEventListener('prestadores-evaluations-updated', syncEvaluations);
+    window.addEventListener('storage', syncRegionalCloud);
     window.addEventListener('storage', syncCentral);
     window.addEventListener('storage', syncEvaluations);
     return () => {
+      window.removeEventListener('prestadores-cloud-updated', syncRegionalCloud);
       window.removeEventListener('central-metrics-updated', syncCentral);
       window.removeEventListener('prestadores-evaluations-updated', syncEvaluations);
+      window.removeEventListener('storage', syncRegionalCloud);
       window.removeEventListener('storage', syncCentral);
       window.removeEventListener('storage', syncEvaluations);
     };
