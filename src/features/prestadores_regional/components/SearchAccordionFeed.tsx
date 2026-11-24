@@ -305,6 +305,7 @@ export const SearchAccordionFeed: React.FC<SearchAccordionFeedProps> = ({
                     ocorrencias={ocorrencias}
                     evaluation={evaluationsMap?.[p.id]}
                     onEvaluationChange={onEvaluationChange}
+                    searchQuery={query}
                   />
                 ))}
               </div>

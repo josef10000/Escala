@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useSchedule } from '../../context/ScheduleContext';
-import { X, Copy, Check, Send, Calendar, Clock, User, Plus, Trash2, ShieldCheck, Sparkles, AlertCircle } from 'lucide-react';
+import { X, Copy, Check, Send, Calendar, Clock, User, Plus, Trash2, ShieldCheck, Sparkles, AlertCircle, Phone, Link2 } from 'lucide-react';
 import { formatDateToISO } from '../../utils/dateUtils';
 import { WhatsAppIcon } from '../../features/prestadores_regional/components/WhatsAppIcon';
-import { openWhatsApp, WHATSAPP_TAB_NAME } from '../../features/prestadores_regional/utils/whatsapp';
+import { openWhatsApp, cleanPhoneNumber, WHATSAPP_TAB_NAME } from '../../features/prestadores_regional/utils/whatsapp';
+import { getStoredPrestadores } from '../../features/prestadores_regional/utils/storage';
 
 interface WeekendDutyModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ interface DutyMember {
   name: string;
   hours: string; // e.g. "07h as 19h" or "08h as 16h"
   assignment: string; // e.g. "OPA encaixe/agendamentos" or "Full grupo"
+  phone?: string;
 }
 
 interface DayDutyConfig {
@@ -52,6 +54,45 @@ export const WeekendDutyModal: React.FC<WeekendDutyModalProps> = ({ isOpen, onCl
   const [greeting, setGreeting] = useState('Boa tarde!');
   const [copied, setCopied] = useState(false);
   const [activeDayTab, setActiveDayTab] = useState<0 | 1>(0);
+  const [memberCopiedId, setMemberCopiedId] = useState<string | null>(null);
+
+  // Group link configuration saved in localStorage
+  const [whatsappGroupLink, setWhatsappGroupLink] = useState(() => {
+    try {
+      return localStorage.getItem('escalapro_weekend_duty_group_link') || '';
+    } catch {
+      return '';
+    }
+  });
+
+  const handleSaveGroupLink = (link: string) => {
+    setWhatsappGroupLink(link);
+    try {
+      localStorage.setItem('escalapro_weekend_duty_group_link', link);
+    } catch {}
+  };
+
+  const findPhoneForMember = (id: string, name: string): string => {
+    const p = providers.find(
+      prov =>
+        prov.id === id ||
+        prov.name.toLowerCase() === name.toLowerCase() ||
+        prov.name.toLowerCase().includes(name.toLowerCase()) ||
+        name.toLowerCase().includes(prov.name.toLowerCase())
+    );
+    if (p?.phone) return p.phone;
+    if (p?.whatsapp) return p.whatsapp;
+
+    const regionalList = getStoredPrestadores();
+    const regProv = regionalList.find(
+      rp =>
+        rp.id === id ||
+        rp.nome.toLowerCase() === name.toLowerCase() ||
+        rp.nome.toLowerCase().includes(name.toLowerCase()) ||
+        name.toLowerCase().includes(rp.nome.toLowerCase())
+    );
+    return regProv?.telefone || '';
+  };
 
   // Calculate upcoming or current weekend (Saturday & Sunday)
   const [saturdayConfig, setSaturdayConfig] = useState<DayDutyConfig>(() => {
@@ -107,6 +148,7 @@ export const WeekendDutyModal: React.FC<WeekendDutyModalProps> = ({ isOpen, onCl
           name: isRegiane ? 'Regiane Técnica' : p.name.split(' ').slice(0, 2).join(' '),
           hours: isRegiane ? '07h as 19h' : '07h as 19h',
           assignment: isRegiane ? 'OPA encaixe/agendamentos' : 'Full grupo',
+          phone: p.phone || p.whatsapp || findPhoneForMember(p.id, p.name),
         });
       }
     });
@@ -123,20 +165,21 @@ export const WeekendDutyModal: React.FC<WeekendDutyModalProps> = ({ isOpen, onCl
           name: isRegiane ? 'Regiane Técnica' : p.name.split(' ').slice(0, 2).join(' '),
           hours: '07h as 19h',
           assignment: isRegiane ? 'OPA encaixe/agendamentos' : 'Full grupo',
+          phone: p.phone || p.whatsapp || findPhoneForMember(p.id, p.name),
         });
       }
     });
 
     // Default fallback if no assignments generated yet
-    const fallbackSat = satMembers.length > 0 ? satMembers : [
-      { id: '1', name: 'Regiane Técnica', hours: '07h as 19h', assignment: 'OPA encaixe/agendamentos' },
-      { id: '2', name: 'Patricia Vieira', hours: '07h as 19h', assignment: 'Full grupo' },
-      { id: '3', name: 'Danilo Rocha Dr Monitora', hours: '08h as 16h', assignment: 'Full grupo' },
+    const fallbackSat: DutyMember[] = satMembers.length > 0 ? satMembers : [
+      { id: '1', name: 'Regiane Técnica', hours: '07h as 19h', assignment: 'OPA encaixe/agendamentos', phone: findPhoneForMember('1', 'Regiane') },
+      { id: '2', name: 'Patricia Vieira', hours: '07h as 19h', assignment: 'Full grupo', phone: findPhoneForMember('2', 'Patricia Vieira') },
+      { id: '3', name: 'Danilo Rocha Dr Monitora', hours: '08h as 16h', assignment: 'Full grupo', phone: findPhoneForMember('3', 'Danilo Rocha') },
     ];
 
-    const fallbackSun = sunMembers.length > 0 ? sunMembers : [
-      { id: '1', name: 'Regiane Técnica', hours: '07h as 19h', assignment: 'OPA encaixe/agendamentos' },
-      { id: '2', name: 'Patricia Vieira', hours: '07h as 19h', assignment: 'Full grupo' },
+    const fallbackSun: DutyMember[] = sunMembers.length > 0 ? sunMembers : [
+      { id: '1', name: 'Regiane Técnica', hours: '07h as 19h', assignment: 'OPA encaixe/agendamentos', phone: findPhoneForMember('1', 'Regiane') },
+      { id: '2', name: 'Patricia Vieira', hours: '07h as 19h', assignment: 'Full grupo', phone: findPhoneForMember('2', 'Patricia Vieira') },
     ];
 
     setSaturdayConfig({
@@ -199,6 +242,54 @@ export const WeekendDutyModal: React.FC<WeekendDutyModalProps> = ({ isOpen, onCl
     openWhatsApp(`https://web.whatsapp.com/send?text=${encoded}`, WHATSAPP_TAB_NAME);
   };
 
+  const handleOpenGroupWhatsApp = () => {
+    const text = generateWhatsAppMessage();
+    const encoded = encodeURIComponent(text);
+    if (whatsappGroupLink && (whatsappGroupLink.startsWith('http://') || whatsappGroupLink.startsWith('https://'))) {
+      openWhatsApp(whatsappGroupLink, WHATSAPP_TAB_NAME);
+    } else {
+      openWhatsApp(`https://web.whatsapp.com/send?text=${encoded}`, WHATSAPP_TAB_NAME);
+    }
+  };
+
+  const getIndividualMessage = (member: DutyMember, isSat: boolean) => {
+    const dayName = isSat ? 'Sábado' : 'Domingo';
+    const dayConfig = isSat ? saturdayConfig : sundayConfig;
+    const firstName = member.name.split(' ')[0] || member.name;
+    return `Olá ${firstName}! 👋\n\n` +
+      `Confirmando sua escala de *Plantão Técnica* no fim de semana:\n\n` +
+      `📅 *Data:* ${dayConfig.dateStr} (${dayName})\n` +
+      `🏢 *Modalidade:* ${dayConfig.workType}\n` +
+      `⏰ *Horário:* ${member.hours}\n` +
+      `📋 *Atribuição:* ${member.assignment}\n` +
+      `👤 *Responsável:* ${dayConfig.responsibleText}\n\n` +
+      `Favor confirmar o recebimento desta escala. Obrigado! 👍`;
+  };
+
+  const handleSendIndividualWhatsApp = (member: DutyMember, isSat: boolean) => {
+    const resolvedPhone = member.phone || findPhoneForMember(member.id, member.name);
+    const clean = cleanPhoneNumber(resolvedPhone);
+    const text = getIndividualMessage(member, isSat);
+    const encoded = encodeURIComponent(text);
+
+    if (clean) {
+      openWhatsApp(`https://web.whatsapp.com/send?phone=${clean}&text=${encoded}`, WHATSAPP_TAB_NAME);
+    } else {
+      openWhatsApp(`https://web.whatsapp.com/send?text=${encoded}`, WHATSAPP_TAB_NAME);
+    }
+  };
+
+  const handleCopyIndividualMessage = async (member: DutyMember, isSat: boolean) => {
+    const text = getIndividualMessage(member, isSat);
+    try {
+      await navigator.clipboard.writeText(text);
+      setMemberCopiedId(member.id);
+      setTimeout(() => setMemberCopiedId(null), 2000);
+    } catch {
+      alert('Não foi possível copiar automaticamente.');
+    }
+  };
+
   // Member CRUD
   const handleAddMember = (isSaturday: boolean) => {
     const newMember: DutyMember = {
@@ -206,6 +297,7 @@ export const WeekendDutyModal: React.FC<WeekendDutyModalProps> = ({ isOpen, onCl
       name: 'Novo Colaborador',
       hours: '07h as 19h',
       assignment: 'Full grupo',
+      phone: '',
     };
     if (isSaturday) {
       setSaturdayConfig(prev => ({ ...prev, members: [...prev.members, newMember] }));
@@ -451,6 +543,46 @@ export const WeekendDutyModal: React.FC<WeekendDutyModalProps> = ({ isOpen, onCl
                         />
                       </div>
                     </div>
+
+                    {/* Telefone & 1-Click WhatsApp Individual */}
+                    <div className="flex items-center justify-between gap-2 pt-1 border-t border-white/5">
+                      <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                        <Phone className="w-3 h-3 text-slate-400 shrink-0" />
+                        <input
+                          type="text"
+                          value={member.phone ?? findPhoneForMember(member.id, member.name)}
+                          onChange={e => handleUpdateMember(isSatTab, member.id, 'phone', e.target.value)}
+                          className="w-full bg-slate-950/70 border border-white/10 rounded-lg px-2 py-0.5 text-xs text-slate-300 font-mono focus:outline-none focus:border-emerald-400"
+                          placeholder="Telefone WhatsApp"
+                          title="Telefone do colaborador para envio individual"
+                        />
+                      </div>
+
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => handleSendIndividualWhatsApp(member, isSatTab)}
+                          className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 text-[11px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+                          title={`Confirmar plantão individual com ${member.name} no WhatsApp`}
+                        >
+                          <WhatsAppIcon className="w-3.5 h-3.5 text-emerald-400" />
+                          <span>Confirmar c/ Ele</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleCopyIndividualMessage(member, isSatTab)}
+                          className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                          title="Copiar texto individual de confirmação"
+                        >
+                          {memberCopiedId === member.id ? (
+                            <Check className="w-3.5 h-3.5 text-emerald-400" />
+                          ) : (
+                            <Copy className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -479,13 +611,37 @@ export const WeekendDutyModal: React.FC<WeekendDutyModalProps> = ({ isOpen, onCl
               </div>
 
               {/* Message Box Styled like WhatsApp bubble */}
-              <div className="bg-[#121b22] text-[#e9edef] rounded-2xl p-4 font-mono text-xs leading-relaxed whitespace-pre-wrap border border-emerald-500/20 shadow-md max-h-[380px] overflow-y-auto">
+              <div className="bg-[#121b22] text-[#e9edef] rounded-2xl p-4 font-mono text-xs leading-relaxed whitespace-pre-wrap border border-emerald-500/20 shadow-md max-h-[300px] overflow-y-auto">
                 {generateWhatsAppMessage()}
+              </div>
+
+              {/* Link de Grupo WhatsApp Configurável */}
+              <div className="mt-3 p-3 rounded-2xl bg-white/[0.03] border border-white/5 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
+                    <Link2 className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Link do Grupo de Plantão (WhatsApp):</span>
+                  </label>
+                  {whatsappGroupLink ? (
+                    <span className="text-[10px] text-emerald-400 font-medium bg-emerald-500/10 px-1.5 py-0.5 rounded-full border border-emerald-500/20">
+                      Salvo
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-slate-500 font-medium">Opcional</span>
+                  )}
+                </div>
+                <input
+                  type="text"
+                  value={whatsappGroupLink}
+                  onChange={e => handleSaveGroupLink(e.target.value)}
+                  className="w-full bg-slate-950/70 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-emerald-400"
+                  placeholder="Ex: https://chat.whatsapp.com/..."
+                />
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="pt-4 mt-4 border-t border-white/10 space-y-2">
+            <div className="pt-3 mt-3 border-t border-white/10 space-y-2">
               <button
                 type="button"
                 onClick={handleCopyMessage}
@@ -499,13 +655,28 @@ export const WeekendDutyModal: React.FC<WeekendDutyModalProps> = ({ isOpen, onCl
                 <span>{copied ? 'Copiado para a Área de Transferência!' : 'Copiar Texto Pronto'}</span>
               </button>
 
+              {whatsappGroupLink && (
+                <button
+                  type="button"
+                  onClick={handleOpenGroupWhatsApp}
+                  className="w-full py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white transition-all cursor-pointer shadow-lg shadow-emerald-600/20 active:scale-98"
+                >
+                  <Link2 className="w-4 h-4" />
+                  <span>Disparar para o Grupo WhatsApp</span>
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={handleOpenWhatsApp}
-                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white transition-all cursor-pointer shadow-lg shadow-emerald-600/20 active:scale-98"
+                className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm ${
+                  whatsappGroupLink
+                    ? 'bg-white/10 hover:bg-white/15 text-white border border-white/10'
+                    : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20 active:scale-98'
+                }`}
               >
                 <WhatsAppIcon className="w-4 h-4" />
-                <span>Abrir WhatsApp Web com Mensagem</span>
+                <span>Abrir WhatsApp Web (Conversa Geral)</span>
               </button>
             </div>
           </div>

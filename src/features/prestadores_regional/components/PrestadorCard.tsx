@@ -24,6 +24,7 @@ import {
   ClipboardCheck,
 } from 'lucide-react';
 import { normalizeText } from '../utils/search';
+import { HighlightText } from './HighlightText';
 import { WhatsAppIcon } from './WhatsAppIcon';
 import { getWhatsAppUrl, cleanPhoneNumber, openWhatsApp, WHATSAPP_TAB_NAME } from '../utils/whatsapp';
 import { useSchedule } from '../../../context/ScheduleContext';
@@ -114,6 +115,7 @@ export interface PrestadorCardProps {
   onEvaluationChange?: (next: TechnicianQualitativeEvaluation) => void;
   initialFlipped?: boolean;
   onOpen3DModal?: (p: Prestador) => void;
+  searchQuery?: string;
 }
 
 const AGENDA_STATUS_META: Record<
@@ -144,6 +146,7 @@ export const PrestadorCard: React.FC<PrestadorCardProps> = ({
   onEvaluationChange,
   initialFlipped = false,
   onOpen3DModal,
+  searchQuery,
 }) => {
   const { isLeaderAuthenticated, authenticatedProviderId, activeProviderId, leaderName } = useSchedule();
   const loggedInProvId = authenticatedProviderId || activeProviderId;
@@ -361,11 +364,13 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="font-mono text-[11px] font-semibold text-white/70 bg-white/[0.06] px-1.5 py-0.5 rounded-full border border-white/10">
-                #{p.codigo}
+                #<HighlightText text={p.codigo} query={searchQuery} />
               </span>
-              <span className="text-xs font-semibold text-white truncate drop-shadow-sm">{p.nome}</span>
+              <span className="text-xs font-semibold text-white truncate drop-shadow-sm">
+                <HighlightText text={p.nome} query={searchQuery} />
+              </span>
               <span className={`text-[10px] font-medium font-mono uppercase px-2 py-0.5 rounded-full border backdrop-blur-md ${regStyle.badge}`}>
-                {p.regiao}
+                <HighlightText text={p.regiao} query={searchQuery} />
               </span>
             </div>
 
@@ -373,7 +378,7 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
               {p.telefone && (
                 <span className="text-white/60 flex items-center gap-1">
                   <Phone className="w-3 h-3 text-white/40" />
-                  <span>{p.telefone}</span>
+                  <span><HighlightText text={p.telefone} query={searchQuery} /></span>
                 </span>
               )}
               {metrics.finalizedCount > 0 ? (
@@ -508,14 +513,14 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
             <div className="flex items-center justify-between gap-2 mb-3.5">
               <div className="flex items-center gap-1.5 flex-wrap min-w-0">
                 <span className="font-mono text-[11px] font-semibold text-white/80 bg-white/[0.07] px-2.5 py-0.5 rounded-full border border-white/10 shrink-0 backdrop-blur-md">
-                  #{p.codigo}
+                  #<HighlightText text={p.codigo} query={searchQuery} />
                 </span>
 
                 <span
                   className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold font-mono uppercase tracking-wide border backdrop-blur-md ${regStyle.badge} truncate max-w-[140px]`}
                 >
                   <span className={`w-1.5 h-1.5 rounded-full ${regStyle.dot} animate-pulse shrink-0`} />
-                  <span className="truncate">{p.regiao}</span>
+                  <span className="truncate"><HighlightText text={p.regiao} query={searchQuery} /></span>
                 </span>
               </div>
 
@@ -589,7 +594,7 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
                   className="text-base font-bold text-white tracking-tight leading-snug truncate drop-shadow-sm"
                   title={p.nome}
                 >
-                  {p.nome}
+                  <HighlightText text={p.nome} query={searchQuery} />
                 </h3>
 
                 {p.telefone ? (
@@ -603,7 +608,7 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
                         href={`tel:${p.telefone}`}
                         className="text-xs font-mono text-white/80 hover:text-white transition-colors truncate"
                       >
-                        {p.telefone}
+                        <HighlightText text={p.telefone} query={searchQuery} />
                       </a>
                     </div>
 
@@ -653,7 +658,7 @@ ${p.observacao ? `OBS: ${p.observacao}` : ''}`.trim();
 
                 {p.observacao && (
                   <div className="text-xs text-white/60 mt-2 line-clamp-2 leading-relaxed bg-white/[0.02] p-2 rounded-xl border border-white/[0.06]">
-                    {p.observacao}
+                    <HighlightText text={p.observacao} query={searchQuery} />
                   </div>
                 )}
               </div>

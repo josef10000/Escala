@@ -10,7 +10,9 @@ import {
   PhoneOff,
   Award,
   ArrowUpDown,
+  Star,
 } from 'lucide-react';
+import { WhatsAppIcon } from './WhatsAppIcon';
 import { normalizeText } from '../utils/search';
 
 export type PhoneFilterType = 'all' | 'with' | 'without';
@@ -35,6 +37,9 @@ interface UnifiedToolbarProps {
   cardDensity: 'spacious' | 'compact';
   onCardDensityChange: (density: 'spacious' | 'compact') => void;
   onExportCSV: () => void;
+  showFavoritesOnly?: boolean;
+  onToggleFavoritesOnly?: () => void;
+  favoritesCount?: number;
 }
 
 const QUICK_MACRO_REGIONS = [
@@ -84,6 +89,9 @@ export const UnifiedToolbar: React.FC<UnifiedToolbarProps> = ({
   onExportCSV,
   viewMode,
   onViewModeChange,
+  showFavoritesOnly = false,
+  onToggleFavoritesOnly,
+  favoritesCount = 0,
 }) => {
   return (
     <div className="bg-[#0e1016] border border-white/[0.08] rounded-2xl p-4 flex flex-col gap-3 shadow-sm relative overflow-hidden">
@@ -177,10 +185,10 @@ export const UnifiedToolbar: React.FC<UnifiedToolbarProps> = ({
         </div>
       </div>
 
-      {/* Bottom Controls Row: Phone Filters, Density, View Modes, Export CSV */}
+      {/* Bottom Controls Row: Phone Filters, Favorites, Density, View Modes, Export CSV */}
       <div className="flex flex-wrap items-center gap-2.5 justify-between lg:justify-end relative z-10 text-xs pt-2.5 border-t border-white/[0.06]">
-        {/* Phone Filter Toggle */}
-        <div className="inline-flex p-1 bg-[#090A0F] border border-white/[0.08] rounded-xl text-xs">
+        {/* Quick Filter Pills (Phone, WhatsApp, Favorites) */}
+        <div className="inline-flex items-center p-1 bg-[#090A0F] border border-white/[0.08] rounded-xl text-xs gap-1">
           <button
             type="button"
             onClick={() => onPhoneFilterChange('all')}
@@ -195,29 +203,44 @@ export const UnifiedToolbar: React.FC<UnifiedToolbarProps> = ({
           <button
             type="button"
             onClick={() => onPhoneFilterChange('with')}
-            className={`px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer flex items-center gap-1 ${
+            className={`px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
               phoneFilter === 'with'
-                ? 'bg-emerald-500/20 text-emerald-300 shadow-sm'
+                ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-400/40 shadow-[0_0_12px_rgba(16,185,129,0.25)]'
                 : 'text-zinc-400 hover:text-emerald-300'
             }`}
-            title="Prestadores com telefone cadastrado"
+            title="Filtrar técnicos com WhatsApp ativo cadastrado"
           >
-            <Phone className="w-3 h-3" />
-            <span>Com Tel</span>
+            <WhatsAppIcon className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Com WhatsApp</span>
           </button>
           <button
             type="button"
             onClick={() => onPhoneFilterChange('without')}
-            className={`px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer flex items-center gap-1 ${
+            className={`px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
               phoneFilter === 'without'
-                ? 'bg-amber-500/20 text-amber-300 shadow-sm'
+                ? 'bg-amber-500/25 text-amber-300 border border-amber-400/40 shadow-[0_0_12px_rgba(245,158,11,0.25)]'
                 : 'text-zinc-400 hover:text-amber-300'
             }`}
-            title="Prestadores sem telefone cadastrado"
+            title="Prestadores pendentes de telefone"
           >
             <PhoneOff className="w-3 h-3" />
             <span>Sem Tel ({pendingPhoneCount})</span>
           </button>
+          {onToggleFavoritesOnly && (
+            <button
+              type="button"
+              onClick={onToggleFavoritesOnly}
+              className={`px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                showFavoritesOnly
+                  ? 'bg-amber-500/25 text-amber-300 border border-amber-400/40 shadow-[0_0_12px_rgba(245,158,11,0.3)]'
+                  : 'text-zinc-400 hover:text-amber-300'
+              }`}
+              title="Filtrar apenas prestadores favoritados"
+            >
+              <Star className={`w-3 h-3 ${showFavoritesOnly ? 'fill-amber-400 text-amber-400' : 'text-zinc-400'}`} />
+              <span>Favoritos ({favoritesCount})</span>
+            </button>
+          )}
         </div>
 
         {/* Density Toggle */}

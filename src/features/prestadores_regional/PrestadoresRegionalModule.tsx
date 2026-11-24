@@ -745,13 +745,16 @@ export function PrestadoresRegionalModule({
                   cardDensity={cardDensity}
                   onCardDensityChange={handleCardDensityChange}
                   onExportCSV={handleExportCSV}
+                  showFavoritesOnly={showFavoritesOnly}
+                  onToggleFavoritesOnly={() => setShowFavoritesOnly((prev) => !prev)}
+                  favoritesCount={favorites.length}
                 />
 
                 {/* Views */}
                 {viewMode === 'terminal' && (
                   <PrestadorTerminalView
                     prestadores={filteredPrestadores}
-                    searchQuery=""
+                    searchQuery={searchQuery}
                     onEdit={(p) => {
                       setEditingPrestador(p);
                       setIsModalOpen(true);
@@ -782,6 +785,7 @@ export function PrestadoresRegionalModule({
                     ocorrencias={centralOcorrencias}
                     evaluationsMap={evaluationsMap}
                     onEvaluationChange={handleEvaluationChange}
+                    searchQuery={searchQuery}
                   />
                 )}
 
@@ -803,6 +807,7 @@ export function PrestadoresRegionalModule({
                     ocorrencias={centralOcorrencias}
                     evaluationsMap={evaluationsMap}
                     onEvaluationChange={handleEvaluationChange}
+                    searchQuery={searchQuery}
                   />
                 )}
               </div>

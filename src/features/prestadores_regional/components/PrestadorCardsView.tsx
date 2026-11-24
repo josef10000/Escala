@@ -23,6 +23,7 @@ interface PrestadorCardsViewProps {
   ocorrencias?: OcorrenciaRecord[];
   evaluationsMap?: Record<string, TechnicianQualitativeEvaluation>;
   onEvaluationChange?: (next: TechnicianQualitativeEvaluation) => void;
+  searchQuery?: string;
 }
 
 export const PrestadorCardsView: React.FC<PrestadorCardsViewProps> = ({
@@ -40,6 +41,7 @@ export const PrestadorCardsView: React.FC<PrestadorCardsViewProps> = ({
   ocorrencias,
   evaluationsMap,
   onEvaluationChange,
+  searchQuery,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [modalPrestador, setModalPrestador] = useState<Prestador | null>(null);
@@ -95,6 +97,7 @@ export const PrestadorCardsView: React.FC<PrestadorCardsViewProps> = ({
             evaluation={evaluationsMap?.[p.id]}
             onEvaluationChange={onEvaluationChange}
             onOpen3DModal={(target) => setModalPrestador(target)}
+            searchQuery={searchQuery}
           />
         ))}
       </div>

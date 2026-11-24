@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { AgendaRegiaoItem, Prestador, TechnicianQualitativeEvaluation } from '../types';
 import { Copy, Check, Edit2, Trash2, Star, ArrowUpDown, MapPin, Hash, RotateCw } from 'lucide-react';
 import { getRegionColor } from '../utils/search';
+import { HighlightText } from './HighlightText';
 import { Pagination } from './Pagination';
 import { WhatsAppIcon } from './WhatsAppIcon';
 import { getWhatsAppUrl, cleanPhoneNumber, openWhatsApp, WHATSAPP_TAB_NAME } from '../utils/whatsapp';
@@ -28,6 +29,7 @@ interface PrestadorTableViewProps {
   ocorrencias?: OcorrenciaRecord[];
   evaluationsMap?: Record<string, TechnicianQualitativeEvaluation>;
   onEvaluationChange?: (next: TechnicianQualitativeEvaluation) => void;
+  searchQuery?: string;
 }
 
 export const PrestadorTableView: React.FC<PrestadorTableViewProps> = ({
@@ -44,6 +46,7 @@ export const PrestadorTableView: React.FC<PrestadorTableViewProps> = ({
   ocorrencias = [],
   evaluationsMap,
   onEvaluationChange,
+  searchQuery,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -193,13 +196,13 @@ export const PrestadorTableView: React.FC<PrestadorTableViewProps> = ({
                     <td className="px-4 py-2.5 font-mono font-bold text-slate-200">
                       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300">
                         <Hash className="w-2.5 h-2.5 text-slate-500" />
-                        {p.codigo}
+                        <HighlightText text={p.codigo} query={searchQuery} />
                       </span>
                     </td>
 
                     <td className="px-4 py-2.5 font-medium text-slate-100 uppercase tracking-tight">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span>{p.nome}</span>
+                        <span><HighlightText text={p.nome} query={searchQuery} /></span>
                         {p.telefone && (
                           <a
                             href={getWhatsAppUrl(p.telefone, p.nome, p.codigo)}
@@ -213,7 +216,7 @@ export const PrestadorTableView: React.FC<PrestadorTableViewProps> = ({
                             title="Conversar no WhatsApp (mesma aba)"
                           >
                             <WhatsAppIcon className="w-3.5 h-3.5 text-emerald-500" />
-                            <span>{p.telefone}</span>
+                            <span><HighlightText text={p.telefone} query={searchQuery} /></span>
                           </a>
                         )}
                       </div>
@@ -224,7 +227,7 @@ export const PrestadorTableView: React.FC<PrestadorTableViewProps> = ({
                         className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-medium font-mono uppercase tracking-wide border ${color.bg} ${color.text} ${color.border}`}
                       >
                         <MapPin className="w-3 h-3 opacity-70" />
-                        {p.regiao}
+                        <HighlightText text={p.regiao} query={searchQuery} />
                       </span>
                     </td>
 
