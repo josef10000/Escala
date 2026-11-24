@@ -125,6 +125,9 @@ const AuditLogModal = lazy(() =>
 const WeekendDutyModal = lazy(() =>
   import('./components/modals/WeekendDutyModal').then((m) => ({ default: m.WeekendDutyModal }))
 );
+const CommandMenuModal = lazy(() =>
+  import('./components/modals/CommandMenuModal').then((m) => ({ default: m.CommandMenuModal }))
+);
 
 function ModuleLoadingFallback() {
   return (
@@ -178,6 +181,7 @@ function ScheduleAppContent() {
   const [announcementsOpen, setAnnouncementsOpen] = useState(false);
   const [auditLogOpen, setAuditLogOpen] = useState(false);
   const [weekendDutyModalOpen, setWeekendDutyModalOpen] = useState(false);
+  const [commandMenuOpen, setCommandMenuOpen] = useState(false);
   const [saleModalDefaultDate, setSaleModalDefaultDate] = useState<string>('');
   const [saleModalDefaultProviderId, setSaleModalDefaultProviderId] = useState<string>('');
 
@@ -186,6 +190,18 @@ function ScheduleAppContent() {
     setSaleModalDefaultProviderId(providerId || '');
     setShiftSaleModalOpen(true);
   };
+
+  // Global Quick Command Menu (Ctrl + K / Cmd + K)
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setCommandMenuOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Handlers
   const handleOpenNewShift = () => {
@@ -237,6 +253,7 @@ function ScheduleAppContent() {
         onOpenAuditLog={() => setAuditLogOpen(true)}
         onOpenWeekendDutyModal={() => setWeekendDutyModalOpen(true)}
         onOpenExecutiveReportModal={() => setExecutiveReportModalOpen(true)}
+        onOpenCommandMenu={() => setCommandMenuOpen(true)}
       />
 
       {activeModule !== 'escala' ? (
@@ -544,6 +561,19 @@ function ScheduleAppContent() {
           <WeekendDutyModal
             isOpen={weekendDutyModalOpen}
             onClose={() => setWeekendDutyModalOpen(false)}
+          />
+        )}
+
+        {commandMenuOpen && (
+          <CommandMenuModal
+            isOpen={commandMenuOpen}
+            onClose={() => setCommandMenuOpen(false)}
+            onOpenNewShiftModal={handleOpenNewShift}
+            onOpenLeaderAuth={() => setLeaderAuthModalOpen(true)}
+            onOpenMarketplace={() => setMarketplaceModalOpen(true)}
+            onOpenExecutiveReportModal={() => setExecutiveReportModalOpen(true)}
+            onOpenWeekendDutyModal={() => setWeekendDutyModalOpen(true)}
+            onOpenProfileModal={() => setProfileModalOpen(true)}
           />
         )}
       </Suspense>

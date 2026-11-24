@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   CheckCircle2,
   Activity,
+  Search,
 } from 'lucide-react';
 import { useSchedule } from '../context/ScheduleContext';
 
@@ -37,6 +38,7 @@ interface NavbarProps {
   onOpenAnnouncements?: () => void;
   onOpenAuditLog?: () => void;
   onOpenWeekendDutyModal?: () => void;
+  onOpenCommandMenu?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -50,6 +52,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenProfileModal,
   onOpenAuditLog,
   onOpenWeekendDutyModal,
+  onOpenCommandMenu,
 }) => {
   const {
     providers,
@@ -233,6 +236,22 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Right Tools, Gestor Command Drawer & User Profile */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           
+          {/* Quick Search Global Command Menu (Ctrl + K) */}
+          {onOpenCommandMenu && (
+            <button
+              type="button"
+              onClick={onOpenCommandMenu}
+              className="h-8 px-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-white/70 hover:text-white text-xs font-medium border border-white/[0.08] flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+              title="Busca rápida global (Ctrl + K)"
+            >
+              <Search className="w-3.5 h-3.5 text-[#00d2d3]" />
+              <span className="hidden xl:inline text-zinc-400 text-[11px]">Buscar</span>
+              <kbd className="hidden sm:inline-block px-1.5 py-0.2 text-[9px] font-mono font-bold text-zinc-400 bg-white/[0.06] border border-white/10 rounded">
+                Ctrl K
+              </kbd>
+            </button>
+          )}
+
           {/* Venda & Repasse de Plantões PJ */}
           {onOpenMarketplace && (
             <button

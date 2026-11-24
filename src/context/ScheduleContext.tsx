@@ -51,6 +51,7 @@ interface FilterState {
   shiftTypeId: string;
   onlyOpenSpots: boolean;
   searchQuery: string;
+  teamGroup?: 'all' | 'turma_a' | 'turma_b';
 }
 
 interface ConflictResult {
@@ -445,6 +446,7 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     shiftTypeId: 'all',
     onlyOpenSpots: false,
     searchQuery: '',
+    teamGroup: 'all',
   });
 
   const [providers, setProviders] = useState<Provider[]>(() => {
@@ -1497,6 +1499,7 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
       shiftTypeId: 'all',
       onlyOpenSpots: false,
       searchQuery: '',
+      teamGroup: 'all',
     });
   };
 

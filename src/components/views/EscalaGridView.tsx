@@ -92,6 +92,7 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
   const [quickSwapOpen, setQuickSwapOpen] = useState(false);
   const [isComparisonModalOpen, setIsComparisonModalOpen] = useState(false);
   const [toastNotification, setToastNotification] = useState<string | null>(null);
+  const [confirmDeleteProvId, setConfirmDeleteProvId] = useState<string | null>(null);
 
   // Quinzena filter: 'all' | 'q1' (1-15) | 'q2' (16-31)
   const [quinzenaView, setQuinzenaView] = useState<'all' | 'q1' | 'q2'>('all');
@@ -140,6 +141,7 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
 
   const displayedProviders = regimeProviders.filter(prov => {
     if (filters.providerId !== 'all' && prov.id !== filters.providerId) return false;
+    if (filters.teamGroup && filters.teamGroup !== 'all' && (prov.teamGroup || 'turma_a') !== filters.teamGroup) return false;
     if (filters.searchQuery) {
       const q = filters.searchQuery.toLowerCase();
       return prov.name.toLowerCase().includes(q) || prov.role.toLowerCase().includes(q);
@@ -537,6 +539,47 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
             </button>
           </div>
 
+          {/* Quick Team A / Team B filter pills for 12x36 */}
+          {activeRegime === '12x36' && (
+            <div className="flex items-center bg-[#1A1D24] p-0.5 rounded-xl border border-white/[0.08] text-xs">
+              <button
+                type="button"
+                onClick={() => setFilters(f => ({ ...f, teamGroup: 'all' }))}
+                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer font-semibold ${
+                  !filters.teamGroup || filters.teamGroup === 'all'
+                    ? 'bg-white/[0.12] text-white font-bold shadow-xs'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                Todas
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilters(f => ({ ...f, teamGroup: 'turma_a' }))}
+                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer font-semibold ${
+                  filters.teamGroup === 'turma_a'
+                    ? 'bg-[#00d2d3]/20 text-[#00d2d3] font-bold border border-[#00d2d3]/35 shadow-xs'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+                title="Apenas Turma A (Dias Ímpares)"
+              >
+                Turma A
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilters(f => ({ ...f, teamGroup: 'turma_b' }))}
+                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer font-semibold ${
+                  filters.teamGroup === 'turma_b'
+                    ? 'bg-[#00d2d3]/20 text-[#00d2d3] font-bold border border-[#00d2d3]/35 shadow-xs'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+                title="Apenas Turma B (Dias Pares)"
+              >
+                Turma B
+              </button>
+            </div>
+          )}
+
           {/* Status badge */}
           <div className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/[0.03] border border-white/[0.06] text-[11px] font-medium text-zinc-400">
             <span className="w-1.5 h-1.5 rounded-full bg-[#00d2d3]" />
@@ -782,6 +825,9 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                   const isWeekend = d.dayOfWeek === 0 || d.dayOfWeek === 6;
                   const isDayToday = d.dayNumber === todayDayNumber;
                   const weekDayName = DAYS_SHORT_PT[d.dayOfWeek] || '';
+                  const dayWorkersCount = assignments.filter(
+                    a => a.date === d.dateStr && a.shiftTypeId === 'st-t' && regimeProviders.some(p => p.id === a.providerId)
+                  ).length;
 
                   return (
                     <th
@@ -800,6 +846,19 @@ export const EscalaGridView: React.FC<EscalaGridViewProps> = ({
                       </div>
                       <div className="text-[10px] font-bold opacity-80 uppercase">
                         {weekDayName}
+                      </div>
+                      {/* Clean Minimum Coverage Alert */}
+                      <div
+                        className={`text-[9px] font-mono font-bold mt-0.5 tracking-tight ${
+                          dayWorkersCount === 0
+                            ? 'text-rose-400 bg-rose-500/15 rounded px-0.5'
+                            : dayWorkersCount < 3
+                            ? 'text-amber-300'
+                            : 'text-zinc-500'
+                        }`}
+                        title={`${dayWorkersCount} atendente(s) escalado(s) neste dia`}
+                      >
+                        👥{dayWorkersCount}
                       </div>
                     </th>
                   );
