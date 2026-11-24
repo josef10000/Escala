@@ -285,9 +285,9 @@ function sanitizeAttendantProviders(list: Provider[]): {
 
 export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const today = new Date();
-  // Default starting calendar view to October 2026
-  const [currentYear, setCurrentYear] = useState<number>(2026);
-  const [currentMonthIndex, setCurrentMonthIndex] = useState<number>(9); // 9 is October (0-indexed)
+  // Start calendar view always on the current month and year
+  const [currentYear, setCurrentYear] = useState<number>(() => today.getFullYear());
+  const [currentMonthIndex, setCurrentMonthIndex] = useState<number>(() => today.getMonth());
   const [viewMode, setViewModeState] = useState<ViewMode>(() => {
     return readEscalaViewFromUrl() || 'escala';
   });
@@ -2325,8 +2325,9 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
   // Reset to Demo Data
   const resetToDemoData = () => {
     const initialAssignments = generateInitialAssignments();
-    setCurrentYear(2026);
-    setCurrentMonthIndex(9); // October
+    const now = new Date();
+    setCurrentYear(now.getFullYear());
+    setCurrentMonthIndex(now.getMonth());
     setProviders(INITIAL_PROVIDERS);
     setAssignments(initialAssignments);
     setDepartments(INITIAL_DEPARTMENTS);
