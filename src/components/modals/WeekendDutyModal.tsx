@@ -3,7 +3,7 @@ import { useSchedule } from '../../context/ScheduleContext';
 import { X, Copy, Check, Send, Calendar, Clock, User, Plus, Trash2, ShieldCheck, Sparkles, AlertCircle, Phone, Link2 } from 'lucide-react';
 import { formatDateToISO } from '../../utils/dateUtils';
 import { WhatsAppIcon } from '../../features/prestadores_regional/components/WhatsAppIcon';
-import { openWhatsApp, cleanPhoneNumber, WHATSAPP_TAB_NAME } from '../../features/prestadores_regional/utils/whatsapp';
+import { openWhatsApp, cleanPhoneNumber, isMobileDevice, WHATSAPP_TAB_NAME } from '../../features/prestadores_regional/utils/whatsapp';
 import { getStoredPrestadores } from '../../features/prestadores_regional/utils/storage';
 
 interface WeekendDutyModalProps {
@@ -236,19 +236,34 @@ export const WeekendDutyModal: React.FC<WeekendDutyModalProps> = ({ isOpen, onCl
     }
   };
 
-  const handleOpenWhatsApp = () => {
-    const text = generateWhatsAppMessage();
-    const encoded = encodeURIComponent(text);
-    openWhatsApp(`https://web.whatsapp.com/send?text=${encoded}`, WHATSAPP_TAB_NAME);
+  const openPreparedWhatsAppLink = (url: string) => {
+    const tab = window.open(url, WHATSAPP_TAB_NAME);
+    try {
+      tab?.focus();
+    } catch {
+      // The browser may block focus on a cross-origin tab.
+    }
   };
 
+  const openWhatsAppShare = (text: string) => {
+    const endpoint = isMobileDevice() ? 'https://wa.me/' : 'https://web.whatsapp.com/send';
+    openPreparedWhatsAppLink(`${endpoint}?text=${encodeURIComponent(text)}`);
+  };
+
+  const handleOpenWhatsApp = () => openWhatsAppShare(generateWhatsAppMessage());
+
   const handleOpenGroupWhatsApp = () => {
-    const text = generateWhatsAppMessage();
-    const encoded = encodeURIComponent(text);
-    if (whatsappGroupLink && (whatsappGroupLink.startsWith('http://') || whatsappGroupLink.startsWith('https://'))) {
-      openWhatsApp(whatsappGroupLink, WHATSAPP_TAB_NAME);
+    let groupUrl: URL | undefined;
+    try {
+      groupUrl = new URL(whatsappGroupLink);
+    } catch {
+      // Without a valid group link, let the user pick a chat instead.
+    }
+    if (groupUrl?.origin === 'https://chat.whatsapp.com' && !groupUrl.username &&
+        !groupUrl.password && /^\/[A-Za-z0-9]+\/?$/.test(groupUrl.pathname)) {
+      openPreparedWhatsAppLink(groupUrl.href);
     } else {
-      openWhatsApp(`https://web.whatsapp.com/send?text=${encoded}`, WHATSAPP_TAB_NAME);
+      handleOpenWhatsApp();
     }
   };
 
@@ -268,14 +283,12 @@ export const WeekendDutyModal: React.FC<WeekendDutyModalProps> = ({ isOpen, onCl
 
   const handleSendIndividualWhatsApp = (member: DutyMember, isSat: boolean) => {
     const resolvedPhone = member.phone || findPhoneForMember(member.id, member.name);
-    const clean = cleanPhoneNumber(resolvedPhone);
     const text = getIndividualMessage(member, isSat);
-    const encoded = encodeURIComponent(text);
 
-    if (clean) {
-      openWhatsApp(`https://web.whatsapp.com/send?phone=${clean}&text=${encoded}`, WHATSAPP_TAB_NAME);
+    if (cleanPhoneNumber(resolvedPhone)) {
+      openWhatsApp(resolvedPhone, undefined, undefined, text);
     } else {
-      openWhatsApp(`https://web.whatsapp.com/send?text=${encoded}`, WHATSAPP_TAB_NAME);
+      openWhatsAppShare(text);
     }
   };
 
@@ -637,6 +650,7 @@ export const WeekendDutyModal: React.FC<WeekendDutyModalProps> = ({ isOpen, onCl
                   className="w-full bg-slate-950/70 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-emerald-400"
                   placeholder="Ex: https://chat.whatsapp.com/..."
                 />
+                <p className="text-[10px] text-slate-400">Para enviar ao grupo pelo link, copie o texto pronto antes de abrir.</p>
               </div>
             </div>
 
@@ -662,7 +676,7 @@ export const WeekendDutyModal: React.FC<WeekendDutyModalProps> = ({ isOpen, onCl
                   className="w-full py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white transition-all cursor-pointer shadow-lg shadow-emerald-600/20 active:scale-98"
                 >
                   <Link2 className="w-4 h-4" />
-                  <span>Disparar para o Grupo WhatsApp</span>
+                  <span>Abrir Grupo no WhatsApp</span>
                 </button>
               )}
 
@@ -676,7 +690,7 @@ export const WeekendDutyModal: React.FC<WeekendDutyModalProps> = ({ isOpen, onCl
                 }`}
               >
                 <WhatsAppIcon className="w-4 h-4" />
-                <span>Abrir WhatsApp Web (Conversa Geral)</span>
+                <span>Escolher Conversa no WhatsApp</span>
               </button>
             </div>
           </div>
